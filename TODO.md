@@ -1,10 +1,6 @@
 # TODO
 
-* Quotes
-	* Quote add
-	* Quote search
-	* Quote id
-	* Migrate quote database
+* Migrate quote database
 
 * Awesome
 
@@ -28,3 +24,6 @@
 
 * Shoutout
 * Timers
+* Quote add
+* Quote search
+* Quote id
