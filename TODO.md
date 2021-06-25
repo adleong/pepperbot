@@ -1,29 +1,24 @@
 # TODO
 
 * Migrate quote database
-
-* Awesome
-
 * Migrate timers
+* Migrate advice database
 
 * Lurk/Unlurk
-
-* Advice
-	* Advice
-	* Migrate advice database
-	* Add advice
-
 * Peppercam counter
-
 * Raid message
-
-* Game command
-* Title command
+* Brags
 
 # DONE
 
+* Advice
 * Shoutout
 * Timers
 * Quote add
 * Quote search
 * Quote id
+* Game command
+* Title command
+* Auth
+* Add advice
+* Awesome

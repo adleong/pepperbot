@@ -1,18 +1,21 @@
 const { ApiClient } = require('twitch');
-const { StaticAuthProvider } = require('twitch-auth');
 const { ChatClient } = require('twitch-chat-client');
+const { PubSubClient } = require('twitch-pubsub-client');
 const { Client } = require('pg');
 
+const auth = require("./auth");
 const quote = require("./quote");
 const timers = require("./timers");
 const so = require("./so");
 const advice = require("./advice");
+const game = require("./game");
+const title = require("./title");
+const awesome = require("./awesome");
 
 const clientId = process.env.CLIENT_ID;
-const accessToken = process.env.ACCESS_TOKEN;
-const authProvider = new StaticAuthProvider(clientId, accessToken);
-
+const clientSecret = process.env.CLIENT_SECRET;
 const channel = process.env.CHANNEL;
+const bot = process.env.NAME
 
 const db = new Client({
   connectionString: process.env.DATABASE_URL,
@@ -24,8 +27,11 @@ console.log("Database connected");
 
 const run = async () => {
 
-  const apiClient = new ApiClient({ authProvider });
-  const chatClient = new ChatClient(authProvider, { channels: [channel] });
+  const userAuth = await auth.provider(db, channel, clientId, clientSecret);
+  const botAuth = await auth.provider(db, bot, clientId, clientSecret);
+
+  const apiClient = new ApiClient({ authProvider: userAuth });
+  const chatClient = new ChatClient(botAuth, { channels: [channel] });
   await chatClient.connect();
   console.log("Chat connected");
 
@@ -46,9 +52,9 @@ const run = async () => {
   var chatters = {};
 
   // Chat listener
-  chatClient.onMessage(async (channel, user, message, msg) => {
+  chatClient.onMessage(async (_, user, message, msg) => {
     try {
-      chatters[user] = new Date(Date.now());
+      awesome.add(user);
 
       const args = message.split(' ');
       const command = args.shift().toLowerCase();
@@ -64,12 +70,39 @@ const run = async () => {
           await advice.command(chatClient, db, channel, args);
           break;
         case '!so':
-          await so.command(apiClient, chatClient, channel, args.shift());
+          await so.command(chatClient, apiClient, channel, args.shift());
+          break;
+        case '!game':
+          await game.command(chatClient, apiClient, channel, user, args);
+          break;
+        case '!title':
+          await title.command(chatClient, apiClient, channel, user, args);
           break;
         case '!chatters':
-          for (const chatter in chatters) {
-            chatClient.say(channel, chatter + ' last spoke at ' + chatters[chatter].toString());
-          }
+          awesome.dumpChatters(chatClient, channel);
+          break;
+        case '!awesome':
+          awesome.command(chatClient, channel);
+          break;
+      }
+    } catch(err) {
+      console.log(err);
+    }
+  });
+
+  // Events listener.
+  const pubSubClient = new PubSubClient();
+  const userId = await pubSubClient.registerUserListener(apiClient);
+  await pubSubClient.onRedemption(userId, (message) => {
+    try {
+      console.log(`${message.userName} redeems ${message.rewardName}`);
+      console.log(message.message);
+      switch (message.rewardName) {
+        case 'Pepper Cam':
+          break;
+        case 'Give Sgt Pepper Advice':
+          advice.add(chatClient, db, channel, message.userName, message.message)
+            .catch(err => console.log(err));
           break;
       }
     } catch(err) {
@@ -77,7 +110,5 @@ const run = async () => {
     }
   });
 };
-
-
 
 run();

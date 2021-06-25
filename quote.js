@@ -1,13 +1,15 @@
 async function command(chatClient, apiClient, db, channel, channelId, user, args) {
     if (args.length == 1 && args[0] == "add") {
+
         chatClient.say(channel, "You have to... actually say the quote...");
     } else if (args.length > 1 && args[0] == "add" ) {
         args.shift();
         const quote = args.join(' ');
-        const game = await apiClient.helix.channels.getChannelInfo(channelId).gameName;
-        db.query('INSERT INTO quotes(message, quoted_by, game) VALUES($1, $2, $3) RETURNING id', [quote, user, game], (err, res) => {
+        const broadcaster = await apiClient.helix.users.getUserByName(channel);
+        const ch = await apiClient.helix.channels.getChannelInfo(broadcaster);
+        db.query('INSERT INTO quotes(message, quoted_by, game) VALUES($1, $2, $3) RETURNING id', [quote, user, ch.gameName], (err, res) => {
             if (err) console.log(err);
-            chatClient.say(channel, `Successfully added quote #${res.rows[0].id}`);
+            chatClient.say(channel, `Successfully added quote #${res.rows[0].id}: "${quote}" [${ch.gameName}]`);
         });
     } else if (args.length == 1 && args[0].match(/^\d+$/)) {
         const id = parseInt(args[0], 10);

@@ -1,3 +1,5 @@
+const awesome = require("./awesome");
+
 const SECONDS = 1000;
 const MINUTES = 60 * SECONDS;
 
@@ -13,7 +15,13 @@ async function load(chatClient, db, channel) {
             console.log(timer.message);
             setTimeout(function() {
                 setInterval(function() {
-                    chatClient.say(channel, timer.message);
+                    switch (timer.message) {
+                        case '!awesome':
+                            awesome.command(chatClient, channel);
+                            break
+                        default:
+                            chatClient.say(channel, timer.message);
+                    }
                 }, timer.period_mins * MINUTES);
             }, offset * MINUTES);
         }

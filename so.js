@@ -1,4 +1,4 @@
-async function command(apiClient, chatClient, channel, user) {
+async function command(chatClient, apiClient, channel, user) {
     const target = await apiClient.helix.users.getUserByName(user);
     const target_channel = await apiClient.helix.channels.getChannelInfo(target);
     chatClient.say(
