@@ -4,21 +4,21 @@
 * Migrate timers
 * Migrate advice database
 
-* Lurk/Unlurk
-* Peppercam counter
 * Raid message
 * Brags
 
 # DONE
 
+* Add advice
 * Advice
+* Auth
+* Awesome
+* Game command
+* Lurk/Unlurk
+* Peppercam counter
+* Quote add
+* Quote id
+* Quote search
 * Shoutout
 * Timers
-* Quote add
-* Quote search
-* Quote id
-* Game command
 * Title command
-* Auth
-* Add advice
-* Awesome

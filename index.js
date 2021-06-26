@@ -11,6 +11,8 @@ const advice = require("./advice");
 const game = require("./game");
 const title = require("./title");
 const awesome = require("./awesome");
+const lurk = require("./lurk");
+const pepper = require("./pepper");
 
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
@@ -54,7 +56,7 @@ const run = async () => {
   // Chat listener
   chatClient.onMessage(async (_, user, message, msg) => {
     try {
-      awesome.add(user);
+      awesome.add(apiClient, user);
 
       const args = message.split(' ');
       const command = args.shift().toLowerCase();
@@ -84,6 +86,15 @@ const run = async () => {
         case '!awesome':
           awesome.command(chatClient, channel);
           break;
+        case '!lurk':
+          lurk.lurk(chatClient, channel, user, args);
+          break;
+        case '!unlurk':
+          lurk.unlurk(chatClient, channel, user);
+          break;
+        case '!grind':
+          pepper.command(chatClient, db, channel, user, 15);
+          break;
       }
     } catch(err) {
       console.log(err);
@@ -99,6 +110,8 @@ const run = async () => {
       console.log(message.message);
       switch (message.rewardName) {
         case 'Pepper Cam':
+          pepper.command(chatClient, db, channel, user, 15)
+            .catch(err => console.log(err));
           break;
         case 'Give Sgt Pepper Advice':
           advice.add(chatClient, db, channel, message.userName, message.message)

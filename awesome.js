@@ -3,13 +3,14 @@ const chatters = new Map();
 const SECONDS = 1000;
 const MINUTES = 60 * SECONDS;
 
-function add(user) {
-	chatters.set(user, Date.now());
+async function add(apiClient, user) {
+	u = await apiClient.helix.users.getUserByName(user);
+	chatters.set(u.displayName, Date.now());
 }
 
 function prune() {
 	for (const [user, ts] of chatters) {
-		if (Date() - ts > 1 * MINUTES) {
+		if (Date.now() - ts > 1 * MINUTES) {
 			console.log(`Pruning ${user} from active chatters`)
 			chatters.delete(user);
 		} 
