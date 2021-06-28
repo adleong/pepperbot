@@ -21,9 +21,11 @@ const clientSecret = process.env.CLIENT_SECRET;
 const channel = process.env.CHANNEL;
 const bot = process.env.NAME
 
+const ssl = process.env.DATABASE_URL.startsWith('postgres://localhost') ?
+  false : { rejectUnauthorized: false }
 const db = new Client({
   connectionString: process.env.DATABASE_URL,
-  ssl: !process.env.DATABASE_URL.startsWith('postgres://localhost'),
+  ssl: ssl
 });
 
 db.connect();
