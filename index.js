@@ -13,6 +13,8 @@ const title = require("./title");
 const awesome = require("./awesome");
 const lurk = require("./lurk");
 const pepper = require("./pepper");
+const roll = require("./roll");
+const brag = require("./brag");
 
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
@@ -21,7 +23,7 @@ const bot = process.env.NAME
 
 const db = new Client({
   connectionString: process.env.DATABASE_URL,
-  ssl: false,
+  ssl: !process.env.DATABASE_URL.startsWith('postgres://localhost'),
 });
 
 db.connect();
@@ -34,6 +36,7 @@ const run = async () => {
 
   const apiClient = new ApiClient({ authProvider: userAuth });
   const chatClient = new ChatClient(botAuth, { channels: [channel] });
+  const userChat = new ChatClient(userAuth, { channels: [channel] });
   await chatClient.connect();
   console.log("Chat connected");
 
@@ -62,9 +65,6 @@ const run = async () => {
       const command = args.shift().toLowerCase();
 
       switch (command) {
-        case '!test': 
-          chatClient.say(channel, 'Your sound card works perfectly');
-          break;
         case '!quote':
           await quote.command(chatClient, apiClient, db, channel, msg.channelId, user, args);
           break;
@@ -80,9 +80,6 @@ const run = async () => {
         case '!title':
           await title.command(chatClient, apiClient, channel, user, args);
           break;
-        case '!chatters':
-          awesome.dumpChatters(chatClient, channel);
-          break;
         case '!awesome':
           awesome.command(chatClient, channel);
           break;
@@ -92,9 +89,22 @@ const run = async () => {
         case '!unlurk':
           lurk.unlurk(chatClient, channel, user);
           break;
-        case '!grind':
-          pepper.command(chatClient, db, channel, user, 15);
+        case '!roll':
+          roll.command(chatClient, channel, args);
           break;
+        case '!pepper':
+          chatClient.say(channel, 'Hello, everyone! Please allow me to introduce myself: I am Sgt Pepper Bot MkII and I am at your service.  Use !commands to see what I can do!');
+          break;
+        case '!commands':
+          chatClient.say(channel, ['!quote', '!advice', '!so', '!game', '!title', '!awesome', '!lurk', '!unlurk', '!roll', '!pepper', '!commands'].join(' '));
+          break;
+        // // DEBUG COMMANDS
+        // case '!grind':
+        //   pepper.command(chatClient, db, channel, user, 15);
+        //   break;
+        // case '!brag':
+        //   brag.brag(chatClient, channel, db);
+        //   break;
       }
     } catch(err) {
       console.log(err);
@@ -117,7 +127,27 @@ const run = async () => {
           advice.add(chatClient, db, channel, message.userName, message.message)
             .catch(err => console.log(err));
           break;
+        case 'Brag Time':
+          const seconds = 1000;
+          const minutes = 60 * seconds;
+          const delay = Math.floor(Math.random() * 5 * minutes);
+          setTimeout(function() {
+            brag.brag(chatClient, channel, db);
+          }, delay);
       }
+    } catch(err) {
+      console.log(err);
+    }
+  });
+
+  chatClient.onRaid(async (_, user, raidInfo, msg) => {
+    try {
+      chatClient.say(channel, `Welcome raiders! Thank you for the raid, ${raidInfo.displayName}!`);
+      if (Math.random() < 0.1) {
+        chatClient.say(channel, `Can we get a shoutout for ${raidInfo.displayName}, please?`);
+        chatClient.say(channel, `Oh right... I can do it`);
+      }
+      await so.command(chatClient, apiClient, channel, user);
     } catch(err) {
       console.log(err);
     }

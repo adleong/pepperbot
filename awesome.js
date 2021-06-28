@@ -10,10 +10,10 @@ async function add(apiClient, user) {
 
 function prune() {
 	for (const [user, ts] of chatters) {
-		if (Date.now() - ts > 1 * MINUTES) {
+		if (Date.now() - ts > 30 * MINUTES) {
 			console.log(`Pruning ${user} from active chatters`)
 			chatters.delete(user);
-		} 
+		}
 	}
 }
 
@@ -22,7 +22,7 @@ function command(chatClient, channel) {
 	const users = Array.from(chatters.keys());
 	users.push('sgt_pepper_bot');
 	const i = Math.floor(Math.random() * users.length);
-	chatClient.say(channel, `You know who's awesome? ${users[i]} is awesome.`);
+	chatClient.say(channel, `You know who's awesome? ${users[i]} is awesome!`);
 	if (users[i] == "sgt_pepper_bot") {
 		chatClient.say(channel, 'If I do say so myself');
 	}
