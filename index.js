@@ -125,7 +125,7 @@ const run = async () => {
       console.log(message.message);
       switch (message.rewardName) {
         case 'Pepper Cam':
-          pepper.command(chatClient, db, channel, user, 15)
+          pepper.command(chatClient, db, channel, message.userName, 15)
             .catch(err => console.log(err));
           break;
         case 'Give Sgt Pepper Advice':
