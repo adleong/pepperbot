@@ -7,14 +7,28 @@ async function command(chatClient, db, channel, user, minutes) {
 		pepper = rows[0].pepper_minutes;
 	}
 	pepper += minutes;
-	const duration = formatDuration(new Duration(pepper * Duration.minute));
-	console.log(duration.toString());
-	chatClient.say(channel, `${user} has redeemed ${duration.toString()} of pepper time in total.`);
+	report(chatClient, channel, user, pepper);
 	if (rows.length == 0) {
 		await db.query('INSERT INTO peppertime (user_name, pepper_minutes) VALUES($1, $2)', [user, pepper]);
 	} else {
 		await db.query('UPDATE peppertime SET pepper_minutes = $1 WHERE user_name = $2', [pepper, user]);
 	}
+}
+
+async function leaders(chatClient, db, channel) {
+	const { rows } = await db.query('SELECT user_name, pepper_minutes FROM peppertime ORDER BY pepper_minutes DESC LIMIT 3');
+	chatClient.say(channel, 'Your super shaker pepper cam leaders are:');
+	if (rows.length == 0) {
+		chatClient.say(channel, 'No one. For shame.');
+	}
+	for (const row of rows) {
+		report(chatClient, channel, row.user_name, row.pepper_minutes);
+	}
+}
+
+function report(chatClient, channel, user, minutes) {
+	const duration = formatDuration(new Duration(minutes * Duration.minute));
+	chatClient.say(channel, `${user} has redeemed ${duration.toString()} of pepper time in total.`);
 }
 
 function formatDuration(d) {
@@ -59,4 +73,4 @@ function pluralize(amount, unit) {
 	}
 }
 
-module.exports = { command };
+module.exports = { command, leaders };

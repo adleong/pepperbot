@@ -29,7 +29,7 @@ const db = new Client({
 });
 
 db.connect();
-console.warn("Database connected");
+console.log("Database connected");
 
 const run = async () => {
 
@@ -40,7 +40,7 @@ const run = async () => {
   const chatClient = new ChatClient(botAuth, { channels: [channel] });
   const userChat = new ChatClient(userAuth, { channels: [channel] });
   await chatClient.connect();
-  console.warn("Chat connected");
+  console.log("Chat connected");
 
   timers.load(chatClient, db, channel);
 
@@ -97,8 +97,11 @@ const run = async () => {
         case '!pepper':
           chatClient.say(channel, 'Hello, everyone! Please allow me to introduce myself: I am Sgt Pepper Bot MkII and I am at your service.  Use !commands to see what I can do!');
           break;
+        case '!leaders':
+          await pepper.leaders(chatClient, db, channel);
+          break;
         case '!commands':
-          chatClient.say(channel, ['!quote', '!advice', '!so', '!game', '!title', '!awesome', '!lurk', '!unlurk', '!roll', '!pepper', '!commands'].join(' '));
+          chatClient.say(channel, ['!quote', '!advice', '!so', '!game', '!title', '!awesome', '!lurk', '!unlurk', '!roll', '!leaders', '!pepper', '!commands'].join(' '));
           break;
         // // DEBUG COMMANDS
         // case '!grind':
@@ -109,7 +112,7 @@ const run = async () => {
         //   break;
       }
     } catch(err) {
-      console.warn(err);
+      console.log(err);
     }
   });
 
@@ -118,16 +121,16 @@ const run = async () => {
   const userId = await pubSubClient.registerUserListener(apiClient);
   await pubSubClient.onRedemption(userId, (message) => {
     try {
-      console.warn(`${message.userName} redeems ${message.rewardName}`);
-      console.warn(message.message);
+      console.log(`${message.userName} redeems ${message.rewardName}`);
+      console.log(message.message);
       switch (message.rewardName) {
         case 'Pepper Cam':
           pepper.command(chatClient, db, channel, user, 15)
-            .catch(err => console.warn(err));
+            .catch(err => console.log(err));
           break;
         case 'Give Sgt Pepper Advice':
           advice.add(chatClient, db, channel, message.userName, message.message)
-            .catch(err => console.warn(err));
+            .catch(err => console.log(err));
           break;
         case 'Brag Time':
           const seconds = 1000;
@@ -138,7 +141,7 @@ const run = async () => {
           }, delay);
       }
     } catch(err) {
-      console.warn(err);
+      console.log(err);
     }
   });
 
@@ -151,7 +154,7 @@ const run = async () => {
       }
       await so.command(chatClient, apiClient, channel, user);
     } catch(err) {
-      console.warn(err);
+      console.log(err);
     }
   });
 };
