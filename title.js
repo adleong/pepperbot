@@ -12,7 +12,7 @@ async function command(chatClient, apiClient, channel, user, args) {
         }
         const title = args.join(' ');
         await apiClient.helix.channels.updateChannelInfo(broadcaster.id, {
-               title: title,
+               title,
         });
         chatClient.say(channel, `Title set to ${title}`);
     }

@@ -12,15 +12,16 @@ async function provider(db, user, clientId, clientSecret) {
     return new RefreshableAuthProvider(
         new StaticAuthProvider(clientId, accessToken),
         {
-            clientSecret: clientSecret,
-            refreshToken: refreshToken,
-            expiry: expiry,
+            clientSecret,
+            expiry,
             onRefresh: async ({ accessToken, refreshToken, expiryDate }) => {
                 console.log(`Refreshing token for ${user}.  Next refresh at ${new Date(expiryDate)}`);
-                await db.query('UPDATE tokens SET access_token = $1, refresh_token = $2, expiry_timestamp = $3 WHERE user_name = $4',
+                await db.query(
+                    'UPDATE tokens SET access_token = $1, refresh_token = $2, expiry_timestamp = $3 WHERE user_name = $4',
                     [accessToken, refreshToken, expiryDate, user]
                 );
-            }
+            },
+            refreshToken
         }
     );
 }

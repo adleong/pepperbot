@@ -32,4 +32,7 @@ async function add(chatClient, db, channel, user, message) {
     chatClient.say(channel, `Thank you, ${user}, I will remember to ${uncap}.`);
 }
 
-module.exports = { add, command };
+module.exports = {
+    add,
+    command
+};

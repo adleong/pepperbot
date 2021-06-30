@@ -21,11 +21,12 @@ const clientSecret = process.env.CLIENT_SECRET;
 const channel = process.env.CHANNEL;
 const bot = process.env.NAME
 
-const ssl = process.env.DATABASE_URL.startsWith('postgres://localhost') ?
-  false : { rejectUnauthorized: false }
+const ssl = process.env.DATABASE_URL.startsWith('postgres://localhost')
+  ? false
+  : { rejectUnauthorized: false }
 const db = new Client({
   connectionString: process.env.DATABASE_URL,
-  ssl: ssl
+  ssl
 });
 
 db.connect();
@@ -38,7 +39,6 @@ const run = async () => {
 
   const apiClient = new ApiClient({ authProvider: userAuth });
   const chatClient = new ChatClient(botAuth, { channels: [channel] });
-  const userChat = new ChatClient(userAuth, { channels: [channel] });
   await chatClient.connect();
   console.log("Chat connected");
 
@@ -55,8 +55,6 @@ const run = async () => {
     db.end();
     process.exit(0);
   }));
-
-  var chatters = {};
 
   // Chat listener
   chatClient.onMessage(async (_, user, message, msg) => {
@@ -103,13 +101,17 @@ const run = async () => {
         case '!commands':
           chatClient.say(channel, ['!quote', '!advice', '!so', '!game', '!title', '!awesome', '!lurk', '!unlurk', '!roll', '!leaders', '!pepper', '!commands'].join(' '));
           break;
-        // // DEBUG COMMANDS
-        // case '!grind':
-        //   pepper.command(chatClient, db, channel, user, 15);
-        //   break;
-        // case '!brag':
-        //   brag.brag(chatClient, channel, db);
-        //   break;
+
+          /*
+        // DEBUG COMMANDS
+        case '!grind':
+          pepper.command(chatClient, db, channel, user, 15);
+          break;
+        case '!brag':
+          brag.brag(chatClient, channel, db);
+          break;
+          */
+
       }
     } catch(err) {
       console.log(err);
@@ -119,33 +121,34 @@ const run = async () => {
   // Events listener.
   const pubSubClient = new PubSubClient();
   const userId = await pubSubClient.registerUserListener(apiClient);
-  await pubSubClient.onRedemption(userId, (message) => {
+  await pubSubClient.onRedemption(userId, message => {
     try {
       console.log(`${message.userName} redeems ${message.rewardName}`);
       console.log(message.message);
       switch (message.rewardName) {
         case 'Pepper Cam':
-          pepper.command(chatClient, db, channel, message.userName, 15)
-            .catch(err => console.log(err));
+          pepper.command(chatClient, db, channel, message.userName, 15).
+            catch(err => console.log(err));
           break;
         case 'Give Sgt Pepper Advice':
-          advice.add(chatClient, db, channel, message.userName, message.message)
-            .catch(err => console.log(err));
+          advice.add(chatClient, db, channel, message.userName, message.message).
+            catch(err => console.log(err));
           break;
-        case 'Brag Time':
+        case 'Brag Time': {
           const seconds = 1000;
           const minutes = 60 * seconds;
           const delay = Math.floor(Math.random() * 5 * minutes);
           setTimeout(function() {
             brag.brag(chatClient, channel, db);
           }, delay);
+        }
       }
     } catch(err) {
       console.log(err);
     }
   });
 
-  chatClient.onRaid(async (_, user, raidInfo, msg) => {
+  chatClient.onRaid(async (_, user, raidInfo, _msg) => {
     try {
       chatClient.say(channel, `Welcome raiders! Thank you for the raid, ${raidInfo.displayName}!`);
       if (Math.random() < 0.1) {
