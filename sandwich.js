@@ -92,7 +92,7 @@ function sandwich(hash) {
 }
 
 function command(chatClient, channel, input) {
-    const normal = input.replaceAll(' ', '').toLowerCase();
+    const normal = input.replace(/ /g, '').toLowerCase();
     const hash = sha256(normal).toString();
 
     const result = sandwich(hash);
