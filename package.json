@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "crypto-js": "^4.0.0",
     "duration-js": "^4.0.0",
     "pg": "^8.6.0",
     "twitch": "^4.5.5",

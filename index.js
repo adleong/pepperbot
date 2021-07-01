@@ -15,6 +15,7 @@ const lurk = require("./lurk");
 const pepper = require("./pepper");
 const roll = require("./roll");
 const brag = require("./brag");
+const sandwich = require("./sandwich");
 
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
@@ -141,7 +142,11 @@ const run = async () => {
           setTimeout(function() {
             brag.brag(chatClient, channel, db);
           }, delay);
+          break;
         }
+        case 'Is it a sandwich?':
+          sandwich.command(chatClient, channel, message.message);
+          break;
       }
     } catch(err) {
       console.log(err);
