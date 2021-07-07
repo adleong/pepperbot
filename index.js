@@ -75,7 +75,7 @@ const run = async () => {
           await advice.command(chatClient, db, channel, args);
           break;
         case '!so': {
-          const target = await so.command(chatClient, apiClient, channel, args.shift);
+          const target = await so.command(chatClient, apiClient, channel, args.shift());
           if (outstandingShoutouts.has(target)) {
             outstandingShoutouts.delete(target.name);
             chatClient.say(channel, `Thanks, ${user} for getting that shoutout to ${target.displayName} <3`);
