@@ -10,6 +10,8 @@ async function load(chatClient, db, channel) {
       
         // Register timers
         for (const timer of res.rows) {
+            if (timer.period_mins === 0) continue;
+
             const offset = Math.floor(Math.random() * timer.period_mins);
             console.log("Registering timer on " + timer.period_mins + "m period (with " + offset + "m offset):");
             console.log(timer.message);
@@ -28,4 +30,14 @@ async function load(chatClient, db, channel) {
     });
 }
 
-module.exports = { load };
+async function command(chatClient, db, channel, command) {
+    const { rows } = await db.query('SELECT message FROM timers WHERE command = $1', [command]);
+    if (rows.length === 1) {
+        chatClient.say(channel, rows[0].message);
+    }
+}
+
+module.exports = {
+    command,
+    load
+};

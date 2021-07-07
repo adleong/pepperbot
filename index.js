@@ -109,6 +109,11 @@ const run = async () => {
         case '!commands':
           chatClient.say(channel, ['!quote', '!advice', '!so', '!game', '!title', '!awesome', '!lurk', '!unlurk', '!roll', '!leaders', '!pepper', '!commands'].join(' '));
           break;
+        default: {
+          if (command.startsWith('!')) {
+            await timers.command(chatClient, db, channel, command);
+          }
+        }
 
           /*
         // DEBUG COMMANDS
