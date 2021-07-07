@@ -10,6 +10,7 @@ async function command(chatClient, apiClient, channel, user) {
     } else {
         chatClient.say(channel, `${user}? Never heard of them.`);
     }
+    return target;
 }
 
 module.exports = { command };

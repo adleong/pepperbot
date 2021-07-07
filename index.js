@@ -57,6 +57,8 @@ const run = async () => {
     process.exit(0);
   }));
 
+  const outstandingShoutouts = new Set();
+
   // Chat listener
   chatClient.onMessage(async (_, user, message, msg) => {
     try {
@@ -72,9 +74,14 @@ const run = async () => {
         case '!advice':
           await advice.command(chatClient, db, channel, args);
           break;
-        case '!so':
-          await so.command(chatClient, apiClient, channel, args.shift());
+        case '!so': {
+          const target = await so.command(chatClient, apiClient, channel, args.shift);
+          if (outstandingShoutouts.has(target)) {
+            outstandingShoutouts.delete(target.name);
+            chatClient.say(channel, `Thanks, ${user} for getting that shoutout to ${target.displayName} <3`);
+          }
           break;
+        }
         case '!game':
           await game.command(chatClient, apiClient, channel, user, args);
           break;
@@ -156,11 +163,15 @@ const run = async () => {
   chatClient.onRaid(async (_, user, raidInfo, _msg) => {
     try {
       chatClient.say(channel, `Welcome raiders! Thank you for the raid, ${raidInfo.displayName}!`);
-      if (Math.random() < 0.1) {
-        chatClient.say(channel, `Can we get a shoutout for ${raidInfo.displayName}, please?`);
-        chatClient.say(channel, `Oh right... I can do it`);
-      }
-      await so.command(chatClient, apiClient, channel, user);
+      chatClient.say(channel, `Can we get a shoutout for ${raidInfo.displayName}, please?`);
+      outstandingShoutouts.add(user);
+      // In 2 minutes, trigger a shoutout.
+      setTimeout(() => {
+        if (outstandingShoutouts.has(user)) {
+          outstandingShoutouts.delete(user);
+          so.command(chatClient, apiClient, channel, user);
+        }
+      }, 2 * 60 * 1000);
     } catch(err) {
       console.log(err);
     }
