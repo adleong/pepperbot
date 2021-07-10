@@ -76,7 +76,7 @@ const run = async () => {
           break;
         case '!so': {
           const target = await so.command(chatClient, apiClient, channel, args.shift());
-          if (outstandingShoutouts.has(target)) {
+          if (outstandingShoutouts.has(target.name)) {
             outstandingShoutouts.delete(target.name);
             chatClient.say(channel, `Thanks, ${user} for getting that shoutout to ${target.displayName} <3`);
           }
@@ -156,8 +156,11 @@ const run = async () => {
           }, delay);
           break;
         }
-        case 'Is it a sandwich?':
+        case 'Ask Sgt. Pepper: Is it a sandwich?':
           sandwich.command(chatClient, channel, message.message);
+          break;
+        case 'Sgt. Pepper Facts!':
+          brag.brag(chatClient, channel, db);
           break;
       }
     } catch(err) {
@@ -174,6 +177,7 @@ const run = async () => {
       setTimeout(() => {
         if (outstandingShoutouts.has(user)) {
           outstandingShoutouts.delete(user);
+          chatClient.say(channel, 'Fine, I\'ll do it myself!');
           so.command(chatClient, apiClient, channel, user);
         }
       }, 2 * 60 * 1000);

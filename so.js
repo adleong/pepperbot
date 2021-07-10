@@ -1,5 +1,9 @@
 async function command(chatClient, apiClient, channel, user) {
-    const target = await apiClient.helix.users.getUserByName(user);
+    let u = user;
+    if (user.startsWith('@')) {
+        u = user.substring(1);
+    }
+    const target = await apiClient.helix.users.getUserByName(u);
     if (target) {
         const target_channel = await apiClient.helix.channels.getChannelInfo(target);
         let shoutout = `Please give a follow to the wonderful ${target_channel.displayName} over at https://twitch.tv/${target_channel.name} <3`;
@@ -8,7 +12,7 @@ async function command(chatClient, apiClient, channel, user) {
         }
         chatClient.say(channel, shoutout);
     } else {
-        chatClient.say(channel, `${user}? Never heard of them.`);
+        chatClient.say(channel, `${u}? Never heard of them.`);
     }
     return target;
 }
