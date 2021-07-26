@@ -89,7 +89,7 @@ const run = async () => {
           await title.command(chatClient, apiClient, channel, user, args);
           break;
         case '!awesome':
-          awesome.command(chatClient, channel);
+          await awesome.command(chatClient, channel, db);
           break;
         case '!lurk':
           lurk.lurk(chatClient, channel, user, args);
@@ -161,6 +161,10 @@ const run = async () => {
           break;
         case 'Sgt. Pepper Facts!':
           brag.brag(chatClient, channel, db);
+          break;
+        case 'Set catchphrase':
+          awesome.setCatchphrase(chatClient, apiClient, channel, db, message.userName, message.message).
+            catch(err => console.log(err));
           break;
       }
     } catch(err) {
