@@ -16,6 +16,7 @@ const pepper = require("./pepper");
 const roll = require("./roll");
 const brag = require("./brag");
 const sandwich = require("./sandwich");
+const repeat = require("./repeat");
 
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
@@ -35,7 +36,7 @@ console.log("Database connected");
 
 const run = async () => {
 
-  const userAuth = await auth.provider(db, channel, clientId, clientSecret);
+  const userAuth = await auth.provider(db, "alexicographic", clientId, clientSecret);
   const botAuth = await auth.provider(db, bot, clientId, clientSecret);
 
   const apiClient = new ApiClient({ authProvider: userAuth });
@@ -63,6 +64,7 @@ const run = async () => {
   chatClient.onMessage(async (_, user, message, msg) => {
     try {
       awesome.add(apiClient, user);
+      repeat.add(chatClient, channel, user, message);
 
       const args = message.split(' ');
       const command = args.shift().toLowerCase();
