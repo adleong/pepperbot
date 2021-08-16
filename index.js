@@ -36,7 +36,7 @@ console.log("Database connected");
 
 const run = async () => {
 
-  const userAuth = await auth.provider(db, "alexicographic", clientId, clientSecret);
+  const userAuth = await auth.provider(db, channel, clientId, clientSecret);
   const botAuth = await auth.provider(db, bot, clientId, clientSecret);
 
   const apiClient = new ApiClient({ authProvider: userAuth });

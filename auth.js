@@ -9,8 +9,10 @@ async function provider(db, user, clientId, clientSecret) {
     const expiry = new Date(rows[0].expiry_timestamp);
 
     console.log(`Loaded token for ${user}.  Token will expire on ${expiry}`)
+    const scopes = ['chat:read', 'chat:edit', 'user:edit:broadcast', 'channel:read:redemptions',
+    'channel:manage:broadcast', 'moderation:read'];
     return new RefreshableAuthProvider(
-        new StaticAuthProvider(clientId, accessToken),
+        new StaticAuthProvider(clientId, accessToken, scopes),
         {
             clientSecret,
             expiry,
