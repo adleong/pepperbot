@@ -10,8 +10,10 @@
     "twitch-pubsub-client": "^4.6.0"
   },
   "devDependencies": {
+    "ejs": "^3.1.6",
     "eslint": "^7.29.0",
     "eslint-config-airbnb-base": "^14.2.1",
-    "eslint-plugin-import": "^2.23.4"
+    "eslint-plugin-import": "^2.23.4",
+    "express": "^4.17.1"
   }
 }

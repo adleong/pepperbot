@@ -74,7 +74,18 @@ async function leaders(chatClient, db, channel) {
     }
 }
 
+async function leadersResults(db) {
+    console.log("querying");
+    const { rows } = await db.query('SELECT user_name, pepper_minutes FROM peppertime ORDER BY pepper_minutes DESC LIMIT 3');
+    console.log(rows);
+    return rows.map(row => ({
+        'name': row.user_name,
+        'time': formatDuration(new Duration(row.pepper_minutes * Duration.minute))
+    }));
+}
+
 module.exports = {
     command,
-    leaders
+    leaders,
+    leadersResults,
 };

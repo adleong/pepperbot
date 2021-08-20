@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pepper Time Leaders</title>
+</head>
+<body>
+    <div class="container">
+    <h2>Pepper Leaders</h2>
+    
+    <ol>
+        <% results.forEach(function(r) { %>
+            <li><%= r.name %> - <%= r.time %></li>
+        <% }); %>
+    </ul>
+    
+    </div>
+</body>
+</html>
