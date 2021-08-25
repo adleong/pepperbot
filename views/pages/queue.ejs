@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Speen Queue</title>
+    <meta http-equiv="refresh" content="10">
+</head>
+<body>
+    <div class="container">
+    <h2>Speen Queue</h2>
+    
+    <ol>
+        <% results.forEach(function(r) { %>
+            <li>#<%= r.id %>: <b><%= r.title %></b> - <i><%= r.charter %></i> (<%= r.XDDifficulty %>)</li>
+        <% }); %>
+    </ul>
+    
+    </div>
+</body>
+</html>

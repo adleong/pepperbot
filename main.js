@@ -17,6 +17,7 @@ const roll = require("./roll");
 const brag = require("./brag");
 const sandwich = require("./sandwich");
 const repeat = require("./repeat");
+const spin = require("./spin");
 
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
@@ -107,6 +108,15 @@ const run = async () => {
           break;
         case '!leaders':
           await pepper.leaders(chatClient, db, channel);
+          break;
+        case '!request':
+          await spin.request(chatClient, channel, db, user, args);
+          break;
+        case '!done':
+          await spin.done(chatClient, channel, apiClient, db, user, args.shift());
+          break;
+        case '!clear':
+          await spin.clear(chatClient, channel, apiClient, db, user);
           break;
         case '!commands':
           chatClient.say(channel, ['!quote', '!advice', '!so', '!game', '!title', '!awesome', '!lurk', '!unlurk', '!roll', '!leaders', '!pepper', '!commands'].join(' '));
