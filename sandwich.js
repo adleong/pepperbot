@@ -80,7 +80,7 @@ function sandwich(hash) {
     switch (hash.charAt(6)) {
         case '0':
         case '1': {
-            const inner = sandwich(hash.substring(6));
+            const inner = sandwich(hash.substring(7));
             if (inner) {
                 output.push('embedded in a');
                 output.push(inner);
