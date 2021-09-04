@@ -1,28 +1,31 @@
 const { ApiClient } = require('twitch');
 const { ChatClient } = require('twitch-chat-client');
-const { PubSubClient } = require('twitch-pubsub-client');
 const { Client } = require('pg');
+const { PubSubClient } = require('twitch-pubsub-client');
+const express = require('express')
+const path = require('path')
 
-const auth = require("./auth");
-const quote = require("./quote");
-const timers = require("./timers");
-const so = require("./so");
 const advice = require("./advice");
-const game = require("./game");
-const title = require("./title");
+const auth = require("./auth");
 const awesome = require("./awesome");
+const brag = require("./brag");
+const game = require("./game");
 const lurk = require("./lurk");
 const pepper = require("./pepper");
-const roll = require("./roll");
-const brag = require("./brag");
-const sandwich = require("./sandwich");
+const quote = require("./quote");
 const repeat = require("./repeat");
+const roll = require("./roll");
+const sandwich = require("./sandwich");
+const so = require("./so");
 const spin = require("./spin");
+const timers = require("./timers");
+const title = require("./title");
 
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
 const channel = process.env.CHANNEL;
 const bot = process.env.NAME
+const PORT = process.env.PORT || 5000
 
 const ssl = process.env.DATABASE_URL.startsWith('postgres://localhost')
   ? false
@@ -34,6 +37,39 @@ const db = new Client({
 
 db.connect();
 console.log("Database connected");
+
+express()
+  .set('views', path.join(__dirname, 'views'))
+  .set('view engine', 'ejs')
+  .get('/leaders', async (req, res) => {
+    const results  = await pepper.leadersResults(db);
+      res.render('pages/leaders', {'results': results})
+  })
+  .get('/reclaimers', async (req, res) => {
+    const results  = await pepper.claimedLeaders(db);
+      res.render('pages/claimed', {'results': results})
+  })
+  .get('/queue', async (req, res) => {
+      res.render('pages/queue', {'results': spin.queue})
+  })
+  .get('/timer', async (req, res) => {
+      res.render('pages/timer')
+  })
+  .get('/timer/start', async (req, res) => {
+    pepper.start();
+    res.sendStatus(200);
+  })
+  .get('/timer/stop', async (req, res) => {
+    pepper.stop();
+    res.sendStatus(200);
+  })
+  .get('/timer/ping', async (req, res) => {
+    const claimant = await pepper.ping(req.query.secs);
+    res.setHeader('Content-Type', 'application/json');
+    res.write(JSON.stringify(claimant));
+    res.end();
+  })
+  .listen(PORT, () => console.log(`Listening on ${ PORT }`))
 
 const run = async () => {
 
@@ -117,6 +153,9 @@ const run = async () => {
           break;
         case '!clear':
           await spin.clear(chatClient, channel, apiClient, db, user);
+          break;
+        case '!claim':
+          await pepper.claim(chatClient, apiClient, db, channel, user);
           break;
         case '!commands':
           chatClient.say(channel, ['!quote', '!advice', '!so', '!game', '!title', '!awesome', '!lurk', '!unlurk', '!roll', '!leaders', '!pepper', '!commands'].join(' '));

@@ -43,6 +43,25 @@ function formatDuration(dur) {
     return out.join(' ');
 }
 
+function formatSmallDuration(dur) {
+
+    const out = [];
+    let d = dur;
+
+    if (d.hours() > 0) {
+        out.push(pluralize(d.hours(), "hour"));
+        d = Duration.subtract(d, d.hours() * Duration.hour);
+    }
+    if (d.minutes() > 0) {
+        out.push(pluralize(d.minutes(), "minute"));
+        d = Duration.subtract(d, d.minutes() * Duration.minute);
+    }
+    if (d.seconds() > 0) {
+        out.push(pluralize(d.seconds(), "second"));
+    }
+    return out.join(' ');
+}
+
 function report(chatClient, channel, user, minutes) {
     const duration = formatDuration(new Duration(minutes * Duration.minute));
     chatClient.say(channel, `${user} has redeemed ${duration.toString()} of pepper time in total.`);
@@ -75,17 +94,95 @@ async function leaders(chatClient, db, channel) {
 }
 
 async function leadersResults(db) {
-    console.log("querying");
     const { rows } = await db.query('SELECT user_name, pepper_minutes FROM peppertime ORDER BY pepper_minutes DESC LIMIT 3');
-    console.log(rows);
     return rows.map(row => ({
         'name': row.user_name,
         'time': formatDuration(new Duration(row.pepper_minutes * Duration.minute))
     }));
 }
 
+async function claimedLeaders(db) {
+    const { rows } = await db.query('SELECT user_name, pepper_seconds FROM claimedtime ORDER BY pepper_seconds DESC LIMIT 3');
+    return rows.map(row => ({
+        'name': row.user_name,
+        'time': formatSmallDuration(new Duration(row.pepper_seconds * Duration.second))
+    }));
+}
+
+// set lastPing to epoch
+let lastPing = 0;
+let timer = 0;
+let claimant = {};
+
+function start(){
+    console.log("Pepper cam activated");
+    // set lastPing to now
+    lastPing = Date.now();
+    timer = 0;
+    claimant = {};
+}
+
+function ping(secs){
+    lastPing = Date.now();
+    timer = Number(secs);
+    return claimant;
+}
+
+function stop(){
+    console.log("Pepper cam maxed out");
+    lastPing = 0;
+    timer = 0;
+    claimant = {};
+}
+
+async function claim(chatClient, apiClient, db, channel, user){
+    const since = Date.now() - lastPing;
+    if (since > 11*1000) {
+        chatClient.say(channel, `Pepper cam isn't active, ${user}. You goofball.`);
+        return;
+    }
+    const adjusted = timer + Math.floor(since/1000);
+    console.log(`${adjusted}s is the adjusted time`);
+    const excess = adjusted - 15*60;
+    console.log(`${excess}s is the excess time`);
+    if (excess < 0) {
+        chatClient.say(channel, `Pepper cam isn't expired, ${user}. You silly.`);
+        return;
+    }
+    if (claimant.claimed) {
+        chatClient.say(channel, `Sorry ${user}, pepper cam time has already been reclaimed by ${claimant.user}.`);
+        return;
+    }
+
+    const target = await apiClient.helix.users.getUserByName(user);
+    claimant = {
+        claimed: true,
+        user: user,
+        profileURL: target.profilePictureUrl,
+        secs: adjusted
+    };
+    chatClient.say(channel, `${user} has reclaimed ${formatSmallDuration(new Duration(excess * Duration.second))} of the pepper cam time.`);
+
+    const { rows } = await db.query('SELECT pepper_seconds FROM claimedtime WHERE user_name = $1', [user]);
+    let pepper = 0;
+    if (rows.length > 0) {
+        pepper = rows[0].pepper_seconds;
+    }
+    pepper += excess;
+    if (rows.length == 0) {
+        await db.query('INSERT INTO claimedtime (user_name, pepper_seconds) VALUES($1, $2)', [user, pepper]);
+    } else {
+        await db.query('UPDATE claimedtime SET pepper_seconds = $1 WHERE user_name = $2', [pepper, user]);
+    }
+}
+
 module.exports = {
     command,
     leaders,
     leadersResults,
+    start,
+    ping,
+    stop,
+    claim,
+    claimedLeaders
 };

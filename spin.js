@@ -1,6 +1,8 @@
 const SSAPI = require('ssapi-node');
 const api = new SSAPI();
 
+const queue = [];
+
 async function lookup(query) {
     // If arg is a number string
     if (query.match(/^\d+$/)) {
@@ -25,13 +27,12 @@ async function lookup(query) {
 
 async function request(chatClient, channel, db, user, args) {
     const query = args.join(' ');
-    // If arg is a number string
     const song = await lookup(query).catch(err => {
         chatClient.say(channel, err);
     });
     // Insert song into database
     if (song) {
-        await db.query('INSERT INTO songqueue(chart, requested_by) VALUES($1, $2) RETURNING id', [song.id, user]);
+        queue.push(song);
         chatClient.say(channel, `Adding #${song.id}: ${song.title} - ${song.charter} (${song.XDDifficulty})`);
     }
 }
@@ -45,9 +46,16 @@ async function done(chatClient, channel, apiClient, db, user, id) {
         return;
     }
     if (id) {
-        await db.query('DELETE FROM songqueue WHERE chart = $1', [id]);
+        var i = 0;
+        while (i < queue.length) {
+            if (queue[i].id == id) {
+                queue.splice(i, 1);
+                break;
+            }
+            i++;
+        }
     } else {
-        await db.query('DELETE FROM songqueue WHERE id in (SELECT id FROM songqueue ORDER BY id ASC LIMIT 1)');
+        queue.splice(0, 1);
     }
 }
 
@@ -59,18 +67,12 @@ async function clear(chatClient, channel, apiClient, db, user) {
         chatClient.say(channel, `Sorry, ${user}, only mods may perform this action`);
         return;
     }
-    await db.query('DELETE FROM songqueue');
-}
-
-async function getQueue(db) {
-    const { rows } = await db.query('SELECT chart FROM songqueue ORDER BY id ASC LIMIT 5');
-
-    return Promise.all(rows.map(row => lookup(row.chart.toString())));
+    queue.splice(0);
 }
 
 module.exports = {
     clear,
     done,
-    getQueue,
+    queue,
     request
 };

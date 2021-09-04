@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script type = "text/javascript" src = "https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js">
+    </script>
+    <style>
+        .container {
+            display: table;
+            width: 100%;
+        }
+        .timer {
+            font-size: xx-large;
+            width: auto;
+            display: table-cell;
+            text-align: right;
+            padding-right: 30px;
+        }
+        .mask {
+            width: 150px;
+            height: 150px;
+            border: black solid 1px;
+            display: table-cell;
+        }
+        .mask h1 {
+            font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+            font-size: 35px;
+            transform: rotate(-25deg);
+            color: white;
+            -webkit-text-stroke: 1px black;
+            text-align: center;
+            padding-top: 25px;
+        }
+        div {
+            vertical-align: middle;   
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+    <div class="timer">
+        <h1><span id="time">00:00</span></h1>
+    </div>
+    <div class="mask"></div>
+    </div>
+    
+    <script type="text/javascript">
+        $(document).ready (function () {
+            startCount();
+            $.getJSON('/timer/start');
+        });
+        
+        function startCount()
+        {
+            timer = setInterval(count,1000);
+        }
+        var mins = 0, secs = 0;
+        var claimed = false;
+        function count()
+        {
+            secs++;
+            if (secs==60){
+                secs = 0;
+                mins=mins + 1;
+            } 
+            if (mins==60){
+                $("#time").text("MAXXED OUT");
+                $('.mask').css({'background-color': 'black'});
+                $('.mask').append('<h1>CENSORED</h1>');
+                $.getJSON('/timer/stop');
+                clearInterval(timer);
+                return;
+            }
+
+            if (secs % 10 == 0) {
+                $.getJSON('/timer/ping', {secs: mins*60 + secs}, function(data) {
+                    if (data.claimed && !claimed) {
+                        claimed = true;
+                        $('.mask').css({
+                            "background-image": `url(${data.profileURL})`,
+                            "background-size": "cover",
+                        });
+                        $('.mask').append('<h1>CENSORED</h1>');
+                        $('#time').css('color', 'red');
+                        mins = Math.floor(data.secs / 60);
+                        secs = data.secs % 60;
+                        $("#time").text(plz(mins) + ":" + plz(secs));
+                    }
+                });
+            }
+            
+            if (!claimed) {
+                $("#time").text(plz(mins) + ":" + plz(secs));
+            }
+            
+        }
+        
+        function plz(digit){
+            
+            var zpad = digit + '';
+            if (digit < 10) {
+                zpad = "0" + zpad;
+            }
+            return zpad;
+        }
+    </script>
+</body>
+</html>

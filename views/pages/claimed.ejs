@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pepper Time Reclaimers</title>
+    <meta http-equiv="refresh" content="10">
+</head>
+<body>
+    <div class="container">
+    <h2>Pepper Reclaimers</h2>
+    
+    <ol>
+        <% results.forEach(function(r) { %>
+            <li><%= r.name %> - <%= r.time %></li>
+        <% }); %>
+    </ul>
+    
+    </div>
+</body>
+</html>
