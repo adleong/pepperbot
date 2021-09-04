@@ -49,6 +49,10 @@ express()
     const results  = await pepper.claimedLeaders(db);
       res.render('pages/claimed', {'results': results})
   })
+  .get('/shoutouts', async (req, res) => {
+    const results  = await so.leaders(db);
+      res.render('pages/shoutouts', {'results': results})
+  })
   .get('/queue', async (req, res) => {
       res.render('pages/queue', {'results': spin.queue})
   })
@@ -118,6 +122,7 @@ const run = async () => {
           if (outstandingShoutouts.has(target.name)) {
             outstandingShoutouts.delete(target.name);
             chatClient.say(channel, `Thanks, ${user} for getting that shoutout to ${target.displayName} <3`);
+            await so.increment(db, user);
           }
           break;
         }
@@ -153,9 +158,6 @@ const run = async () => {
           break;
         case '!clear':
           await spin.clear(chatClient, channel, apiClient, db, user);
-          break;
-        case '!claim':
-          await pepper.claim(chatClient, apiClient, db, channel, user);
           break;
         case '!commands':
           chatClient.say(channel, ['!quote', '!advice', '!so', '!game', '!title', '!awesome', '!lurk', '!unlurk', '!roll', '!leaders', '!pepper', '!commands'].join(' '));
@@ -215,6 +217,10 @@ const run = async () => {
           break;
         case 'Set catchphrase':
           awesome.setCatchphrase(chatClient, apiClient, channel, db, message.userName, message.message).
+            catch(err => console.log(err));
+          break;
+        case 'Pepper Cam is OVERTIME':
+          pepper.claim(chatClient, apiClient, db, channel, message.userName).
             catch(err => console.log(err));
           break;
       }

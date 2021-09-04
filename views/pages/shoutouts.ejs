@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shoutout Leaders</title>
+    <meta http-equiv="refresh" content="10">
+</head>
+<body>
+    <div class="container">
+    <h2>Shoutout Leaders</h2>
+    
+    <ol>
+        <% results.forEach(function(r) { %>
+            <li><%= r.name %> - <%= r.shoutouts %></li>
+        <% }); %>
+    </ul>
+    
+    </div>
+</body>
+</html>

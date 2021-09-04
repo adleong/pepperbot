@@ -17,4 +17,26 @@ async function command(chatClient, apiClient, channel, user) {
     return target;
 }
 
-module.exports = { command };
+async function increment(db, user) {
+    const { rows } = await db.query('SELECT shoutouts FROM shoutouts WHERE user_name = $1', [user]);
+    let shouts = 0;
+    if (rows.length > 0) {
+        shouts = rows[0].shoutouts;
+    }
+    shouts += 1;
+    if (rows.length == 0) {
+        await db.query('INSERT INTO shoutouts (user_name, shoutouts) VALUES($1, $2)', [user, shouts]);
+    } else {
+        await db.query('UPDATE shoutouts SET shoutouts = $1 WHERE user_name = $2', [shouts, user]);
+    }
+}
+
+async function leaders(db) {
+    const { rows } = await db.query('SELECT user_name, shoutouts FROM shoutouts ORDER BY shoutouts DESC LIMIT 3');
+    return rows.map(row => ({
+        'name': row.user_name,
+        'shoutouts': row.shoutouts
+    }));
+}
+
+module.exports = { command, increment, leaders };
