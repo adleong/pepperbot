@@ -109,41 +109,41 @@ async function claimedLeaders(db) {
     }));
 }
 
-// set lastPing to epoch
+// Set lastPing to epoch
 let lastPing = 0;
 let timer = 0;
 let claimant = {};
 
-function start(){
+function start() {
     console.log("Pepper cam activated");
-    // set lastPing to now
+    // Set lastPing to now
     lastPing = Date.now();
     timer = 0;
     claimant = {};
 }
 
-function ping(secs){
+function ping(secs) {
     lastPing = Date.now();
     timer = Number(secs);
     return claimant;
 }
 
-function stop(){
+function stop() {
     console.log("Pepper cam maxed out");
     lastPing = 0;
     timer = 0;
     claimant = {};
 }
 
-async function claim(chatClient, apiClient, db, channel, user){
+async function claim(chatClient, apiClient, db, channel, user) {
     const since = Date.now() - lastPing;
-    if (since > 11*1000) {
+    if (since > 11 * 1000) {
         chatClient.say(channel, `Pepper cam isn't active, ${user}. You goofball.`);
         return;
     }
-    const adjusted = timer + Math.floor(since/1000);
+    const adjusted = timer + Math.floor(since / 1000);
     console.log(`${adjusted}s is the adjusted time`);
-    const excess = adjusted - 15*60;
+    const excess = adjusted - 15 * 60;
     console.log(`${excess}s is the excess time`);
     if (excess < 0) {
         chatClient.say(channel, `Pepper cam isn't expired, ${user}. You silly.`);
@@ -157,9 +157,9 @@ async function claim(chatClient, apiClient, db, channel, user){
     const target = await apiClient.helix.users.getUserByName(user);
     claimant = {
         claimed: true,
-        user: user,
         profileURL: target.profilePictureUrl,
-        secs: adjusted
+        secs: adjusted,
+        user
     };
     chatClient.say(channel, `${user} has reclaimed ${formatSmallDuration(new Duration(excess * Duration.second))} of the pepper cam time.`);
 
@@ -177,12 +177,12 @@ async function claim(chatClient, apiClient, db, channel, user){
 }
 
 module.exports = {
+    claim,
+    claimedLeaders,
     command,
     leaders,
     leadersResults,
-    start,
     ping,
-    stop,
-    claim,
-    claimedLeaders
+    start,
+    stop
 };

@@ -3,8 +3,12 @@ const messages = ["", "", ""];
 const users = ["", "", ""];
 const length = 3;
 
+function prev(x) {
+    return (i - x + length) % length;
+}
+
 async function add(chatClient, channel, user, msg) {
-    const message = msg.toLowerCase().replace(/[.,\/\?#!$%\^&\*;:{}=\-_`~()]/g,"")
+    const message = msg.toLowerCase().replace(/[.,/?#!$%^&*;:{}=\-_`~()]/g, "")
     messages[i] = message;
     users[i] = user;
     if (message === messages[prev(1)] && message === messages[prev(2)] &&
@@ -30,10 +34,6 @@ async function add(chatClient, channel, user, msg) {
         users[i] = "";
     }
     i = (i + 1) % length;
-}
-
-function prev(x) {
-    return (i - x + length) % length;
 }
 
 module.exports = { add };

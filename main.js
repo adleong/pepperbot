@@ -42,19 +42,19 @@ express()
   .set('views', path.join(__dirname, 'views'))
   .set('view engine', 'ejs')
   .get('/leaders', async (req, res) => {
-    const results  = await pepper.leadersResults(db);
-      res.render('pages/leaders', {'results': results})
+    const results = await pepper.leadersResults(db);
+      res.render('pages/leaders', { results })
   })
   .get('/reclaimers', async (req, res) => {
-    const results  = await pepper.claimedLeaders(db);
-      res.render('pages/claimed', {'results': results})
+    const results = await pepper.claimedLeaders(db);
+      res.render('pages/claimed', { results })
   })
   .get('/shoutouts', async (req, res) => {
-    const results  = await so.leaders(db);
-      res.render('pages/shoutouts', {'results': results})
+    const results = await so.leaders(db);
+      res.render('pages/shoutouts', { results })
   })
   .get('/queue', async (req, res) => {
-      res.render('pages/queue', {'results': spin.queue})
+      res.render('pages/queue', { 'results': spin.queue })
   })
   .get('/timer', async (req, res) => {
       res.render('pages/timer')
@@ -73,7 +73,7 @@ express()
     res.write(JSON.stringify(claimant));
     res.end();
   })
-  .listen(PORT, () => console.log(`Listening on ${ PORT }`))
+  .listen(PORT, () => console.log(`Listening on ${PORT}`))
 
 const run = async () => {
 

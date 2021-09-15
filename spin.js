@@ -7,7 +7,7 @@ async function lookup(query) {
     // If arg is a number string
     if (query.match(/^\d+$/)) {
         const song = await api.getOpenData(`song/${query}`);
-        if (song) {
+        if (song && song.id) {
             return song;
         }
         throw `${query} not found`;
