@@ -35,12 +35,19 @@ const db = new Client({
   ssl
 });
 
-db.connect();
+db.connect(); 
 console.log("Database connected");
 
 express()
   .set('views', path.join(__dirname, 'views'))
   .set('view engine', 'ejs')
+  .get('/carousel', async (req, res) => {
+      res.render('pages/carousel', {})
+  })
+  .get('/quote', async (req, res) => {
+    const q = await quote.quote(db);
+    res.render('pages/quote', { 'quote': q })
+  })
   .get('/leaders', async (req, res) => {
     const results = await pepper.leadersResults(db);
       res.render('pages/leaders', { results })

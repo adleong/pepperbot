@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type = "text/javascript" src = "https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js">
+        </script>
+        <style>
+            iframe {
+                border: 0;
+            }
+        </style>
+    </head>
+<body>
+    <iframe scrolling="no" width="600"></iframe>
+    <script>
+        const urls = ["/leaders", "/shoutouts", "/reclaimers", "/quote"];
+        var i = 0;
+        $('iframe').attr('src', urls[i]);;
+
+        setInterval(function() {
+            $('iframe').fadeOut(800, function() {
+                i = (i + 1) % urls.length;
+                $('iframe').attr('src', urls[i]);
+                $('iframe').fadeIn(800);
+            });
+        }, 60*1000);
+    </script>
+</body>
+</html>
