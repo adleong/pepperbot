@@ -9,7 +9,7 @@
             width: 100%;
         }
         .timer {
-            font-size: xx-large;
+            font-size: large;
             width: auto;
             display: table-cell;
             text-align: right;
@@ -62,14 +62,6 @@
                 secs = 0;
                 mins=mins + 1;
             } 
-            if (mins==60){
-                $("#time").text("MAXXED OUT");
-                $('.mask').css({'background-color': 'black'});
-                $('.mask').append('<h1>CENSORED</h1>');
-                $.getJSON('/timer/stop');
-                clearInterval(timer);
-                return;
-            }
 
             if (secs % 10 == 0) {
                 $.getJSON('/timer/ping', {secs: mins*60 + secs}, function(data) {

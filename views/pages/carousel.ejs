@@ -6,11 +6,12 @@
         <style>
             iframe {
                 border: 0;
+                background-color: transparent;
             }
         </style>
     </head>
 <body>
-    <iframe scrolling="no" width="600"></iframe>
+    <iframe scrolling="no"  allowtransparency="true" width="400"></iframe>
     <script>
         const urls = ["/leaders", "/shoutouts", "/reclaimers", "/quote"];
         var i = 0;
@@ -22,7 +23,7 @@
                 $('iframe').attr('src', urls[i]);
                 $('iframe').fadeIn(800);
             });
-        }, 60*1000);
+        }, 5*1000);
     </script>
 </body>
 </html>

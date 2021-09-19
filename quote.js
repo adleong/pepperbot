@@ -60,9 +60,7 @@ async function quote(db) {
     const { rows } = await db.query('SELECT id, message, game, quoted_by, created_at FROM quotes;');
 
     const i = Math.floor(Math.random() * rows.length);
-    const q = rows[i];
-    const date = new Date(q.created_at);
-    return `#${q.id}: "${q.message}" [${q.game}] ${date.toDateString()}`;
+    return rows[i];
 }
 
 module.exports = { command, quote };
