@@ -7,13 +7,13 @@ async function command(chatClient, apiClient, db, channel, channelId, user, args
         const quote = args.join(' ');
         const broadcaster = await apiClient.helix.users.getUserByName(channel);
         const ch = await apiClient.helix.channels.getChannelInfo(broadcaster);
-        db.query('INSERT INTO quotes(message, quoted_by, game) VALUES($1, $2, $3) RETURNING id', [quote, user, ch.gameName], (err, res) => {
+        db.query('INSERT INTO quotes(message, quoted_by, game, channel) VALUES($1, $2, $3, $4) RETURNING id', [quote, user, ch.gameName, channel], (err, res) => {
             if (err) console.log(err);
             chatClient.say(channel, `Successfully added quote #${res.rows[0].id}: "${quote}" [${ch.gameName}]`);
         });
     } else if (args.length == 1 && args[0].match(/^\d+$/)) {
         const id = parseInt(args[0], 10);
-        db.query('SELECT id, message, game, created_at FROM quotes WHERE id = $1;', [id], (err, res) => {
+        db.query('SELECT id, message, game, created_at FROM quotes WHERE id = $1 AND channel = $2;', [id, channel], (err, res) => {
             if (err) console.log(err);
             if (res.rows.length > 0) {
                 const q = res.rows[0]
@@ -24,7 +24,7 @@ async function command(chatClient, apiClient, db, channel, channelId, user, args
             }
         });
     } else {
-        db.query('SELECT id, message, game, quoted_by, created_at FROM quotes;', (err, res) => {
+        db.query('SELECT id, message, game, quoted_by, created_at FROM quotes WHERE channel = $1;', [channel], (err, res) => {
             if (err) console.log(err);
 
             let quotes = [];
@@ -56,8 +56,8 @@ async function command(chatClient, apiClient, db, channel, channelId, user, args
     } 
 }
 
-async function quote(db) {
-    const { rows } = await db.query('SELECT id, message, game, quoted_by, created_at FROM quotes;');
+async function quote(db, channel) {
+    const { rows } = await db.query('SELECT id, message, game, quoted_by, created_at FROM quotes WHERE channel = $1;', [channel]);
 
     const i = Math.floor(Math.random() * rows.length);
     return rows[i];

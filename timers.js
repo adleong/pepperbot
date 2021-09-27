@@ -4,7 +4,7 @@ const SECONDS = 1000;
 const MINUTES = 60 * SECONDS;
 
 async function load(chatClient, db, channel) {
-    db.query('SELECT message,period_mins FROM timers;', (err, res) => {
+    db.query('SELECT message,period_mins FROM timers WHERE channel = $1;', [channel], (err, res) => {
         if (err) console.log(err);
         console.log("Loaded " + res.rows.length + " timers");
       

@@ -23,9 +23,9 @@ const title = require("./title");
 
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
-const channel = process.env.CHANNEL;
 const bot = process.env.NAME
 const PORT = process.env.PORT || 5000
+const channels = process.env.CHANNELS.split(',');
 
 const ssl = process.env.DATABASE_URL.startsWith('postgres://localhost')
   ? false
@@ -41,63 +41,30 @@ console.log("Database connected");
 express()
   .set('views', path.join(__dirname, 'views'))
   .set('view engine', 'ejs')
-  .get('/carousel', async (req, res) => {
-      res.render('pages/carousel', {})
-  })
-  .get('/quote', async (req, res) => {
-    const q = await quote.quote(db, channel);
-    res.render('pages/quote', { 'quote': q })
-  })
-  .get('/leaders', async (req, res) => {
-    const results = await pepper.leadersResults(db);
-      res.render('pages/leaders', { results })
-  })
-  .get('/reclaimers', async (req, res) => {
-    const results = await pepper.claimedLeaders(db);
-      res.render('pages/claimed', { results })
-  })
-  .get('/shoutouts', async (req, res) => {
-    const results = await so.leaders(db);
-      res.render('pages/shoutouts', { results })
-  })
-  .get('/queue', async (req, res) => {
-      res.render('pages/queue', { 'results': spin.queue })
-  })
-  .get('/timer', async (req, res) => {
-      res.render('pages/timer')
-  })
-  .get('/timer/start', async (req, res) => {
-    pepper.start();
-    res.sendStatus(200);
-  })
-  .get('/timer/stop', async (req, res) => {
-    pepper.stop();
-    res.sendStatus(200);
-  })
-  .get('/timer/ping', async (req, res) => {
-    const claimant = await pepper.ping(req.query.secs);
-    res.setHeader('Content-Type', 'application/json');
-    res.write(JSON.stringify(claimant));
-    res.end();
-  })
   .listen(PORT, () => console.log(`Listening on ${PORT}`))
 
 const run = async () => {
 
-  const userAuth = await auth.provider(db, channel, clientId, clientSecret);
   const botAuth = await auth.provider(db, bot, clientId, clientSecret);
 
-  const apiClient = new ApiClient({ authProvider: userAuth });
-  const chatClient = new ChatClient(botAuth, { channels: [channel] });
-  await chatClient.connect();
-  console.log("Chat connected");
+  const apiClients = {};
+  const chatClients = {};
+  for (const channel of channels) {
+    const userAuth = await auth.provider(db, channel, clientId, clientSecret);
+    apiClients[channel] = new ApiClient({ authProvider: userAuth });
 
-  timers.load(chatClient, db, channel);
+    const chatClient = new ChatClient(botAuth, { channels: [channel] });
+    chatClients[channel] = chatClient
+    await chatClient.connect()
+    console.log(`Chat connected to ${channel}`);
 
-  // On startup
-  chatClient.onRegister(async () => {
-    chatClient.say(channel, 'Sgt. Pepper powered on!');
-  });
+    timers.load(chatClient, db, channel);
+
+    // On startup
+    chatClient.onRegister(async () => {
+        chatClient.say(channel, 'Sgt. Pepper powered on!');
+    });
+  }
 
   // Shutdown handlers
   ['SIGINT', 'SIGTERM'].forEach(signal => process.on(signal, () => {
@@ -154,18 +121,6 @@ const run = async () => {
         case '!pepper':
           chatClient.say(channel, 'Hello, everyone! Please allow me to introduce myself: I am Sgt Pepper Bot MkII and I am at your service.  Use !commands to see what I can do!');
           break;
-        case '!leaders':
-          await pepper.leaders(chatClient, db, channel);
-          break;
-        case '!request':
-          await spin.request(chatClient, channel, db, user, args);
-          break;
-        case '!done':
-          await spin.done(chatClient, channel, apiClient, db, user, args.shift());
-          break;
-        case '!clear':
-          await spin.clear(chatClient, channel, apiClient, db, user);
-          break;
         case '!commands':
           chatClient.say(channel, ['!quote', '!advice', '!so', '!game', '!title', '!awesome', '!lurk', '!unlurk', '!roll', '!leaders', '!pepper', '!commands'].join(' '));
           break;
@@ -174,62 +129,6 @@ const run = async () => {
             await timers.command(chatClient, db, channel, command);
           }
         }
-
-          /*
-        // DEBUG COMMANDS
-        case '!grind':
-          pepper.command(chatClient, db, channel, user, 15);
-          break;
-        case '!brag':
-          brag.brag(chatClient, channel, db);
-          break;
-          */
-
-      }
-    } catch(err) {
-      console.log(err);
-    }
-  });
-
-  // Events listener.
-  const pubSubClient = new PubSubClient();
-  const userId = await pubSubClient.registerUserListener(apiClient);
-  await pubSubClient.onRedemption(userId, message => {
-    try {
-      console.log(`${message.userName} redeems ${message.rewardName}`);
-      console.log(message.message);
-      switch (message.rewardName) {
-        case 'Pepper Cam':
-          pepper.command(chatClient, db, channel, message.userName, 15).
-            catch(err => console.log(err));
-          break;
-        case 'Give Sgt Pepper Advice':
-          advice.add(chatClient, db, channel, message.userName, message.message).
-            catch(err => console.log(err));
-          break;
-        case 'Brag Time': {
-          const seconds = 1000;
-          const minutes = 60 * seconds;
-          const delay = Math.floor(Math.random() * 5 * minutes);
-          setTimeout(function() {
-            brag.brag(chatClient, channel, db);
-          }, delay);
-          break;
-        }
-        case 'Ask Sgt. Pepper: Is it a sandwich?':
-          sandwich.command(chatClient, channel, message.message);
-          break;
-        case 'Sgt. Pepper Facts!':
-          brag.brag(chatClient, channel, db);
-          break;
-        case 'Set catchphrase':
-          awesome.setCatchphrase(chatClient, apiClient, channel, db, message.userName, message.message).
-            catch(err => console.log(err));
-          break;
-        case 'Pepper Cam is OVERTIME':
-          pepper.claim(chatClient, apiClient, db, channel, message.userName).
-            catch(err => console.log(err));
-          break;
       }
     } catch(err) {
       console.log(err);
