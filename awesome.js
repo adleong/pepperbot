@@ -3,23 +3,32 @@ const chatters = new Map();
 const SECONDS = 1000;
 const MINUTES = 60 * SECONDS;
 
-async function add(apiClient, user) {
+async function add(apiClient, channel, user) {
     const u = await apiClient.helix.users.getUserByName(user);
-    chatters.set(u.displayName, Date.now());
+    if (chatters.has(channel)) {
+        chatters.get(channel).set(u.displayName, Date.now());
+    } else {
+        chatters.set(channel, new Map([[u.displayName, Date.now()]]));
+    }
 }
 
 function prune() {
-    for (const [user, ts] of chatters) {
-        if (Date.now() - ts > 30 * MINUTES) {
-            console.log(`Pruning ${user} from active chatters`)
-            chatters.delete(user);
+    for (const [channel, users] of chatters) {
+        for (const [user, ts] of users) {
+            if (Date.now() - ts > 30 * MINUTES) {
+                console.log(`Pruning ${user} from active chatters in ${channel}`)
+                users.delete(user);
+            }
         }
     }
 }
 
 async function command(chatClient, channel, db) {
     prune();
-    const users = Array.from(chatters.keys());
+    let users = [];
+    if (chatters.has(channel)) {
+        users = Array.from(chatters.get(channel).keys());
+    }
     users.push('sgt_pepper_bot');
     const i = Math.floor(Math.random() * users.length);
     chatClient.say(channel, `You know who's awesome? ${users[i]} is awesome!`);
@@ -44,7 +53,7 @@ async function setCatchphrase(chatClient, apiClient, channel, db, user, catchphr
 
 function dumpChatters(chatClient, channel) {
     prune();
-    for (const [user, ts] of chatters) {
+    for (const [user, ts] of chatters.get(channel)) {
         chatClient.say(channel, user + ' last spoke at ' + new Date(ts).toString());
     }
 }

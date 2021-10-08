@@ -46,29 +46,25 @@ express()
 const run = async () => {
 
   const botAuth = await auth.provider(db, bot, clientId, clientSecret);
-
-  const apiClients = {};
-  const chatClients = {};
+  const apiClient = new ApiClient({ authProvider: botAuth });;
+  const chatClient = new ChatClient(botAuth, { channels: channels });
+  await chatClient.connect()
   for (const channel of channels) {
-    const userAuth = await auth.provider(db, channel, clientId, clientSecret);
-    apiClients[channel] = new ApiClient({ authProvider: userAuth });
-
-    const chatClient = new ChatClient(botAuth, { channels: [channel] });
-    chatClients[channel] = chatClient
-    await chatClient.connect()
     console.log(`Chat connected to ${channel}`);
 
     timers.load(chatClient, db, channel);
 
     // On startup
     chatClient.onRegister(async () => {
-        chatClient.say(channel, 'Sgt. Pepper powered on!');
+        chatClient.say(channel, 'Mini Vanilla powered on!');
     });
   }
 
   // Shutdown handlers
   ['SIGINT', 'SIGTERM'].forEach(signal => process.on(signal, () => {
-    chatClient.say(channel, 'Sgt. Pepper powering down...');
+    for (const channel of channels) {    
+        chatClient.say(channel, 'Mini Vanilla powering down...');
+    }
     db.end();
     process.exit(0);
   }));
@@ -76,9 +72,10 @@ const run = async () => {
   const outstandingShoutouts = new Set();
 
   // Chat listener
-  chatClient.onMessage(async (_, user, message, msg) => {
+  chatClient.onMessage(async (chan, user, message, msg) => {
     try {
-      awesome.add(apiClient, user);
+      const channel = chan.substring(1);
+      awesome.add(apiClient, channel, user);
       repeat.add(chatClient, channel, user, message);
 
       const args = message.split(' ');
@@ -118,11 +115,8 @@ const run = async () => {
         case '!roll':
           roll.command(chatClient, channel, args);
           break;
-        case '!pepper':
-          chatClient.say(channel, 'Hello, everyone! Please allow me to introduce myself: I am Sgt Pepper Bot MkII and I am at your service.  Use !commands to see what I can do!');
-          break;
-        case '!commands':
-          chatClient.say(channel, ['!quote', '!advice', '!so', '!game', '!title', '!awesome', '!lurk', '!unlurk', '!roll', '!leaders', '!pepper', '!commands'].join(' '));
+        case '!mini':
+          chatClient.say(channel, "Hello, everyone! Please allow me to introduce myself: I am Mini Vanilla Bot, Sgt Pepper Bot's little sister. I am mini, but mighty!");
           break;
         default: {
           if (command.startsWith('!')) {

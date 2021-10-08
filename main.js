@@ -111,7 +111,7 @@ const run = async () => {
   // Chat listener
   chatClient.onMessage(async (_, user, message, msg) => {
     try {
-      awesome.add(apiClient, user);
+      awesome.add(apiClient, channel, user);
       repeat.add(chatClient, channel, user, message);
 
       const args = message.split(' ');
