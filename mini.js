@@ -23,8 +23,8 @@ const title = require("./title");
 
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
-const bot = process.env.NAME
-const PORT = process.env.PORT || 5000
+const bot = "mini_vanilla_bot"
+const PORT = process.env.PORT || 5001
 const channels = process.env.CHANNELS.split(',');
 
 const ssl = process.env.DATABASE_URL.startsWith('postgres://localhost')
@@ -41,6 +41,9 @@ console.log("Database connected");
 express()
   .set('views', path.join(__dirname, 'views'))
   .set('view engine', 'ejs')
+  .get('/mini', async (req, res) => {
+    res.render('pages/mini', {})
+  })
   .listen(PORT, () => console.log(`Listening on ${PORT}`))
 
 const run = async () => {
@@ -52,7 +55,7 @@ const run = async () => {
   for (const channel of channels) {
     console.log(`Chat connected to ${channel}`);
 
-    timers.load(chatClient, db, channel);
+    timers.load(chatClient, db, channel, "mini_vanilla_bot");
 
     // On startup
     chatClient.onRegister(async () => {
@@ -104,7 +107,7 @@ const run = async () => {
           await title.command(chatClient, apiClient, channel, user, args);
           break;
         case '!awesome':
-          await awesome.command(chatClient, channel, db);
+          await awesome.command(chatClient, channel, "mini_vanilla_bot", db);
           break;
         case '!lurk':
           lurk.lurk(chatClient, channel, user, args);

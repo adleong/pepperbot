@@ -3,7 +3,7 @@ const awesome = require("./awesome");
 const SECONDS = 1000;
 const MINUTES = 60 * SECONDS;
 
-async function load(chatClient, db, channel) {
+async function load(chatClient, db, channel, self) {
     db.query('SELECT message,period_mins FROM timers WHERE channel = $1;', [channel], (err, res) => {
         if (err) console.log(err);
         console.log("Loaded " + res.rows.length + " timers");
@@ -19,7 +19,7 @@ async function load(chatClient, db, channel) {
                 setInterval(function() {
                     switch (timer.message) {
                         case '!awesome':
-                            awesome.command(chatClient, channel, db);
+                            awesome.command(chatClient, channel, db, self);
                             break
                         default:
                             chatClient.say(channel, timer.message);

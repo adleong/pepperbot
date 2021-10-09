@@ -23,13 +23,13 @@ function prune() {
     }
 }
 
-async function command(chatClient, channel, db) {
+async function command(chatClient, channel, self, db) {
     prune();
     let users = [];
     if (chatters.has(channel)) {
         users = Array.from(chatters.get(channel).keys());
     }
-    users.push('sgt_pepper_bot');
+    users.push(self);
     const i = Math.floor(Math.random() * users.length);
     chatClient.say(channel, `You know who's awesome? ${users[i]} is awesome!`);
 
