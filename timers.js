@@ -19,7 +19,7 @@ async function load(chatClient, db, channel, self) {
                 setInterval(function() {
                     switch (timer.message) {
                         case '!awesome':
-                            awesome.command(chatClient, channel, db, self);
+                            awesome.command(chatClient, channel, self, db);
                             break
                         default:
                             chatClient.say(channel, timer.message);
