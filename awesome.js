@@ -29,6 +29,9 @@ async function command(chatClient, channel, self, db) {
     if (chatters.has(channel)) {
         users = Array.from(chatters.get(channel).keys());
     }
+    if (users.length === 0) {
+        return;
+    }
     users.push(self);
     const i = Math.floor(Math.random() * users.length);
     chatClient.say(channel, `You know who's awesome? ${users[i]} is awesome!`);
