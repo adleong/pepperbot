@@ -1,23 +1,18 @@
 const { ApiClient } = require('twitch');
 const { ChatClient } = require('twitch-chat-client');
 const { Client } = require('pg');
-const { PubSubClient } = require('twitch-pubsub-client');
 const express = require('express')
 const path = require('path')
 
 const advice = require("./advice");
 const auth = require("./auth");
 const awesome = require("./awesome");
-const brag = require("./brag");
 const game = require("./game");
 const lurk = require("./lurk");
-const pepper = require("./pepper");
 const quote = require("./quote");
 const repeat = require("./repeat");
 const roll = require("./roll");
-const sandwich = require("./sandwich");
 const so = require("./so");
-const spin = require("./spin");
 const timers = require("./timers");
 const title = require("./title");
 
@@ -26,6 +21,7 @@ const clientSecret = process.env.CLIENT_SECRET;
 const bot = "mini_vanilla_bot"
 const PORT = process.env.PORT || 5001
 const channels = process.env.CHANNELS.split(',');
+const admins = process.env.ADMINS.split(',')
 
 const ssl = process.env.DATABASE_URL.startsWith('postgres://localhost')
   ? false
@@ -49,8 +45,8 @@ express()
 const run = async () => {
 
   const botAuth = await auth.provider(db, bot, clientId, clientSecret);
-  const apiClient = new ApiClient({ authProvider: botAuth });;
-  const chatClient = new ChatClient(botAuth, { channels: channels });
+  const apiClient = new ApiClient({ authProvider: botAuth });
+  const chatClient = new ChatClient(botAuth, { channels });
   await chatClient.connect()
   for (const channel of channels) {
     console.log(`Chat connected to ${channel}`);
@@ -119,8 +115,37 @@ const run = async () => {
           roll.command(chatClient, channel, args);
           break;
         case '!mini':
-          chatClient.say(channel, "Hello, everyone! Please allow me to introduce myself: I am Mini Vanilla Bot, Sgt Pepper Bot's little sister. I am mini, but mighty!");
+          chatClient.say(channel, "Hello, everyone! Please allow me to introduce myself: I am Mini Vanilla Bot, Sgt Pepper Bot's little sister. I am mini, but mighty! https://github.com/adleong/pepperbot");
           break;
+        case '!addcommand':
+          if (user === channel || admins.includes(user)) {
+            await timers.addCommand(chatClient, db, channel, args.shift(), args.join(' '));
+          } else {
+            chatClient.say(channel, `Sorry, ${user}, only ${channel} can do that.`);
+          }
+          break;
+        case '!addtimer':
+          if (user === channel || admins.includes(user)) {
+            const command = args.shift();
+            const time = args.shift();
+            await timers.addTimer(chatClient, db, channel, command, args.join(' '), time);
+          } else {
+            chatClient.say(channel, `Sorry, ${user}, only ${channel} can do that.`);
+          }
+          break;
+        case '!remove':
+          if (user === channel || admins.includes(user)) {
+            await timers.remove(chatClient, db, channel, args.shift());
+          } else {
+            chatClient.say(channel, `Sorry, ${user}, only ${channel} can do that.`);
+          }
+          break;
+        case '!commands':
+          let commands = ['!game', '!title', '!awesome', '!lurk','!unlurk', '!roll',
+            '!mini', '!addcommand', '!addtimer', '!remove'];
+          const extra = await timers.getCommands(db, channel);
+          commands = commands.concat(extra);
+          chatClient.say(channel, commands.join(' '));
         default: {
           if (command.startsWith('!')) {
             await timers.command(chatClient, db, channel, command);
@@ -132,7 +157,8 @@ const run = async () => {
     }
   });
 
-  chatClient.onRaid(async (_, user, raidInfo, _msg) => {
+  chatClient.onRaid(async (chan, user, raidInfo, _msg) => {
+    const channel = chan.substring(1);
     try {
       chatClient.say(channel, `Welcome raiders! Thank you for the raid, ${raidInfo.displayName}!`);
       chatClient.say(channel, `Can we get a shoutout for ${raidInfo.displayName}, please?`);

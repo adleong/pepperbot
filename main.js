@@ -117,6 +117,10 @@ const run = async () => {
       const args = message.split(' ');
       const command = args.shift().toLowerCase();
 
+      const broadcaster = await apiClient.helix.users.getUserByName(channel);
+      const u = await apiClient.helix.users.getUserByName(user);
+      const mod = await apiClient.helix.moderation.checkUserMod(broadcaster.id, u.id);
+
       switch (command) {
         case '!quote':
           await quote.command(chatClient, apiClient, db, channel, msg.channelId, user, args);
@@ -152,7 +156,7 @@ const run = async () => {
           roll.command(chatClient, channel, args);
           break;
         case '!pepper':
-          chatClient.say(channel, 'Hello, everyone! Please allow me to introduce myself: I am Sgt Pepper Bot MkII and I am at your service.  Use !commands to see what I can do!');
+          chatClient.say(channel, 'Hello, everyone! Please allow me to introduce myself: I am Sgt Pepper Bot MkII and I am at your service.  Use !commands to see what I can do! https://github.com/adleong/pepperbot');
           break;
         case '!leaders':
           await pepper.leaders(chatClient, db, channel);
@@ -166,25 +170,41 @@ const run = async () => {
         case '!clear':
           await spin.clear(chatClient, channel, apiClient, db, user);
           break;
+        case '!addcommand':
+          if (mod || user === channel) {
+            await timers.addCommand(chatClient, db, channel, args.shift(), args.join(' '));
+          } else {
+            chatClient.say(channel, `Sorry, ${user}, only mods can do that.`);
+          }
+          break;
+        case '!addtimer':
+          if (mod || user === channel) {
+            const command = args.shift();
+            const time = args.shift();
+            await timers.addTimer(chatClient, db, channel, command, args.join(' '), time);
+          } else {
+            chatClient.say(channel, `Sorry, ${user}, only mods can do that.`);
+          }
+          break;
+        case '!remove':
+          if (mod || user === channel) {
+            await timers.remove(chatClient, db, channel, args.shift());
+          } else {
+            chatClient.say(channel, `Sorry, ${user}, only mods can do that.`);
+          }
+          break;
         case '!commands':
-          chatClient.say(channel, ['!quote', '!advice', '!so', '!game', '!title', '!awesome', '!lurk', '!unlurk', '!roll', '!leaders', '!pepper', '!commands'].join(' '));
+          let commands = ['!game', '!title', '!awesome', '!lurk','!unlurk', '!roll', '!pepper', '!leaders', '!request',
+            '!done', '!clear', '!addcommand', '!addtimer', '!remove'];
+          const extra = await timers.getCommands(db, channel);
+          commands = commands.concat(extra);
+          chatClient.say(channel, commands.join(' '));
           break;
         default: {
           if (command.startsWith('!')) {
             await timers.command(chatClient, db, channel, command);
           }
         }
-
-          /*
-        // DEBUG COMMANDS
-        case '!grind':
-          pepper.command(chatClient, db, channel, user, 15);
-          break;
-        case '!brag':
-          brag.brag(chatClient, channel, db);
-          break;
-          */
-
       }
     } catch(err) {
       console.log(err);

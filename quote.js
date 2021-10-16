@@ -63,4 +63,7 @@ async function quote(db, channel) {
     return rows[i];
 }
 
-module.exports = { command, quote };
+module.exports = {
+    command,
+    quote
+};
