@@ -51,7 +51,7 @@ const run = async () => {
   for (const channel of channels) {
     console.log(`Chat connected to ${channel}`);
 
-    timers.load(chatClient, db, channel, "mini_vanilla_bot");
+    timers.load(chatClient, db, channel, bot);
 
     // On startup
     chatClient.onRegister(async () => {
@@ -128,7 +128,7 @@ const run = async () => {
           if (user === channel || admins.includes(user)) {
             const command = args.shift();
             const time = args.shift();
-            await timers.addTimer(chatClient, db, channel, command, args.join(' '), time);
+            await timers.addTimer(chatClient, db, channel, bot, command, args.join(' '), time);
           } else {
             chatClient.say(channel, `Sorry, ${user}, only ${channel} can do that.`);
           }

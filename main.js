@@ -92,7 +92,7 @@ const run = async () => {
   await chatClient.connect();
   console.log("Chat connected");
 
-  timers.load(chatClient, db, channel, "sgt_pepper_bot");
+  timers.load(chatClient, db, channel, bot);
 
   // On startup
   chatClient.onRegister(async () => {
@@ -144,7 +144,7 @@ const run = async () => {
           await title.command(chatClient, apiClient, channel, user, args);
           break;
         case '!awesome':
-          await awesome.command(chatClient, channel, "sgt_pepper_bot", db);
+          await awesome.command(chatClient, channel, bot, db);
           break;
         case '!lurk':
           lurk.lurk(chatClient, channel, user, args);

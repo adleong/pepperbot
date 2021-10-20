@@ -21,7 +21,7 @@ async function load(chatClient, db, channel, self) {
                 const handle = setInterval(function() {
                     switch (timer.message) {
                         case '!awesome':
-                            awesome.command(chatClient, channel, self, db);
+                            awesome.command(chatClient, channel, self, db)
                             break
                         default:
                             chatClient.say(channel, timer.message);
@@ -59,7 +59,7 @@ async function addCommand(chatClient, db, channel, cmd, message) {
     chatClient.say(channel, `Command ${command} added`);
 }
 
-async function addTimer(chatClient, db, channel, cmd, message, period_mins) {
+async function addTimer(chatClient, db, channel, self, cmd, message, period_mins) {
     let command = cmd;
     if (!command || !(period_mins*1)) {
         chatClient.say(channel, "Usage: !addtimer (command) (period) (message)");
@@ -76,7 +76,13 @@ async function addTimer(chatClient, db, channel, cmd, message, period_mins) {
     await db.query('INSERT INTO timers (channel, command, message, period_mins) VALUES ($1, $2, $3, $4)', [channel, command, message, period_mins]);
     chatClient.say(channel, `Timer ${command} added with ${period_mins}m interval`);
     const handle = setInterval(function() {
-        chatClient.say(channel, message);
+        switch (message) {
+            case '!awesome':
+                awesome.command(chatClient, channel, self, db);
+                break
+            default:
+                chatClient.say(channel, message);
+        }
     }, period_mins * MINUTES);
     timers[[channel, command]] = handle;
 }
