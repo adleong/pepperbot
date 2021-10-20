@@ -194,11 +194,11 @@ const run = async () => {
           }
           break;
         case '!commands':
-          let commands = ['!game', '!title', '!awesome', '!lurk','!unlurk', '!roll', '!pepper', '!leaders', '!request',
+          let commands = ['!advice', '!game', '!title', '!awesome', '!lurk','!unlurk', '!roll', '!pepper', '!leaders', '!request',
             '!done', '!clear', '!addcommand', '!addtimer', '!remove'];
           const extra = await timers.getCommands(db, channel);
           commands = commands.concat(extra);
-          chatClient.say(channel, commands.join(' '));
+          chatClient.say(channel, 'My commands are: ' + commands.join(' '));
           break;
         default: {
           if (command.startsWith('!')) {
