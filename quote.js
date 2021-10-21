@@ -7,24 +7,24 @@ async function command(chatClient, apiClient, db, channel, channelId, user, args
         const quote = args.join(' ');
         const broadcaster = await apiClient.helix.users.getUserByName(channel);
         const ch = await apiClient.helix.channels.getChannelInfo(broadcaster);
-        db.query('INSERT INTO quotes(message, quoted_by, game, channel) VALUES($1, $2, $3, $4) RETURNING id', [quote, user, ch.gameName, channel], (err, res) => {
-            if (err) console.log(err);
-            chatClient.say(channel, `Successfully added quote #${res.rows[0].id}: "${quote}" [${ch.gameName}]`);
-        });
+        const { rows } = await db.query('SELECT MAX(number) FROM quotes WHERE channel=$1', [channel]);
+        const number = rows[0].max + 1;
+        const result = await db.query('INSERT INTO quotes(message, quoted_by, game, channel, number) VALUES($1, $2, $3, $4, $5)', [quote, user, ch.gameName, channel, number]);
+        chatClient.say(channel, `Successfully added quote #${number}: "${quote}" [${ch.gameName}]`);
     } else if (args.length == 1 && args[0].match(/^\d+$/)) {
         const id = parseInt(args[0], 10);
-        db.query('SELECT id, message, game, created_at FROM quotes WHERE id = $1 AND channel = $2;', [id, channel], (err, res) => {
+        db.query('SELECT number, message, game, created_at FROM quotes WHERE number = $1 AND channel = $2;', [id, channel], (err, res) => {
             if (err) console.log(err);
             if (res.rows.length > 0) {
                 const q = res.rows[0]
                 const date = new Date(q.created_at);
-                chatClient.say(channel, `#${q.id}: "${q.message}" [${q.game}] ${date.toDateString()}`);
+                chatClient.say(channel, `#${q.number}: "${q.message}" [${q.game}] ${date.toDateString()}`);
             } else {
                 chatClient.say(channel, `Quote #${id} not found`);
             }
         });
     } else {
-        db.query('SELECT id, message, game, quoted_by, created_at FROM quotes WHERE channel = $1;', [channel], (err, res) => {
+        db.query('SELECT number, message, game, quoted_by, created_at FROM quotes WHERE channel = $1;', [channel], (err, res) => {
             if (err) console.log(err);
 
             let quotes = [];
@@ -51,7 +51,7 @@ async function command(chatClient, apiClient, db, channel, channelId, user, args
             const i = Math.floor(Math.random() * quotes.length);
             const q = quotes[i]
             const date = new Date(q.created_at);
-            chatClient.say(channel, `#${q.id}: "${q.message}" [${q.game}] ${date.toDateString()}`);
+            chatClient.say(channel, `#${q.number}: "${q.message}" [${q.game}] ${date.toDateString()}`);
         });
     } 
 }
