@@ -34,7 +34,7 @@ async function load(chatClient, db, channel, self) {
 }
 
 async function command(chatClient, db, channel, command) {
-    const { rows } = await db.query('SELECT message FROM timers WHERE command = $1', [command]);
+    const { rows } = await db.query('SELECT message FROM timers WHERE command = $1 AND channel = $2', [command, channel]);
     if (rows.length === 1) {
         chatClient.say(channel, rows[0].message);
     }
