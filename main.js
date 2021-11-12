@@ -20,6 +20,7 @@ const so = require("./so");
 const spin = require("./spin");
 const timers = require("./timers");
 const title = require("./title");
+const quiz = require("./quiz");
 
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
@@ -181,7 +182,7 @@ const run = async () => {
           if (mod || user === channel) {
             const command = args.shift();
             const time = args.shift();
-            await timers.addTimer(chatClient, db, channel, command, args.join(' '), time);
+            await timers.addTimer(chatClient, db, channel, bot, command, args.join(' '), time);
           } else {
             chatClient.say(channel, `Sorry, ${user}, only mods can do that.`);
           }
