@@ -20,7 +20,6 @@ const so = require("./so");
 const spin = require("./spin");
 const timers = require("./timers");
 const title = require("./title");
-const quiz = require("./quiz");
 
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
