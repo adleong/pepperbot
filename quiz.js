@@ -1,0 +1,122 @@
+
+const re = /(.*)[-~]\W*(\w+)/;
+const timer = 60*1000;
+let quiz = null;
+
+async function command(chatClient, channel, db) {
+    const { rows } = await db.query('SELECT message, game, quoted_by FROM quotes WHERE CHANNEL = $1 ORDER BY random() LIMIT 1', [channel]);
+    const match = rows[0].message.match(re);
+    if (!match) {
+        await command(chatClient, channel, db);
+        return;
+    }
+    chatClient.say(channel, "It's quiz time! Answer these three questions correctly to win a prize!")
+    chatClient.say(channel, "ROUND 1: Who said this?");
+    chatClient.say(channel, match[1]);
+    chatClient.say(channel, "(You have 60 seconds to answer starting... NOW)");
+    quiz = {
+        correct: match[2].toLowerCase(),
+        answers: {}
+    }
+    setTimeout(() => {
+        endRound1(chatClient, channel, db);
+    }, timer);
+}
+
+function answer(user, message) {
+    if (quiz === null) {
+        return;
+    }
+    quiz.answers[user] = message.toLowerCase();
+}
+
+function endRound1(chatClient, channel, db) {
+    const correct = [];
+    for (const key in quiz.answers) {
+        if (quiz.answers[key] === quiz.correct) {
+            correct.push(key);
+        }
+    }
+    if (correct.length === 0) {
+        chatClient.say(channel, "Nobody answered correctly. The correct answer was " + quiz.correct);
+    } else {
+        chatClient.say(channel, correct.join(', ') + " got it right, it was " + quiz.correct);
+    }
+
+    startRound2(chatClient, channel, db);
+}
+
+async function startRound2(chatClient, channel, db) {
+    const { rows } = await db.query('SELECT message, game, quoted_by FROM quotes WHERE CHANNEL = $1 ORDER BY random() LIMIT 1', ['damaplaysgames']);
+    chatClient.say(channel, "ROUND 2: What GAME is this quote from?");
+    chatClient.say(channel, rows[0].message);
+    chatClient.say(channel, "(You have 60 seconds to answer starting... NOW)");
+    quiz = {
+        correct: rows[0].game.toLowerCase(),
+        answers: {}
+    }
+    setTimeout(() => {
+        endRound2(chatClient, channel, db);
+    }, timer);
+}
+
+function endRound2(chatClient, channel, db) {
+    const correct = [];
+    for (const key in quiz.answers) {
+        if (quiz.answers[key] === quiz.correct) {
+            correct.push(key);
+        }
+    }
+    if (correct.length === 0) {
+        chatClient.say(channel, "Nobody answered correctly. The correct answer was " + quiz.correct);
+    } else {
+        chatClient.say(channel, correct.join(', ') + " got it right, it was " + quiz.correct);
+    }
+
+    startRound3(chatClient, channel, db);
+}
+
+async function startRound3(chatClient, channel, db) {
+    const { rows } = await db.query('SELECT message, game, quoted_by FROM quotes WHERE CHANNEL = $1 ORDER BY random() LIMIT 1', ['damaplaysgames']);
+    const match = rows[0].message.match(re);
+    if (!match) {
+        await command(chatClient, channel, db);
+        return;
+    }
+    let words = match[1].trim().split(' ');
+    if (words.length < 4) {
+        await startRound3(chatClient, channel, db);
+        return;
+    }
+    const i = Math.floor(Math.random() * words.length)
+    const word = words[i].replace(/[,.?!:;]/,"");
+    words[i] = '_____';
+    chatClient.say(channel, "ROUND 3: What word is missing from this quote?");
+    chatClient.say(channel, words.join(' '));
+    chatClient.say(channel, "(You have 60 seconds to answer starting... NOW)");
+    quiz = {
+        correct: word.toLowerCase(),
+        answers: {}
+    }
+    setTimeout(() => {
+        endRound3(chatClient, channel, db);
+    }, timer);
+}
+
+function endRound3(chatClient, channel, db) {
+    const correct = [];
+    for (const key in quiz.answers) {
+        if (quiz.answers[key] === quiz.correct) {
+            correct.push(key);
+        }
+    }
+    if (correct.length === 0) {
+        chatClient.say(channel, "Nobody answered correctly. The correct answer was " + quiz.correct);
+    } else {
+        chatClient.say(channel, correct.join(', ') + " got it right, it was " + quiz.correct);
+    }
+
+    chatClient.say(channel, "Thanks for playing, everyone!");
+}
+
+module.exports = { command, answer };

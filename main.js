@@ -20,6 +20,7 @@ const so = require("./so");
 const spin = require("./spin");
 const timers = require("./timers");
 const title = require("./title");
+const quiz = require("./quiz");
 
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
@@ -192,6 +193,16 @@ const run = async () => {
           } else {
             chatClient.say(channel, `Sorry, ${user}, only mods can do that.`);
           }
+          break;
+        case '!quiz':
+          if (mod || user === channel) {
+            await quiz.command(chatClient, channel, db);
+          } else {
+            chatClient.say(channel, `Sorry, ${user}, only mods can do that.`);
+          }
+          break;
+        case '!answer':
+          quiz.answer(user, args.join(' '));
           break;
         case '!commands':
           let commands = ['!advice', '!game', '!title', '!awesome', '!lurk','!unlurk', '!roll', '!pepper', '!leaders', '!request',
