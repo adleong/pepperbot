@@ -15,6 +15,7 @@ const roll = require("./roll");
 const so = require("./so");
 const timers = require("./timers");
 const title = require("./title");
+const sandwich = require("./sandwich");
 
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
@@ -117,6 +118,9 @@ const run = async () => {
         case '!mini':
           chatClient.say(channel, "Hello, everyone! Please allow me to introduce myself: I am Mini Vanilla Bot, Sgt Pepper Bot's little sister. I am mini, but mighty! https://github.com/adleong/pepperbot");
           break;
+        case '!sandwich':
+          sandwich.command(chatClient, channel, args.join(' '));
+          break;
         case '!addcommand':
           if (user === channel || admins.includes(user)) {
             await timers.addCommand(chatClient, db, channel, args.shift(), args.join(' '));
@@ -142,7 +146,7 @@ const run = async () => {
           break;
         case '!commands':
           let commands = ['!advice', '!game', '!title', '!awesome', '!lurk','!unlurk', '!roll',
-            '!mini', '!addcommand', '!addtimer', '!remove'];
+            '!mini', '!sandwich', '!addcommand', '!addtimer', '!remove'];
           const extra = await timers.getCommands(db, channel);
           commands = commands.concat(extra);
           chatClient.say(channel, 'My commands are: ' + commands.join(' '));

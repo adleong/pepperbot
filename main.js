@@ -171,6 +171,9 @@ const run = async () => {
         case '!clear':
           await spin.clear(chatClient, channel, apiClient, db, user);
           break;
+        case '!sandwich':
+          sandwich.command(chatClient, channel, args.join(' '));
+          break;
         case '!addcommand':
           if (mod || user === channel) {
             await timers.addCommand(chatClient, db, channel, args.shift(), args.join(' '));
@@ -206,7 +209,7 @@ const run = async () => {
           break;
         case '!commands':
           let commands = ['!advice', '!game', '!title', '!awesome', '!lurk','!unlurk', '!roll', '!pepper', '!leaders', '!request',
-            '!done', '!clear', '!addcommand', '!addtimer', '!remove'];
+            '!done', '!clear', '!sandwich', '!addcommand', '!addtimer', '!remove'];
           const extra = await timers.getCommands(db, channel);
           commands = commands.concat(extra);
           chatClient.say(channel, 'My commands are: ' + commands.join(' '));
