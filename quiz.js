@@ -1,10 +1,12 @@
 
+const money = require("./money");
+
 const re = /(.*)[-~]\W*(\w+)/;
 const timer = 60*1000;
 let quiz = null;
 
 async function command(chatClient, channel, db) {
-    const { rows } = await db.query('SELECT message, game, quoted_by FROM quotes WHERE CHANNEL = $1 ORDER BY random() LIMIT 1', [channel]);
+    const { rows } = await db.query('SELECT message, game, quoted_by FROM quotes WHERE CHANNEL = $1 ORDER BY random() LIMIT 1', ['damaplaysgames']);
     const match = rows[0].message.match(re);
     if (!match) {
         await command(chatClient, channel, db);
@@ -43,7 +45,11 @@ function endRound1(chatClient, channel, db) {
         chatClient.say(channel, correct.join(', ') + " got it right, it was " + quiz.correct);
     }
 
-    startRound2(chatClient, channel, db);
+    Promise.all(
+        correct.map(user => money.earn(chatClient, db, channel, user))
+    ).then(() => {
+        startRound2(chatClient, channel, db);
+    });
 }
 
 async function startRound2(chatClient, channel, db) {
@@ -73,7 +79,11 @@ function endRound2(chatClient, channel, db) {
         chatClient.say(channel, correct.join(', ') + " got it right, it was " + quiz.correct);
     }
 
-    startRound3(chatClient, channel, db);
+    Promise.all(
+        correct.map(user => money.earn(chatClient, db, channel, user))
+    ).then(() => {
+        startRound3(chatClient, channel, db);
+    });
 }
 
 async function startRound3(chatClient, channel, db) {
@@ -116,7 +126,11 @@ function endRound3(chatClient, channel, db) {
         chatClient.say(channel, correct.join(', ') + " got it right, it was " + quiz.correct);
     }
 
-    chatClient.say(channel, "Thanks for playing, everyone!");
+    Promise.all(
+        correct.map(user => money.earn(chatClient, db, channel, user))
+    ).then(() => {
+        chatClient.say(channel, "Thanks for playing, everyone!");
+    });
 }
 
 module.exports = { command, answer };

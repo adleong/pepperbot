@@ -21,6 +21,7 @@ const spin = require("./spin");
 const timers = require("./timers");
 const title = require("./title");
 const quiz = require("./quiz");
+const money = require("./money");
 
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
@@ -134,6 +135,7 @@ const run = async () => {
           if (outstandingShoutouts.has(target.name)) {
             outstandingShoutouts.delete(target.name);
             chatClient.say(channel, `Thanks, ${user} for getting that shoutout to ${target.displayName} <3`);
+            await money.earn(chatClient, db, channel, user);
             await so.increment(db, user);
           }
           break;
@@ -206,6 +208,9 @@ const run = async () => {
           break;
         case '!answer':
           quiz.answer(user, args.join(' '));
+          break;
+        case '!money':
+          await money.report(chatClient, db, channel, user);
           break;
         case '!commands':
           let commands = ['!advice', '!game', '!title', '!awesome', '!lurk','!unlurk', '!roll', '!pepper', '!leaders', '!request',
