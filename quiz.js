@@ -6,7 +6,7 @@ const timer = 60*1000;
 let quiz = null;
 
 async function command(chatClient, channel, db) {
-    const { rows } = await db.query('SELECT message, game, quoted_by FROM quotes WHERE CHANNEL = $1 ORDER BY random() LIMIT 1', ['damaplaysgames']);
+    const { rows } = await db.query('SELECT message, game, quoted_by FROM quotes WHERE CHANNEL = $1 ORDER BY random() LIMIT 1', [channel]);
     const match = rows[0].message.match(re);
     if (!match) {
         await command(chatClient, channel, db);
@@ -53,7 +53,7 @@ function endRound1(chatClient, channel, db) {
 }
 
 async function startRound2(chatClient, channel, db) {
-    const { rows } = await db.query('SELECT message, game, quoted_by FROM quotes WHERE CHANNEL = $1 ORDER BY random() LIMIT 1', ['damaplaysgames']);
+    const { rows } = await db.query('SELECT message, game, quoted_by FROM quotes WHERE CHANNEL = $1 ORDER BY random() LIMIT 1', [channel]);
     chatClient.say(channel, "ROUND 2: What GAME is this quote from?");
     chatClient.say(channel, rows[0].message);
     chatClient.say(channel, "(You have 60 seconds to answer starting... NOW)");
@@ -69,7 +69,7 @@ async function startRound2(chatClient, channel, db) {
 function endRound2(chatClient, channel, db) {
     const correct = [];
     for (const key in quiz.answers) {
-        if (quiz.answers[key] === quiz.correct) {
+        if (quiz.answers[key].replace(/[^a-z0-9]/gi,"") === quiz.correct.replace(/[^a-z0-9]/gi,"")) {
             correct.push(key);
         }
     }
@@ -87,10 +87,10 @@ function endRound2(chatClient, channel, db) {
 }
 
 async function startRound3(chatClient, channel, db) {
-    const { rows } = await db.query('SELECT message, game, quoted_by FROM quotes WHERE CHANNEL = $1 ORDER BY random() LIMIT 1', ['damaplaysgames']);
+    const { rows } = await db.query('SELECT message, game, quoted_by FROM quotes WHERE CHANNEL = $1 ORDER BY random() LIMIT 1', [channel]);
     const match = rows[0].message.match(re);
     if (!match) {
-        await command(chatClient, channel, db);
+        await startRound3(chatClient, channel, db);
         return;
     }
     let words = match[1].trim().split(' ');
@@ -99,7 +99,7 @@ async function startRound3(chatClient, channel, db) {
         return;
     }
     const i = Math.floor(Math.random() * words.length)
-    const word = words[i].replace(/[,.?!:;]/,"");
+    const word = words[i];
     words[i] = '_____';
     chatClient.say(channel, "ROUND 3: What word is missing from this quote?");
     chatClient.say(channel, words.join(' '));
@@ -116,7 +116,7 @@ async function startRound3(chatClient, channel, db) {
 function endRound3(chatClient, channel, db) {
     const correct = [];
     for (const key in quiz.answers) {
-        if (quiz.answers[key] === quiz.correct) {
+        if (quiz.answers[key].replace(/[^a-z0-9]/gi,"") === quiz.correct.replace(/[^a-z0-9]/gi,"")) {
             correct.push(key);
         }
     }
