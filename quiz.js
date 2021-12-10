@@ -2,8 +2,18 @@
 const money = require("./money");
 
 const re = /(.*)[-~]\W*(\w+)/;
-const timer = 60*1000;
+const timer = 60 * 1000;
 let quiz = null;
+
+function pickWord(words) {
+    const i = Math.floor(Math.random() * words.length);
+    const word = words[i];
+    const commonWords = ['the', 'of', 'and', 'a', 'to', 'in', 'is', 'you', 'that', 'it', 'he', 'was', 'for', 'on', 'are', 'as', 'with', 'his', 'they', 'i'];
+    if (commonWords.includes(word.toLowerCase())) {
+        return pickWord(words);
+    }
+    return i;
+}
 
 async function command(chatClient, channel, db) {
     const { rows } = await db.query('SELECT message, game, quoted_by FROM quotes WHERE CHANNEL = $1 ORDER BY random() LIMIT 1', [channel]);
@@ -93,12 +103,12 @@ async function startRound3(chatClient, channel, db) {
         await startRound3(chatClient, channel, db);
         return;
     }
-    let words = match[1].trim().split(' ');
+    const words = match[1].trim().split(' ');
     if (words.length < 4) {
         await startRound3(chatClient, channel, db);
         return;
     }
-    const i = Math.floor(Math.random() * words.length)
+    const i = pickWord(words);
     const word = words[i];
     words[i] = '_____';
     chatClient.say(channel, "ROUND 3: What word is missing from this quote?");
