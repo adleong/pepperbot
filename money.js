@@ -24,4 +24,12 @@ async function report(chatClient, db, channel, user) {
     chatClient.say(channel, `${user} has ${money} PepperMoney`);
 }
 
-module.exports = { earn, report };
+async function leaders(db) {
+    const { rows } = await db.query('SELECT user_name, money FROM money ORDER BY money DESC LIMIT 3');
+    return rows.map(row => ({
+        'name': row.user_name,
+        'money': row.money
+    }));
+}
+
+module.exports = { earn, report, leaders };

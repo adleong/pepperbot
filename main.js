@@ -58,9 +58,9 @@ express()
     const results = await pepper.claimedLeaders(db);
       res.render('pages/claimed', { results })
   })
-  .get('/shoutouts', async (req, res) => {
-    const results = await so.leaders(db);
-      res.render('pages/shoutouts', { results })
+  .get('/money', async (req, res) => {
+    const results = await money.leaders(db);
+      res.render('pages/money', { results })
   })
   .get('/queue', async (req, res) => {
       res.render('pages/queue', { 'results': spin.queue })
