@@ -123,8 +123,8 @@ function start() {
 }
 
 function ping(secs) {
-    lastPing = Date.now();
     timer = Number(secs);
+    lastPing = Date.now();
     return claimant;
 }
 

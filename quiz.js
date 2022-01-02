@@ -140,7 +140,12 @@ function endRound3(chatClient, channel, db) {
         correct.map(user => money.earn(chatClient, db, channel, user))
     ).then(() => {
         chatClient.say(channel, "Thanks for playing, everyone!");
+        quiz = null;
     });
 }
 
-module.exports = { command, answer };
+function quiz_active() {
+    return quiz !== null;
+}
+
+module.exports = { command, answer, quiz_active };

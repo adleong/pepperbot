@@ -1,4 +1,11 @@
+const quiz = require('./quiz.js');
+
 async function command(chatClient, apiClient, db, channel, channelId, user, args) {
+    if (quiz.quiz_active()) {
+        chatClient.say(channel, `NO CHEATING, ${user}! SHAME ON YOU!`);
+        return;
+    }
+
     if (args.length == 1 && args[0] == "add") {
 
         chatClient.say(channel, "You have to... actually say the quote...");
