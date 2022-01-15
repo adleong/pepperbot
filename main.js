@@ -63,7 +63,10 @@ express()
       res.render('pages/money', { results })
   })
   .get('/queue', async (req, res) => {
-      res.render('pages/queue', { 'results': spin.queue })
+      if (!spin.queue[channel]) {
+          spin.queue[channel] = [];
+      }
+      res.render('pages/queue', { 'results': spin.queue[channel] })
   })
   .get('/timer', async (req, res) => {
       res.render('pages/timer')
@@ -165,7 +168,7 @@ const run = async () => {
           await pepper.leaders(chatClient, db, channel);
           break;
         case '!request':
-          await spin.request(chatClient, channel, db, user, args);
+          await spin.request(chatClient, channel, args);
           break;
         case '!done':
           await spin.done(chatClient, channel, apiClient, db, user, args.shift());

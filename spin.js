@@ -1,7 +1,7 @@
 const SSAPI = require('ssapi-node');
 const api = new SSAPI();
 
-const queue = [];
+const queue = {};
 
 async function lookup(query) {
     // If arg is a number string
@@ -25,14 +25,17 @@ async function lookup(query) {
     }
 }
 
-async function request(chatClient, channel, db, user, args) {
+async function request(chatClient, channel, args) {
     const query = args.join(' ');
     const song = await lookup(query).catch(err => {
         chatClient.say(channel, err);
     });
-    // Insert song into database
+    // Insert song into queue
     if (song) {
-        queue.push(song);
+        if (!queue[channel]) {
+            queue[channel] = [];
+        }
+        queue[channel].push(song);
         chatClient.say(channel, `Adding #${song.id}: ${song.title} - ${song.charter} (${song.XDDifficulty})`);
     }
 }
@@ -47,15 +50,15 @@ async function done(chatClient, channel, apiClient, db, user, id) {
     }
     if (id) {
         var i = 0;
-        while (i < queue.length) {
-            if (queue[i].id == id) {
-                queue.splice(i, 1);
+        while (queue[channel] && i < queue[channel].length) {
+            if (queue[channel][i].id == id) {
+                queue[channel].splice(i, 1);
                 break;
             }
             i++;
         }
     } else {
-        queue.splice(0, 1);
+        queue[channel].splice(0, 1);
     }
 }
 
@@ -67,7 +70,9 @@ async function clear(chatClient, channel, apiClient, db, user) {
         chatClient.say(channel, `Sorry, ${user}, only mods may perform this action`);
         return;
     }
-    queue.splice(0);
+    if (queue[channel]) {
+        queue[channel].splice(0);
+    }
 }
 
 module.exports = {
