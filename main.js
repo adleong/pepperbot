@@ -22,6 +22,7 @@ const timers = require("./timers");
 const title = require("./title");
 const quiz = require("./quiz");
 const money = require("./money");
+const ban = require("./ban");
 
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
@@ -214,6 +215,9 @@ const run = async () => {
           break;
         case '!money':
           await money.report(chatClient, db, channel, user);
+          break;
+        case '!ban':
+          await ban.command(chatClient, apiClient, channel, bot, user, args.join(' '));
           break;
         case '!commands':
           let commands = ['!advice', '!game', '!title', '!awesome', '!lurk','!unlurk', '!roll', '!pepper', '!leaders', '!request',
