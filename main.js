@@ -23,6 +23,7 @@ const title = require("./title");
 const quiz = require("./quiz");
 const money = require("./money");
 const ban = require("./ban");
+const first = require("./first");
 
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
@@ -275,6 +276,12 @@ const run = async () => {
         case 'Pepper Cam is OVERTIME':
           pepper.claim(chatClient, apiClient, db, channel, message.userName).
             catch(err => console.log(err));
+          break;
+        case 'First!':
+          first.firstCommand(chatClient, channel, db, user);
+          break;
+        case 'Second!':
+          first.secondCommand(chatClient, channel, db, user);
           break;
       }
     } catch(err) {
