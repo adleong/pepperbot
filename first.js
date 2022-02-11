@@ -14,7 +14,6 @@ function expired(ts) {
 }
 
 function expire() {
-    const now = Date.now();
     if (first && expired(first.ts)) {
         console.log("Expiring first");
         first = {};
