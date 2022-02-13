@@ -32,7 +32,7 @@ function expire() {
 
 async function firstCommand(chatClient, apiClient, channel, db, user) {
     expire();
-    const stream = await apiClient.streams.getStreamByUserName(channel);
+    const stream = await apiClient.helix.streams.getStreamByUserName(channel);
     if (!stream) {
         chatClient.say(channel, `OMG, ${user}, ${channel} isn't even live.`);
         return;
@@ -56,7 +56,7 @@ async function firstCommand(chatClient, apiClient, channel, db, user) {
 
 async function secondCommand(chatClient, apiClient, channel, db, user) {
     expire();
-    const stream = await apiClient.streams.getStreamByUserName(channel);
+    const stream = await apiClient.helix.streams.getStreamByUserName(channel);
     if (!stream) {
         chatClient.say(channel, `OMG, ${user}, ${channel} isn't even live.`);
         return;
