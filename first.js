@@ -30,8 +30,13 @@ function expire() {
     }
 }
 
-function firstCommand(chatClient, channel, db, user) {
+async function firstCommand(chatClient, apiClient, channel, db, user) {
     expire();
+    const stream = await apiClient.streams.getStreamByUserName(channel);
+    if (!stream) {
+        chatClient.say(channel, `OMG, ${user}, ${channel} isn't even live.`);
+        return;
+    }
     if (guesses.has(user)) {
         const guess = guesses.get(user);
         chatClient.say(channel, `Nice try, ${user}, but you already tried to be ${guess.guess}.`);
@@ -49,8 +54,13 @@ function firstCommand(chatClient, channel, db, user) {
     money.earn(chatClient, db, channel, user);
 }
 
-function secondCommand(chatClient, channel, db, user) {
+async function secondCommand(chatClient, apiClient, channel, db, user) {
     expire();
+    const stream = await apiClient.streams.getStreamByUserName(channel);
+    if (!stream) {
+        chatClient.say(channel, `OMG, ${user}, ${channel} isn't even live.`);
+        return;
+    }
     if (guesses.has(user)) {
         const guess = guesses.get(user);
         chatClient.say(channel, `Nice try, ${user}, but you already tried to be ${guess.guess}.`);

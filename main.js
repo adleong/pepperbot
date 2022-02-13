@@ -278,10 +278,10 @@ const run = async () => {
             catch(err => console.log(err));
           break;
         case 'First!':
-          first.firstCommand(chatClient, channel, db, message.userName);
+          first.firstCommand(chatClient, apiClient, channel, db, message.userName);
           break;
         case 'Second!':
-          first.secondCommand(chatClient, channel, db, message.userName);
+          first.secondCommand(chatClient, apiClient, channel, db, message.userName);
           break;
       }
     } catch(err) {
