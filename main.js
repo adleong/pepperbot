@@ -170,7 +170,7 @@ const run = async () => {
           await pepper.leaders(chatClient, db, channel);
           break;
         case '!request':
-          await spin.request(chatClient, channel, args);
+          await spin.request(chatClient, channel, user, args);
           break;
         case '!done':
           await spin.done(chatClient, channel, apiClient, db, user, args.shift());

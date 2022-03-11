@@ -2,6 +2,7 @@ const SSAPI = require('ssapi-node');
 const api = new SSAPI();
 
 const queue = {};
+let requestCounts = new Map();
 
 async function lookup(query) {
     // If arg is a number string
@@ -25,7 +26,7 @@ async function lookup(query) {
     }
 }
 
-async function request(chatClient, channel, args) {
+async function request(chatClient, channel, user, args) {
     const query = args.join(' ');
     const song = await lookup(query).catch(err => {
         chatClient.say(channel, err);
@@ -35,7 +36,12 @@ async function request(chatClient, channel, args) {
         if (!queue[channel]) {
             queue[channel] = [];
         }
+        requestCounts.set(user, (requestCounts.get(user) ?? 0) + 1);
+        song.requesterCount = requestCounts.get(user);
         queue[channel].push(song);
+        queue[channel].sort((a, b) => {
+            return a.requesterCount - b.requesterCount;
+        });
         chatClient.say(channel, `Adding #${song.id}: ${song.title} - ${song.charter} (${song.XDDifficulty})`);
     }
 }
@@ -73,6 +79,7 @@ async function clear(chatClient, channel, apiClient, db, user) {
     if (queue[channel]) {
         queue[channel].splice(0);
     }
+    requestCounts = new Map();
 }
 
 module.exports = {
