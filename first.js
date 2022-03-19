@@ -50,8 +50,12 @@ async function firstCommand(chatClient, apiClient, channel, db, user) {
         chatClient.say(channel, `Sorry, ${user}, but ${first.user} was first.`);
         return;
     }
+    first = {
+        user: user,
+        ts: Date.now()
+    };
     chatClient.say(channel, `Congrats, ${user}, on being first!`);
-    money.earn(chatClient, db, channel, user);
+    money.earn(chatClient, db, channel, user, 2);
 }
 
 async function secondCommand(chatClient, apiClient, channel, db, user) {

@@ -15,7 +15,13 @@ function pickWord(words) {
     return i;
 }
 
-async function command(chatClient, channel, db) {
+async function command(chatClient, apiClient, channel, db) {
+    const stream = await apiClient.helix.streams.getStreamByUserName(channel);
+    if (!stream) {
+        chatClient.say(channel, `OMG, ${user}, ${channel} isn't even live.`);
+        return;
+    }
+    
     const { rows } = await db.query('SELECT message, game, quoted_by FROM quotes WHERE CHANNEL = $1 ORDER BY random() LIMIT 1', [channel]);
     const match = rows[0].message.match(re);
     if (!match) {

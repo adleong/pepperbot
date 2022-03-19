@@ -24,6 +24,7 @@ const quiz = require("./quiz");
 const money = require("./money");
 const ban = require("./ban");
 const first = require("./first");
+const wotd = require("./wotd");
 
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
@@ -137,6 +138,10 @@ const run = async () => {
           break;
         case '!so': {
           const target = await so.command(chatClient, apiClient, channel, args.shift());
+          const stream = await apiClient.helix.streams.getStreamByUserName(channel);
+          if (!stream) {
+              break; // No shoutout rewards while channel isn't live.
+          }
           if (outstandingShoutouts.has(target.name)) {
             outstandingShoutouts.delete(target.name);
             chatClient.say(channel, `Thanks, ${user} for getting that shoutout to ${target.displayName} <3`);
@@ -206,7 +211,7 @@ const run = async () => {
           break;
         case '!quiz':
           if (mod || user === channel) {
-            await quiz.command(chatClient, channel, db);
+            await quiz.command(chatClient, apiClient, channel, db);
           } else {
             chatClient.say(channel, `Sorry, ${user}, only mods can do that.`);
           }
@@ -282,6 +287,9 @@ const run = async () => {
           break;
         case 'Second!':
           first.secondCommand(chatClient, apiClient, channel, db, message.userName);
+          break;
+        case 'Random word':
+          wotd.command(chatClient, channel).catch(err => console.log(err));
           break;
       }
     } catch(err) {
