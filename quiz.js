@@ -18,7 +18,7 @@ function pickWord(words) {
 async function command(chatClient, apiClient, channel, db) {
     const stream = await apiClient.helix.streams.getStreamByUserName(channel);
     if (!stream) {
-        chatClient.say(channel, `OMG, ${user}, ${channel} isn't even live.`);
+        chatClient.say(channel, `No quizzes while ${channel} isn't live.`);
         return;
     }
     
