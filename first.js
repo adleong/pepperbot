@@ -82,6 +82,10 @@ async function secondCommand(chatClient, apiClient, channel, db, user) {
         chatClient.say(channel, `Sorry, ${user}, but ${second.user} was second.`);
         return;
     }
+    second = {
+        user: user,
+        ts: Date.now()
+    };
     chatClient.say(channel, `Congrats, ${user}, on being second!`);
     money.earn(chatClient, db, channel, user);
 }
