@@ -115,7 +115,7 @@ let timer = 0;
 let claimant = {};
 
 function start() {
-    console.log("Pepper cam activated");
+    console.log("Salt cam activated");
     // Set lastPing to now
     lastPing = Date.now();
     timer = 0;
@@ -129,7 +129,7 @@ function ping(secs) {
 }
 
 function stop() {
-    console.log("Pepper cam maxed out");
+    console.log("Salt cam maxed out");
     lastPing = 0;
     timer = 0;
     claimant = {};
@@ -138,7 +138,7 @@ function stop() {
 async function claim(chatClient, apiClient, db, channel, user) {
     const since = Date.now() - lastPing;
     if (since > 11 * 1000) {
-        chatClient.say(channel, `Pepper cam isn't active, ${user}. You goofball.`);
+        chatClient.say(channel, `Salt cam isn't active, ${user}. You goofball.`);
         return;
     }
     const adjusted = timer + Math.floor(since / 1000);
@@ -146,7 +146,7 @@ async function claim(chatClient, apiClient, db, channel, user) {
     const excess = adjusted - 15 * 60;
     console.log(`${excess}s is the excess time`);
     if (excess < 0) {
-        chatClient.say(channel, `Pepper cam isn't expired, ${user}. You silly.`);
+        chatClient.say(channel, `Salt cam isn't expired, ${user}. You silly.`);
         return;
     }
     if (claimant.claimed) {
@@ -161,7 +161,7 @@ async function claim(chatClient, apiClient, db, channel, user) {
         secs: adjusted,
         user
     };
-    chatClient.say(channel, `${user} has reclaimed ${formatSmallDuration(new Duration(excess * Duration.second))} of the pepper cam time.`);
+    chatClient.say(channel, `${user} has reclaimed ${formatSmallDuration(new Duration(excess * Duration.second))} of the salt cam time.`);
 
     const { rows } = await db.query('SELECT pepper_seconds FROM claimedtime WHERE user_name = $1', [user]);
     let pepper = 0;

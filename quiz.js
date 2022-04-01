@@ -1,4 +1,4 @@
-
+const awesome = require("./awesome");
 const money = require("./money");
 
 const re = /(.*)[-~]\W*(\w+)/;
@@ -21,6 +21,8 @@ async function command(chatClient, apiClient, channel, db) {
         chatClient.say(channel, `No quizzes while ${channel} isn't live.`);
         return;
     }
+
+    console.log(db);
     
     const { rows } = await db.query('SELECT message, game, quoted_by FROM quotes WHERE CHANNEL = $1 ORDER BY random() LIMIT 1', [channel]);
     const match = rows[0].message.match(re);
@@ -33,7 +35,7 @@ async function command(chatClient, apiClient, channel, db) {
     chatClient.say(channel, match[1]);
     chatClient.say(channel, "(You have 60 seconds to answer starting... NOW)");
     quiz = {
-        correct: match[2].toLowerCase(),
+        correct: awesome.get(channel).toLowerCase(),
         answers: {}
     }
     setTimeout(() => {
@@ -68,13 +70,21 @@ function endRound1(chatClient, channel, db) {
     });
 }
 
+function game() {
+    const games = ["Grand Theft Auto V", "VALORANT", "Fortnite", "League of Legends", "Apex Legends", "Elden Ring",
+        "Overwatch", "Dota 2", "Counter-Strike: Global Offensive",
+        "Call of Duty: Modern Warfare", "ASMR", "Pools, Hot Tubs, and Beaches" ];
+    return games[Math.floor(Math.random() * games.length)];
+}
+
+
 async function startRound2(chatClient, channel, db) {
     const { rows } = await db.query('SELECT message, game, quoted_by FROM quotes WHERE CHANNEL = $1 ORDER BY random() LIMIT 1', [channel]);
     chatClient.say(channel, "ROUND 2: What GAME is this quote from?");
     chatClient.say(channel, rows[0].message);
     chatClient.say(channel, "(You have 60 seconds to answer starting... NOW)");
     quiz = {
-        correct: rows[0].game.toLowerCase(),
+        correct: game(),
         answers: {}
     }
     setTimeout(() => {
@@ -121,7 +131,7 @@ async function startRound3(chatClient, channel, db) {
     chatClient.say(channel, words.join(' '));
     chatClient.say(channel, "(You have 60 seconds to answer starting... NOW)");
     quiz = {
-        correct: word.toLowerCase(),
+        correct: "metapod",
         answers: {}
     }
     setTimeout(() => {

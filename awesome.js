@@ -23,6 +23,11 @@ function prune() {
     }
 }
 
+function sleep(ms) {
+    // add ms millisecond timeout before promise resolution
+    return new Promise(resolve => setTimeout(resolve, ms))
+  }
+
 async function command(chatClient, channel, self, db) {
     prune();
     let users = [];
@@ -34,7 +39,9 @@ async function command(chatClient, channel, self, db) {
     }
     users.push(self);
     const i = Math.floor(Math.random() * users.length);
-    chatClient.say(channel, `You know who's awesome? ${users[i]} is awesome!`);
+    chatClient.say(channel, `You know who sucks? ${users[i]} is the WORST!`);
+    await sleep(10000);
+    chatClient.say(channel, `April Fools! ${users[i]} is actually awesome!`);
 
     const { rows } = await db.query('SELECT message FROM catchphrases WHERE user_name = $1', [users[i]]);
     if (rows.length > 0) {
@@ -61,10 +68,23 @@ function dumpChatters(chatClient, channel) {
     }
 }
 
+function get(channel){
+    prune();
+    let users = [];
+    if (chatters.has(channel)) {
+        users = Array.from(chatters.get(channel).keys());
+    }
+    if (users.length === 0) {
+        return "sgt_pepper_bot";
+    }
+    const i = Math.floor(Math.random() * users.length);
+    return users[i];
+}
 
 module.exports = {
     add,
     command,
     dumpChatters,
-    setCatchphrase
+    setCatchphrase,
+    get
 };

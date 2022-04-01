@@ -25,6 +25,7 @@ async function command(chatClient, apiClient, db, channel, channelId, user, args
             if (res.rows.length > 0) {
                 const q = res.rows[0]
                 const date = new Date(q.created_at);
+                q.game = game();
                 chatClient.say(channel, `#${q.number}: "${q.message}" [${q.game}] ${date.toDateString()}`);
             } else {
                 chatClient.say(channel, `Quote #${id} not found`);
@@ -58,6 +59,7 @@ async function command(chatClient, apiClient, db, channel, channelId, user, args
             const i = Math.floor(Math.random() * quotes.length);
             const q = quotes[i]
             const date = new Date(q.created_at);
+            q.game = game();
             chatClient.say(channel, `#${q.number}: "${q.message}" [${q.game}] ${date.toDateString()}`);
         });
     } 
@@ -67,7 +69,15 @@ async function quote(db, channel) {
     const { rows } = await db.query('SELECT id, message, game, quoted_by, created_at FROM quotes WHERE channel = $1;', [channel]);
 
     const i = Math.floor(Math.random() * rows.length);
+    rows[i].game = game();
     return rows[i];
+}
+
+function game() {
+    const games = ["Grand Theft Auto V", "VALORANT", "Fortnite", "League of Legends", "Apex Legends", "Elden Ring",
+        "Overwatch", "Dota 2", "Counter-Strike: Global Offensive",
+        "Call of Duty: Modern Warfare", "ASMR", "Pools, Hot Tubs, and Beaches" ];
+    return games[Math.floor(Math.random() * games.length)];
 }
 
 module.exports = {
