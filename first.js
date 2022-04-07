@@ -31,8 +31,11 @@ function expire() {
 }
 
 function timeSince(start) {
-    const now = Date.now();
+    const now = new Date();
     let hours = now.getHours() - start.getHours();
+    if (hours < 0) {
+        hours += 24;
+    }
     let minutes = now.getMinutes() - start.getMinutes();
     if (minutes < 0) {
         hours -= 1;
@@ -52,10 +55,10 @@ function timeSince(start) {
 async function firstCommand(chatClient, apiClient, channel, db, user) {
     expire();
     const stream = await apiClient.helix.streams.getStreamByUserName(channel);
-    // if (!stream) {
-    //     chatClient.say(channel, `OMG, ${user}, ${channel} isn't even live.`);
-    //     return;
-    // }
+    if (!stream) {
+        chatClient.say(channel, `OMG, ${user}, ${channel} isn't even live.`);
+        return;
+    }
     if (guesses.has(user)) {
         const guess = guesses.get(user);
         chatClient.say(channel, `Nice try, ${user}, but you already tried to be ${guess.guess}.`);
