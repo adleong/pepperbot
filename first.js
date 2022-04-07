@@ -6,7 +6,7 @@ const hours = 60 * minutes;
 
 let first = {};
 let second = {};
-let guesses = new Map();
+const guesses = new Map();
 
 function expired(ts) {
     const now = Date.now();
@@ -22,12 +22,31 @@ function expire() {
         console.log("Expiring second");
         second = {};
     }
-    for (let [user, guess] of guesses) {
+    for (const [user, guess] of guesses) {
         if (expired(guess.ts)) {
             console.log("Expiring guess of " + user);
             guesses.delete(user);
         }
     }
+}
+
+function timeSince(start) {
+    const now = Date.now();
+    let hours = now.getHours() - start.getHours();
+    let minutes = now.getMinutes() - start.getMinutes();
+    if (minutes < 0) {
+        hours -= 1;
+        minutes += 60;
+    }
+
+    let duration = "";
+    if (hours > 0) {
+        duration += ` ${hours} hour${hours > 1 ? 's' : ''}`;
+    }
+    if (minutes > 0) {
+        duration += ` ${minutes} minute${minutes > 1 ? 's' : ''}`;
+    }
+    return duration;
 }
 
 async function firstCommand(chatClient, apiClient, channel, db, user) {
@@ -47,14 +66,18 @@ async function firstCommand(chatClient, apiClient, channel, db, user) {
         ts: Date.now()
     });
     if (first && first.user) {
-        chatClient.say(channel, `Sorry, ${user}, but ${first.user} was first.`);
+        if (stream.startDate < Date.now() - Number(hours)) {
+            chatClient.say(channel, `${user}. Did you seriously expect to be first when stream has been live for ${timeSince(stream.startDate)}? ${first.user} beat you to it.`);
+        } else {
+            chatClient.say(channel, `Sorry, ${user}, but ${first.user} was first.`);
+        }
         return;
     }
     first = {
-        user: user,
+        user,
         ts: Date.now()
     };
-    chatClient.say(channel, `Congrats, ${user}, on being first!`);
+    chatClient.say(channel, `Congrats, ${user}, on being first ${timeSince(stream.startDate)} since the start of stream!`);
     money.earn(chatClient, db, channel, user, 2);
 }
 
@@ -79,14 +102,18 @@ async function secondCommand(chatClient, apiClient, channel, db, user) {
         return;
     }
     if (second && second.user) {
-        chatClient.say(channel, `Sorry, ${user}, but ${second.user} was second.`);
+        if (stream.startDate < Date.now() - Number(hours)) {
+            chatClient.say(channel, `${user}. Did you seriously expect to be second when stream has been live for ${timeSince(stream.startDate)}? ${first.user} beat you to it.`);
+        } else {
+            chatClient.say(channel, `Sorry, ${user}, but ${second.user} was second.`);
+        }
         return;
     }
     second = {
         user: user,
         ts: Date.now()
     };
-    chatClient.say(channel, `Congrats, ${user}, on being second!`);
+    chatClient.say(channel, `Congrats, ${user}, on being second ${timeSince(stream.startDate)} since the start of stream!`);
     money.earn(chatClient, db, channel, user);
 }
 
