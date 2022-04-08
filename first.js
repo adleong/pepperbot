@@ -41,6 +41,11 @@ function timeSince(start) {
         hours -= 1;
         minutes += 60;
     }
+    let seconds = new.getSeconds() - start.getSeconds();
+    if (seconds < 0) {
+        minutes -= 1;
+        seconds += 60;
+    }
 
     let duration = "";
     if (hours > 0) {
@@ -49,6 +54,10 @@ function timeSince(start) {
     if (minutes > 0) {
         duration += ` ${minutes} minute${minutes > 1 ? 's' : ''}`;
     }
+    if (seconds > 0) {
+        duration += ` ${seconds} second${seconds > 1 ? 's' : ''}`;
+    }
+    
     return duration;
 }
 
