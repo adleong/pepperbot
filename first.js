@@ -41,7 +41,7 @@ function timeSince(start) {
         hours -= 1;
         minutes += 60;
     }
-    let seconds = new.getSeconds() - start.getSeconds();
+    let seconds = now.getSeconds() - start.getSeconds();
     if (seconds < 0) {
         minutes -= 1;
         seconds += 60;
