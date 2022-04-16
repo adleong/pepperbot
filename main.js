@@ -104,7 +104,11 @@ const run = async () => {
 
   // On startup
   chatClient.onRegister(async () => {
+    const stream = await apiClient.helix.streams.getStreamByUserName(channel);
     chatClient.say(channel, 'Sgt. Pepper powered on!');
+    if (stream) {
+      chatClient.say(channel, 'It\'s a chat quick time event: the First! and Second! redeems are now available! Come and get \'em!');
+    }
   });
 
   // Shutdown handlers
@@ -242,8 +246,6 @@ const run = async () => {
       console.log(err);
     }
   });
-
-  chatClient.say(channel, 'It\'s a chat quick time event: the First! and Second! redeems are now available! Come and get \'em!');
 
   // Events listener.
   const pubSubClient = new PubSubClient();

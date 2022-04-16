@@ -115,7 +115,7 @@ async function secondCommand(chatClient, apiClient, channel, db, user) {
     }
     if (second && second.user) {
         if (stream.startDate < Date.now() - Number(hours)) {
-            chatClient.say(channel, `${user}. Did you seriously expect to be second when stream has been live for ${timeSince(stream.startDate)}? ${first.user} beat you to it.`);
+            chatClient.say(channel, `${user}. Did you seriously expect to be second when stream has been live for ${timeSince(stream.startDate)}? ${second.user} beat you to it.`);
         } else {
             chatClient.say(channel, `Sorry, ${user}, but ${second.user} was second.`);
         }
