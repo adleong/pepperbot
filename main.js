@@ -243,6 +243,8 @@ const run = async () => {
     }
   });
 
+  chatClient.say(channel, 'It\'s a chat quick time event: the First! and Second! redeems are now available! Come and get \'em!');
+
   // Events listener.
   const pubSubClient = new PubSubClient();
   const userId = await pubSubClient.registerUserListener(apiClient);
