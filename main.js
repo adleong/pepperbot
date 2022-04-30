@@ -9,6 +9,7 @@ const advice = require("./advice");
 const auth = require("./auth");
 const awesome = require("./awesome");
 const brag = require("./brag");
+const fakequote = require("./fakequote");
 const game = require("./game");
 const lurk = require("./lurk");
 const pepper = require("./pepper");
@@ -228,6 +229,9 @@ const run = async () => {
           break;
         case '!ban':
           await ban.command(chatClient, apiClient, channel, bot, user, args.join(' '));
+          break;
+        case '!fakequote':
+          await fakequote.command(chatClient, channel);
           break;
         case '!commands':
           let commands = ['!advice', '!game', '!title', '!awesome', '!lurk','!unlurk', '!roll', '!pepper', '!leaders', '!request',
