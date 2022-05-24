@@ -3,7 +3,7 @@ const money = require("./money");
 const fake = require("./fakequote");
 
 const re = /(.*)[-~]\W*(\w+)/;
-const timer = 10 * 1000;
+const timer = 60 * 1000;
 let quiz = null;
 
 function pickWord(words) {
