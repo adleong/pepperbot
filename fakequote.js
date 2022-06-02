@@ -42,6 +42,7 @@ async function create() {
         prompt: "",
         stop: "###",
         n: 10,
+        max_tokens: 250,
       });
     for (const choice of response.data.choices) {
         if (choice.text.match(re)) {
