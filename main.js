@@ -26,6 +26,7 @@ const money = require("./money");
 const ban = require("./ban");
 const first = require("./first");
 const wotd = require("./wotd");
+const say = require("./say");
 
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
@@ -88,6 +89,12 @@ express()
     res.setHeader('Content-Type', 'application/json');
     res.write(JSON.stringify(claimant));
     res.end();
+  })
+  .get('/say', async (req, res) => {
+    res.render('pages/say', {})
+  })
+  .get('/say.json', async (req, res) => {
+    say.listen(res);
   })
   .listen(PORT, () => console.log(`Listening on ${PORT}`))
 
@@ -233,6 +240,13 @@ const run = async () => {
         case '!fakequote':
           await fakequote.command(chatClient, channel);
           break;
+        case '!say':
+          if (mod || user === channel) {
+            say.say(args.join(' '));
+          } else {
+            chatClient.say(channel, `Sorry, ${user}, only mods can do that.`);
+          }
+          break;
         case '!commands':
           let commands = ['!advice', '!game', '!title', '!awesome', '!lurk','!unlurk', '!roll', '!pepper', '!leaders', '!request',
             '!done', '!clear', '!sandwich', '!addcommand', '!addtimer', '!remove'];
@@ -298,6 +312,12 @@ const run = async () => {
           break;
         case 'Random word':
           wotd.command(chatClient, channel).catch(err => console.log(err));
+          break;
+        case 'TTS Fake Quote':
+          fakequote.fake().then(quote => {
+            say.say(quote);
+            chatClient.say(channel, quote);
+          });
           break;
       }
     } catch(err) {

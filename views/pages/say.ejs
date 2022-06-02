@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script>
+            var voices = window.speechSynthesis.getVoices();
+            console.log(voices);
+            // Call say.json api and stream the response.
+            fetch("/say.json").then(response => {
+                const reader = response.body.getReader();
+                return pump();
+                function pump() {
+                    reader.read().then(({ done, value }) => {
+                        if (done) {
+                            console.log("done");
+                            return;
+                        } else {
+                            // Process value.
+                            const say = JSON.parse(String.fromCharCode(...value));
+                            console.log(say);
+                            var msg = new SpeechSynthesisUtterance();
+                            // replace last instance of - with ; in say
+                            const n = say.lastIndexOf("-");
+                            msg.text = say.substring(0, n) + ";" + say.substring(n + 1);
+                            msg.text = say;
+                            msg.rate = 0.8;
+                            window.speechSynthesis.speak(msg);
+                            return pump();
+                        }
+                    }).catch(e => {
+                        console.log(e);
+                        // reload page
+                        location.reload();
+                    });
+                }
+            });
+        </script>
+    </head>
+<body>
+</body>
+</html>
