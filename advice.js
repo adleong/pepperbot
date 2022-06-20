@@ -26,6 +26,31 @@ async function command(chatClient, db, channel, args) {
     });
 }
 
+async function lookup(db, channel, args) {
+    const { rows } = await db.query('SELECT message FROM advice;');
+
+    let advices = [];
+    if (args.length == 0) {
+        advices = rows;
+    } else {
+        const search = args.join(' ');
+        for (const advice of rows) {
+            if (
+                advice.message.toLowerCase().includes(search.toLowerCase())
+            ) {
+                advices.push(advice);
+            }
+        }
+    }
+
+    if (advices.length == 0) {
+        return "You're on your own, buddy";
+    }
+
+    const i = Math.floor(Math.random() * advices.length);
+    return advices[i].message;
+}
+
 async function add(chatClient, db, channel, user, message) {
     await db.query('INSERT INTO advice (message, added_by) VALUES($1, $2)', [message, user]);
     const uncap = message[0].toLowerCase() + message.substring(1)
@@ -34,5 +59,6 @@ async function add(chatClient, db, channel, user, message) {
 
 module.exports = {
     add,
-    command
+    command,
+    lookup
 };

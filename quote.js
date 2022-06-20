@@ -70,7 +70,52 @@ async function quote(db, channel) {
     return rows[i];
 }
 
+async function lookup(db, channel, user, args) {
+    if (quiz.quiz_active()) {
+        return `NO CHEATING, ${user}! SHAME ON YOU!`;
+    }
+
+    if (args.length == 1 && args[0].match(/^\d+$/)) {
+        const id = parseInt(args[0], 10);
+        const { rows } = await db.query('SELECT number, message, game, created_at FROM quotes WHERE number = $1 AND channel = $2;', [id, channel]);
+        if (rows.length > 0) {
+            const q = rows[0]
+            const date = new Date(q.created_at);
+            return `#${q.number}: "${q.message}" [${q.game}] ${date.toDateString()}`;
+        } else {
+            return`Quote #${id} not found`;
+        }
+    } else {
+        const { rows } = await db.query('SELECT number, message, game, quoted_by, created_at FROM quotes WHERE channel = $1;', [channel]);
+        let quotes = [];
+        if (args.length == 0) {
+            quotes = rows;
+        } else {
+            const search = args.join(' ');
+            for (const quote of rows) {
+                if (
+                    search.toLowerCase() == String(quote.game).toLowerCase() ||
+                    search.toLowerCase() == String(quote.quoted_by).toLowerCase() ||
+                    quote.message.toLowerCase().includes(search.toLowerCase())
+                ) {
+                    quotes.push(quote);
+                }
+            }
+        }
+
+        if (quotes.length == 0) {
+            return "Sorry, I can't find any quotes about that";
+        }
+
+        const i = Math.floor(Math.random() * quotes.length);
+        const q = quotes[i]
+        const date = new Date(q.created_at);
+        return `#${q.number}: "${q.message}" [${q.game}] ${date.toDateString()}`;
+    }
+}
+
 module.exports = {
     command,
-    quote
+    quote,
+    lookup,
 };

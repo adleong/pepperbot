@@ -4,6 +4,10 @@ const { Client } = require('pg');
 const { PubSubClient } = require('twitch-pubsub-client');
 const express = require('express')
 const path = require('path')
+const Discord = require('discord.js');
+const { REST } = require('@discordjs/rest');
+const { Routes } = require('discord-api-types/v9');
+const { SlashCommandBuilder } = require('@discordjs/builders');
 
 const advice = require("./advice");
 const auth = require("./auth");
@@ -27,6 +31,7 @@ const ban = require("./ban");
 const first = require("./first");
 const wotd = require("./wotd");
 const say = require("./say");
+const { env } = require('process');
 
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
@@ -342,6 +347,75 @@ const run = async () => {
       console.log(err);
     }
   });
+
+  // Discord
+  const token = env.DISCORD_TOKEN;
+  const guildId = env.GUILD_ID;
+  const discordClientId = env.DISCORD_CLIENT_ID;
+
+  const discordClient = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS] });
+  discordClient.on('ready', () => {
+    console.log('Discord client ready.');
+    console.log('Initializing slash commands...');
+
+    const commands = [
+      new SlashCommandBuilder()
+        .setName('quote')
+        .setDescription('Fetch a quote')
+        .addStringOption(option =>
+          option.setName('query')
+            .setDescription('Quote id or search query')),
+      new SlashCommandBuilder()
+        .setName('fakequote')
+        .setDescription('Generate a fake quote'),
+      new SlashCommandBuilder()
+        .setName('advice')
+        .setDescription('Get some advice')
+        .addStringOption(option =>
+          option.setName('query')
+            .setDescription('search query')),
+    ].map(command => command.toJSON());
+
+    console.log(commands);
+
+    const rest = new REST({ version: '9' }).setToken(token);
+
+    rest.put(Routes.applicationGuildCommands(discordClientId, guildId), { body: commands })
+	    .then(() => console.log('Successfully registered application commands.'))
+	    .catch(console.error);
+
+  });
+
+  discordClient.on('interactionCreate', async interaction => {
+	  if (!interaction.isCommand()) return;
+
+	  const { commandName } = interaction;
+
+	  if (commandName === 'quote') {
+      const query = interaction.options.getString('query');
+      const args = [];
+      if (query) {
+        args.push(query);
+      }
+      const result = await quote.lookup(db, channel, interaction.user.toString(), args);
+		  await interaction.reply(result);
+	  } else if (commandName === 'fakequote') {
+      await interaction.deferReply();
+      const result = await fakequote.fake();
+      await interaction.editReply(result);
+    } else if (commandName === 'advice') {
+      const query = interaction.options.getString('query');
+      const args = [];
+      if (query) {
+        args.push(query);
+      }
+      const result = await advice.lookup(db, channel, args);
+		  await interaction.reply(result);
+    }
+  });
+
+  discordClient.login(token);
+
 };
 
 run();
