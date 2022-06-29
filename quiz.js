@@ -26,14 +26,14 @@ async function command(chatClient, apiClient, channel, db) {
         chatClient.say(channel, `No quizzes while ${channel} isn't live.`);
         return;
     }
-    
+
     const { rows } = await db.query('SELECT message, game, quoted_by FROM quotes WHERE CHANNEL = $1 ORDER BY random() LIMIT 1', [channel]);
     const match = rows[0].message.match(re);
     if (!match) {
         await command(chatClient, channel, db);
         return;
     }
-    chatClient.say(channel, "It's quiz time! Answer these three questions correctly to win a prize!")
+    chatClient.say(channel, "It's quiz time! Answer these four questions correctly to win a prize!")
     chatClient.say(channel, "ROUND 1: Who said this?");
     chatClient.say(channel, match[1]);
     chatClient.say(channel, "(You have 60 seconds to answer starting... NOW)");
@@ -90,7 +90,7 @@ async function startRound2(chatClient, channel, db) {
 function endRound2(chatClient, channel, db) {
     const correct = [];
     for (const key in quiz.answers) {
-        if (quiz.answers[key].replace(/[^a-z0-9]/gi,"") === quiz.correct.replace(/[^a-z0-9]/gi,"")) {
+        if (quiz.answers[key].replace(/[^a-z0-9]/gi, "") === quiz.correct.replace(/[^a-z0-9]/gi, "")) {
             correct.push(key);
         }
     }
@@ -137,7 +137,7 @@ async function startRound3(chatClient, channel, db) {
 function endRound3(chatClient, channel, db) {
     const correct = [];
     for (const key in quiz.answers) {
-        if (quiz.answers[key].replace(/[^a-z0-9]/gi,"") === quiz.correct.replace(/[^a-z0-9]/gi,"")) {
+        if (quiz.answers[key].replace(/[^a-z0-9]/gi, "") === quiz.correct.replace(/[^a-z0-9]/gi, "")) {
             correct.push(key);
         }
     }
@@ -184,7 +184,7 @@ async function startRound4(chatClient, channel, db) {
 function endRound4(chatClient, channel, db) {
     const correct = [];
     for (const key in quiz.answers) {
-        if (quiz.answers[key].replace(/[^a-z0-9]/gi,"") === quiz.correct.replace(/[^a-z0-9]/gi,"")) {
+        if (quiz.answers[key].replace(/[^a-z0-9]/gi, "") === quiz.correct.replace(/[^a-z0-9]/gi, "")) {
             correct.push(key);
         }
     }

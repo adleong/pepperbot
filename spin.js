@@ -1,9 +1,6 @@
 const SSAPI = require('ssapi-node');
 const api = new SSAPI();
 
-const queue = {};
-let requestCounts = new Map();
-
 async function lookup(query) {
     // If arg is a number string
     if (query.match(/^\d+$/)) {
@@ -26,22 +23,16 @@ async function lookup(query) {
     }
 }
 
-async function request(chatClient, channel, user, args) {
+async function request(chatClient, channel, db, user, args) {
     const query = args.join(' ');
     const song = await lookup(query).catch(err => {
         chatClient.say(channel, err);
     });
     // Insert song into queue
     if (song) {
-        if (!queue[channel]) {
-            queue[channel] = [];
-        }
-        requestCounts.set(user, (requestCounts.get(user) ?? 0) + 1);
-        song.requesterCount = requestCounts.get(user);
-        queue[channel].push(song);
-        queue[channel].sort((a, b) => {
-            return a.requesterCount - b.requesterCount;
-        });
+        const text = `#${song.id}: ${song.title} - ${song.charter} (${song.XDDifficulty})`;
+        await db.query('INSERT INTO requests (spin_id, channel, title, added_by, done) VALUES ($1, $2, $3, $4, $5)',
+            [song.id, channel, text, user, false]);
         chatClient.say(channel, `Adding #${song.id}: ${song.title} - ${song.charter} (${song.XDDifficulty})`);
     }
 }
@@ -55,16 +46,9 @@ async function done(chatClient, channel, apiClient, db, user, id) {
         return;
     }
     if (id) {
-        var i = 0;
-        while (queue[channel] && i < queue[channel].length) {
-            if (queue[channel][i].id == id) {
-                queue[channel].splice(i, 1);
-                break;
-            }
-            i++;
-        }
+        await db.query('UPDATE requests SET done = true WHERE spin_id = $1 AND channel = $2', [id, channel]);
     } else {
-        queue[channel].splice(0, 1);
+        await db.query('UPDATE requests SET done = true WHERE id = (SELECT id from requests WHERE channel = $1 AND done = false ORDER BY id LIMIT 1)', [channel]);
     }
 }
 
