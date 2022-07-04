@@ -47,14 +47,14 @@ const db = new Client({
   ssl
 });
 
-db.connect(); 
+db.connect();
 console.log("Database connected");
 
 express()
   .set('views', path.join(__dirname, 'views'))
   .set('view engine', 'ejs')
   .get('/carousel', async (req, res) => {
-      res.render('pages/carousel', {})
+    res.render('pages/carousel', {})
   })
   .get('/quote', async (req, res) => {
     const q = await quote.quote(db, channel);
@@ -62,24 +62,22 @@ express()
   })
   .get('/leaders', async (req, res) => {
     const results = await pepper.leadersResults(db);
-      res.render('pages/leaders', { results })
+    res.render('pages/leaders', { results })
   })
   .get('/reclaimers', async (req, res) => {
     const results = await pepper.claimedLeaders(db);
-      res.render('pages/claimed', { results })
+    res.render('pages/claimed', { results })
   })
   .get('/money', async (req, res) => {
     const results = await money.leaders(db);
-      res.render('pages/money', { results })
+    res.render('pages/money', { results })
   })
   .get('/queue', async (req, res) => {
-      if (!spin.queue[channel]) {
-          spin.queue[channel] = [];
-      }
-      res.render('pages/queue', { 'results': spin.queue[channel] })
+    const queue = await spin.queue(channel, db);
+    res.render('pages/queue', { 'results': queue })
   })
   .get('/timer', async (req, res) => {
-      res.render('pages/timer')
+    res.render('pages/timer')
   })
   .get('/timer/start', async (req, res) => {
     pepper.start();
@@ -157,7 +155,7 @@ const run = async () => {
           const target = await so.command(chatClient, apiClient, channel, args.shift());
           const stream = await apiClient.helix.streams.getStreamByUserName(channel);
           if (!stream) {
-              break; // No shoutout rewards while channel isn't live.
+            break; // No shoutout rewards while channel isn't live.
           }
           if (outstandingShoutouts.has(target.name)) {
             outstandingShoutouts.delete(target.name);
@@ -192,8 +190,12 @@ const run = async () => {
           await pepper.leaders(chatClient, db, channel);
           break;
         case '!request':
-          await spin.request(chatClient, channel, user, args);
+          await spin.request(chatClient, channel, db, user, args);
           break;
+        // case '!requestas':
+        //   const as = args.shift();
+        //   await spin.request(chatClient, channel, db, as, args);
+        //   break;
         case '!done':
           await spin.done(chatClient, channel, apiClient, db, user, args.shift());
           break;
@@ -253,7 +255,7 @@ const run = async () => {
           }
           break;
         case '!commands':
-          let commands = ['!advice', '!game', '!title', '!awesome', '!lurk','!unlurk', '!roll', '!pepper', '!leaders', '!request',
+          let commands = ['!advice', '!game', '!title', '!awesome', '!lurk', '!unlurk', '!roll', '!pepper', '!leaders', '!request',
             '!done', '!clear', '!sandwich', '!addcommand', '!addtimer', '!remove'];
           const extra = await timers.getCommands(db, channel);
           commands = commands.concat(extra);
@@ -265,7 +267,7 @@ const run = async () => {
           }
         }
       }
-    } catch(err) {
+    } catch (err) {
       console.log(err);
     }
   });
@@ -290,7 +292,7 @@ const run = async () => {
           const seconds = 1000;
           const minutes = 60 * seconds;
           const delay = Math.floor(Math.random() * 5 * minutes);
-          setTimeout(function() {
+          setTimeout(function () {
             brag.brag(chatClient, channel, db);
           }, delay);
           break;
@@ -325,7 +327,7 @@ const run = async () => {
           });
           break;
       }
-    } catch(err) {
+    } catch (err) {
       console.log(err);
     }
   });
@@ -343,7 +345,7 @@ const run = async () => {
           so.command(chatClient, apiClient, channel, user);
         }
       }, 2 * 60 * 1000);
-    } catch(err) {
+    } catch (err) {
       console.log(err);
     }
   });
@@ -381,25 +383,25 @@ const run = async () => {
     const rest = new REST({ version: '9' }).setToken(token);
 
     rest.put(Routes.applicationGuildCommands(discordClientId, guildId), { body: commands })
-	    .then(() => console.log('Successfully registered application commands.'))
-	    .catch(console.error);
+      .then(() => console.log('Successfully registered application commands.'))
+      .catch(console.error);
 
   });
 
   discordClient.on('interactionCreate', async interaction => {
-	  if (!interaction.isCommand()) return;
+    if (!interaction.isCommand()) return;
 
-	  const { commandName } = interaction;
+    const { commandName } = interaction;
 
-	  if (commandName === 'quote') {
+    if (commandName === 'quote') {
       const query = interaction.options.getString('query');
       const args = [];
       if (query) {
         args.push(query);
       }
       const result = await quote.lookup(db, channel, interaction.user.toString(), args);
-		  await interaction.reply(result);
-	  } else if (commandName === 'fakequote') {
+      await interaction.reply(result);
+    } else if (commandName === 'fakequote') {
       await interaction.deferReply();
       const result = await fakequote.fake();
       await interaction.editReply(result);
@@ -410,7 +412,7 @@ const run = async () => {
         args.push(query);
       }
       const result = await advice.lookup(db, channel, args);
-		  await interaction.reply(result);
+      await interaction.reply(result);
     }
   });
 

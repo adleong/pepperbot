@@ -31,8 +31,10 @@ async function request(chatClient, channel, db, user, args) {
     // Insert song into queue
     if (song) {
         const text = `#${song.id}: ${song.title} - ${song.charter} (${song.XDDifficulty})`;
-        await db.query('INSERT INTO requests (spin_id, channel, title, added_by, done) VALUES ($1, $2, $3, $4, $5)',
-            [song.id, channel, text, user, false]);
+        const { rows } = await db.query('SELECT count(1) from requests where channel = $1 and added_by = $2', [channel, user]);
+        const priority = rows[0].count;
+        await db.query('INSERT INTO requests (spin_id, channel, title, added_by, priority, done) VALUES ($1, $2, $3, $4, $5, $6)',
+            [song.id, channel, text, user, priority, false]);
         chatClient.say(channel, `Adding #${song.id}: ${song.title} - ${song.charter} (${song.XDDifficulty})`);
     }
 }
@@ -48,7 +50,10 @@ async function done(chatClient, channel, apiClient, db, user, id) {
     if (id) {
         await db.query('UPDATE requests SET done = true WHERE spin_id = $1 AND channel = $2', [id, channel]);
     } else {
-        await db.query('UPDATE requests SET done = true WHERE id = (SELECT id from requests WHERE channel = $1 AND done = false ORDER BY id LIMIT 1)', [channel]);
+        await db.query('UPDATE requests SET done = true WHERE id = (' +
+            'SELECT id FROM requests ' +
+            'WHERE channel=$1 AND DONE=false ' +
+            'ORDER BY priority, id LIMIT 1)', [channel]);
     }
 }
 
@@ -60,10 +65,15 @@ async function clear(chatClient, channel, apiClient, db, user) {
         chatClient.say(channel, `Sorry, ${user}, only mods may perform this action`);
         return;
     }
-    if (queue[channel]) {
-        queue[channel].splice(0);
-    }
-    requestCounts = new Map();
+    await db.query('DELETE FROM requests WHERE channel = $1', [channel]);
+}
+
+async function queue(channel, db) {
+    const { rows } = await db.query(
+        'SELECT title, added_by FROM requests ' +
+        'WHERE channel=$1 AND done=false ' +
+        'ORDER BY priority, id', [channel]);
+    return rows;
 }
 
 module.exports = {
