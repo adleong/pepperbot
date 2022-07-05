@@ -31,6 +31,7 @@ const ban = require("./ban");
 const first = require("./first");
 const wotd = require("./wotd");
 const say = require("./say");
+const pronouns = require("./pronouns");
 const { env } = require('process');
 
 const clientId = process.env.CLIENT_ID;
@@ -243,6 +244,13 @@ const run = async () => {
           break;
         case '!ban':
           await ban.command(chatClient, apiClient, channel, bot, user, args.join(' '));
+          break;
+        case '!pronouns':
+          let target = args.shift();
+          if (!target) {
+            target = user;
+          }
+          await pronouns.pronouns(chatClient, channel, target);
           break;
         case '!fakequote':
           await fakequote.command(chatClient, channel);
