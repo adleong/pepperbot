@@ -5,11 +5,11 @@ function listen(res) {
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Transfer-Encoding', 'chunked');
     res.setHeader('Connection', 'keep-alive');
-    listeners.push(res);
+    listeners[0] = res;
 }
 
 function say(msg) {
-    listeners.forEach(function(res) {
+    listeners.forEach(function (res) {
         res.write(JSON.stringify(msg));
         res.write("\n");
     });
