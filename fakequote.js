@@ -1,9 +1,10 @@
 const { Configuration, OpenAIApi } = require("openai");
 const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
+    apiKey: process.env.OPENAI_API_KEY,
 });
 const openai = new OpenAIApi(configuration);
 const re = /\-\w\w+\W*$/;
+const url = /(\w+:\/\/)?\w+\.[a-zA-Z0-9\/\?\%\#\&_=\-\.]+/g;
 
 async function command(chatClient, channel) {
     const quote = await fake();
@@ -15,9 +16,12 @@ async function command(chatClient, channel) {
 }
 
 async function fake() {
-    const quote = await create();
-    const response = await openai.createCompletion("content-filter-alpha",{
-        prompt: "<|endoftext|>"+quote+"\n--\nLabel:",
+    let quote = await create();
+    // Replace all links in quote with [hyperlink blocked]
+    quote = quote.replaceAll(url, "[hyperlink blocked]");
+
+    const response = await openai.createCompletion("content-filter-alpha", {
+        prompt: "<|endoftext|>" + quote + "\n--\nLabel:",
         temperature: 0,
         max_tokens: 1,
         top_p: 0,
@@ -43,7 +47,7 @@ async function create() {
         stop: "###",
         n: 10,
         max_tokens: 250,
-      });
+    });
     for (const choice of response.data.choices) {
         if (choice.text.match(re)) {
             return choice.text;
