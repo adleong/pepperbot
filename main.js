@@ -262,6 +262,15 @@ const run = async () => {
             chatClient.say(channel, `Sorry, ${user}, only mods can do that.`);
           }
           break;
+        // case '!nth':
+        //   const nthT = args.shift();
+        //   const n = args.shift();
+        //   await first.nthCommand(chatClient, apiClient, channel, db, nthT, n);
+        //   break;
+        // case '!first':
+        //   const firstT = args.shift();
+        //   await first.firstCommand(chatClient, apiClient, channel, db, firstT);
+        //   break;
         case '!commands':
           let commands = ['!advice', '!game', '!title', '!awesome', '!lurk', '!unlurk', '!roll', '!pepper', '!leaders', '!request',
             '!done', '!clear', '!sandwich', '!addcommand', '!addtimer', '!remove'];
@@ -322,8 +331,8 @@ const run = async () => {
         case 'First!':
           first.firstCommand(chatClient, apiClient, channel, db, message.userName);
           break;
-        case 'Second!':
-          first.secondCommand(chatClient, apiClient, channel, db, message.userName);
+        case 'Nth!':
+          first.nthCommand(chatClient, apiClient, channel, db, message.userName, message.message);
           break;
         case 'Random word':
           wotd.command(chatClient, channel).catch(err => console.log(err));

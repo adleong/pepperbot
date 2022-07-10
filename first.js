@@ -4,8 +4,8 @@ const seconds = 1000;
 const minutes = 60 * seconds;
 const hours = 60 * minutes;
 
-let first = {};
-let second = {};
+let winners = [];
+let ts = Date.now();
 const guesses = new Map();
 
 function expired(ts) {
@@ -14,13 +14,9 @@ function expired(ts) {
 }
 
 function expire() {
-    if (first && expired(first.ts)) {
-        console.log("Expiring first");
-        first = {};
-    }
-    if (second && expired(second.ts)) {
-        console.log("Expiring second");
-        second = {};
+    if (expired(ts)) {
+        console.log("Expiring winners");
+        winners = [];
     }
     for (const [user, guess] of guesses) {
         if (expired(guess.ts)) {
@@ -57,79 +53,77 @@ function timeSince(start) {
     if (seconds > 0) {
         duration += ` ${seconds} second${seconds > 1 ? 's' : ''}`;
     }
-    
+
     return duration;
 }
 
-async function firstCommand(chatClient, apiClient, channel, db, user) {
-    expire();
-    const stream = await apiClient.helix.streams.getStreamByUserName(channel);
-    if (!stream) {
-        chatClient.say(channel, `OMG, ${user}, ${channel} isn't even live.`);
-        return;
+function ordinal(n) {
+    const s = n % 100;
+    if (s > 10 && s < 21) {
+        return `${n}th`;
     }
-    if (guesses.has(user)) {
-        const guess = guesses.get(user);
-        chatClient.say(channel, `Nice try, ${user}, but you already tried to be ${guess.guess}.`);
-        return;
+    switch (s % 10) {
+        case 1:
+            return `${n}st`;
+        case 2:
+            return `${n}nd`;
+        case 3:
+            return `${n}rd`;
+        default:
+            return `${n}th`;
     }
-    guesses.set(user, {
-        guess: 'first',
-        ts: Date.now()
-    });
-    if (first && first.user) {
-        if (stream.startDate < Date.now() - Number(hours)) {
-            chatClient.say(channel, `${user}. Did you seriously expect to be first when stream has been live for ${timeSince(stream.startDate)}? ${first.user} beat you to it.`);
-        } else {
-            chatClient.say(channel, `Sorry, ${user}, but ${first.user} was first.`);
-        }
-        return;
-    }
-    first = {
-        user,
-        ts: Date.now()
-    };
-    chatClient.say(channel, `Congrats, ${user}, on being first ${timeSince(stream.startDate)} since the start of stream!`);
-    money.earn(chatClient, db, channel, user, 2);
 }
 
-async function secondCommand(chatClient, apiClient, channel, db, user) {
+async function nth(chatClient, apiClient, channel, db, user, n) {
     expire();
     const stream = await apiClient.helix.streams.getStreamByUserName(channel);
     if (!stream) {
         chatClient.say(channel, `OMG, ${user}, ${channel} isn't even live.`);
         return;
     }
+    ts = Date.now();
     if (guesses.has(user)) {
         const guess = guesses.get(user);
         chatClient.say(channel, `Nice try, ${user}, but you already tried to be ${guess.guess}.`);
         return;
     }
     guesses.set(user, {
-        guess: 'second',
+        guess: ordinal(n),
         ts: Date.now()
     });
-    if (!first || !first.user) {
-        chatClient.say(channel, `Sorry, ${user}, you can't be second because nobody was first.`);
-        return;
-    }
-    if (second && second.user) {
-        if (stream.startDate < Date.now() - Number(hours)) {
-            chatClient.say(channel, `${user}. Did you seriously expect to be second when stream has been live for ${timeSince(stream.startDate)}? ${second.user} beat you to it.`);
+    if (winners[n - 1]) {
+        if (n == 1 && (stream.startDate < Date.now() - Number(hours))) {
+            chatClient.say(channel, `${user}. Did you seriously expect to be first when stream has been live for ${timeSince(stream.startDate)}? ${winners[n - 1]} beat you to it.`);
         } else {
-            chatClient.say(channel, `Sorry, ${user}, but ${second.user} was second.`);
+            chatClient.say(channel, `Sorry, ${user}, but ${winners[n - 1]} was ${ordinal(n)}.`);
         }
+    } else if (n == 1 || winners[n - 2]) {
+        winners.push(user);
+        chatClient.say(channel, `Congrats, ${user}, on being ${ordinal(n)}!`);
+        if (n == 1) {
+            money.earn(chatClient, db, channel, user, 2);
+        } else {
+            money.earn(chatClient, db, channel, user, 1);
+        }
+    } else {
+        chatClient.say(channel, `Sorry, ${user}, you can't be ${ordinal(n)} because nobody was ${ordinal(n - 1)}.`);
+    }
+}
+
+async function firstCommand(chatClient, apiClient, channel, db, user) {
+    await nth(chatClient, apiClient, channel, db, user, 1);
+}
+
+async function nthCommand(chatClient, apiClient, channel, db, user, arg) {
+    const n = parseInt(arg);
+    if (!(n > 0)) {
+        await chatClient.say(channel, `${user}: nth must be a positive number.`);
         return;
     }
-    second = {
-        user: user,
-        ts: Date.now()
-    };
-    chatClient.say(channel, `Congrats, ${user}, on being second ${timeSince(stream.startDate)} since the start of stream!`);
-    money.earn(chatClient, db, channel, user);
+    nth(chatClient, apiClient, channel, db, user, n);
 }
 
 module.exports = {
     firstCommand,
-    secondCommand
+    nthCommand
 };
