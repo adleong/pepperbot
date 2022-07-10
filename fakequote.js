@@ -42,7 +42,7 @@ async function fake() {
 
 async function create() {
     const response = await openai.createCompletionFromModel({
-        model: "curie:ft-personal-2022-04-29-00-17-58",
+        model: "curie:ft-personal-2022-07-10-22-06-17",
         prompt: "",
         stop: "###",
         n: 10,
