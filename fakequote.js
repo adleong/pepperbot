@@ -8,15 +8,30 @@ const url = /(\w+:\/\/)?\w+\.[a-zA-Z0-9\/\?\%\#\&_=\-\.]+/g;
 
 async function command(chatClient, channel) {
     const quote = await fake();
-    if (quote) {
-        chatClient.say(channel, quote);
-    } else {
-        chatClient.say(channel, "Sorry, I couldn't think of anything. -Sgt Pepper Bot");
-    }
+    chatClient.say(channel, quote);
 }
 
 async function fake() {
-    let quote = await create();
+    let quote = await create().catch(error => {
+        if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+            console.log(error.response.data);
+            console.log(error.response.status);
+        } else if (error.request) {
+            // The request was made but no response was received
+            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+            // http.ClientRequest in node.js
+            console.log(error.request);
+        } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+        }
+        return null;
+    });
+    if (!quote) {
+        return "Sorry, I couldn't think of anything. -Sgt Pepper Bot";
+    }
     // Replace all links in quote with [hyperlink blocked]
     quote = quote.replaceAll(url, "[hyperlink blocked]");
 
