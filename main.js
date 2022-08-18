@@ -348,7 +348,7 @@ const run = async () => {
           });
           break;
         case 'Fake validate me':
-          fakevalidate.command(chatClient, channel, user).catch(err => console.log(err));
+          fakevalidate.command(chatClient, channel, message.userName).catch(err => console.log(err));
           break;
       }
     } catch (err) {
