@@ -14,6 +14,7 @@ const auth = require("./auth");
 const awesome = require("./awesome");
 const brag = require("./brag");
 const fakequote = require("./fakequote");
+const fakevalidate = require("./fakevalidate");
 const game = require("./game");
 const lurk = require("./lurk");
 const pepper = require("./pepper");
@@ -255,6 +256,9 @@ const run = async () => {
         case '!fakequote':
           await fakequote.command(chatClient, channel);
           break;
+        case '!fakevalidate':
+          await fakevalidate.command(chatClient, channel, user);
+          break;
         case '!say':
           if (mod || user === channel) {
             say.say(args.join(' '));
@@ -342,6 +346,9 @@ const run = async () => {
             say.say(quote);
             chatClient.say(channel, quote);
           });
+          break;
+        case 'Fake validate me':
+          fakevalidate.command(chatClient, channel, user).catch(err => console.log(err));
           break;
       }
     } catch (err) {
