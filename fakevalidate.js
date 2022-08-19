@@ -1,4 +1,6 @@
 const { Configuration, OpenAIApi } = require("openai");
+const pronouns = require("./pronouns.js");
+
 const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
 });
@@ -6,34 +8,33 @@ const openai = new OpenAIApi(configuration);
 const url = /(\w+:\/\/)?\w+\.[a-zA-Z0-9\/\?\%\#\&_=\-\.]+/g;
 
 const focus = [
-    "how I can vanquish my foes",
-    "how evil I am",
-    "how I'm a mastermind",
-    "that time we robbed a bank togeter",
-    "when I was trapped in a time loop",
-    "that time I killed god",
-    "my love for pepper",
-    "my musical talents",
-    "how I'm a famous pop star",
-    "all the movies I've acted in",
-    "our marriage",
-    "our history",
-    "our epic rivalry",
-    "our future",
-    "my demon summoning",
-    "my gaming skills",
-    "my name",
-    "my flavor",
-    "how many weapons I can wield",
-    "my unusual fashion choices",
-    "my specific accomplishments",
-    "that time we overthrew a government",
-    "how hot I am",
-    "how powerful I am",
-    "how we're both eternal gods",
+    "about how I can vanquish my foes",
+    "about how evil I am",
+    "about how I'm a mastermind",
+    "about that time we robbed a bank togeter",
+    "about when I was trapped in a time loop",
+    "about that time I killed god",
+    "about my love for pepper",
+    "about my musical talents",
+    "about how I'm a famous pop star",
+    "about all the movies I've acted in",
+    "about how you're married to me",
+    "about our history",
+    "about our epic rivalry",
+    "about our future",
+    "about my demon summoning",
+    "about my gaming skills",
+    "about my name",
+    "about my flavor",
+    "about how many weapons I can wield",
+    "about my unusual fashion choices",
+    "about my specific accomplishments",
+    "about that time we overthrew a government",
+    "about how hot I am",
+    "about how powerful I am",
+    "about how we're both eternal gods",
     "speaking like an uwu catgirl",
-    "my l33t hax0r skills",
-    "incorporating a new pun",
+    "about my l33t hax0r skills",
     "speaking in l33t-speak",
     "speaking like an overwrought poet",
     "speaking like an evil villian",
@@ -98,8 +99,10 @@ async function fake(user) {
 
 async function create(user) {
 
-    const f = focus[Math.floor(Math.random() * focus.length)];
-    const prompt = user + ": give me words of validation and focus on " + f + "\nSgt Pepper Bot:";
+    const pronoun = await pronouns.get_pronouns(user);
+    const prompt = `${user}'s pronouns are ${pronoun}\n\n` +
+        `${user}: give me words of validation ${focus[Math.floor(Math.random() * focus.length)]}\n` +
+        `Sgt Pepper Bot:`;
     console.log(prompt);
 
     const response = await openai.createCompletion("text-davinci-002", {
@@ -109,7 +112,7 @@ async function create(user) {
     });
     const result = response.data.choices[0];
     // trim spaces and newlines
-    return "@" + user + ": " + result.text.trim();
+    return "@" + user + " " + result.text.trim();
 }
 
 module.exports = {
