@@ -100,7 +100,7 @@ async function fake(user) {
 async function create(user) {
 
     const pronoun = await pronouns.get_pronouns(user);
-    const prompt = `${user}'s pronouns are ${pronoun}\n\n` +
+    const prompt = (pronoun ? `${user}'s pronouns are ${pronoun}\n\n` : "") +
         `${user}: give me words of validation ${focus[Math.floor(Math.random() * focus.length)]}\n` +
         `Sgt Pepper Bot:`;
     console.log(prompt);

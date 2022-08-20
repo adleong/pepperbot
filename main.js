@@ -257,7 +257,8 @@ const run = async () => {
           await fakequote.command(chatClient, channel);
           break;
         case '!fakevalidate':
-          await fakevalidate.command(chatClient, channel, user);
+          const t = args.shift();
+          await fakevalidate.command(chatClient, channel, t ? t : user);
           break;
         case '!say':
           if (mod || user === channel) {

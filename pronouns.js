@@ -22,6 +22,9 @@ async function get_pronouns(user) {
         }
     }
     const res = await axios.get(`https://pronouns.alejo.io/api/users/${user}`);
+    if (!res.data[0]) {
+        return null;
+    }
     const id = res.data[0].pronoun_id;
     return display[id];
 }
