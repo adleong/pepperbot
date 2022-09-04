@@ -8,33 +8,44 @@ const openai = new OpenAIApi(configuration);
 const url = /(\w+:\/\/)?\w+\.[a-zA-Z0-9\/\?\%\#\&_=\-\.]+/g;
 
 const focus = [
-    "about how I can vanquish my foes",
-    "about how evil I am",
-    "about how I'm a mastermind",
+    "about how they can vanquish my foes",
+    "about how evil they are",
+    "about how they are a mastermind",
     "about that time we robbed a bank togeter",
-    "about when I was trapped in a time loop",
-    "about that time I killed god",
-    "about my love for pepper",
-    "about my musical talents",
-    "about how I'm a famous pop star",
-    "about all the movies I've acted in",
-    "about how you're married to me",
+    "about when they were trapped in a time loop",
+    "about that time they killed god",
+    "about their love for pepper",
+    "about their musical talents",
+    "about how they are a famous pop star",
+    "about all the movies they acted in",
+    "about how you're married to them",
     "about our history",
     "about our epic rivalry",
     "about our future",
-    "about my demon summoning",
-    "about my gaming skills",
-    "about my name",
-    "about my flavor",
-    "about how many weapons I can wield",
+    "about their demon summoning",
+    "about their gaming skills",
+    "about their name",
+    "about their flavor",
+    "about friendship",
+    "about how many arms they have",
+    "about how many weapons they can wield",
     "about my unusual fashion choices",
     "about my specific accomplishments",
     "about that time we overthrew a government",
-    "about how hot I am",
-    "about how powerful I am",
+    "about how hot they are",
+    "about how powerful they are",
     "about how we're both eternal gods",
+    "about board games",
+    "about being a fan of Damaplaysgames",
+    "about loving Sgt Pepper Bot (he/him)",
+    "about avoiding time paradoxes",
     "speaking like an uwu catgirl",
-    "about my l33t hax0r skills",
+    "about their l33t hax0r skills",
+    "about ergonomic sitting",
+    "about how they are a famous streamer",
+    "about hydration",
+    "about their signing",
+    "about being a Damaplaysgames viewer",
     "speaking in l33t-speak",
     "speaking like an overwrought poet",
     "speaking like an evil villian",
@@ -45,7 +56,14 @@ const focus = [
     "speaking like an alien trying to enslave humanity",
     "speaking in rhyme",
     "speaking in ye olde english",
-    "speaking like an aristocrat",
+    "speaking like a haughty aristocrat",
+    "speaking like a southern belle",
+    "speaking like a vampire",
+    "speaking like a valley girl",
+    "speaking like a surfer dude",
+    "but spell some words wrong",
+    "in rhyming couplet",
+    "in a wierd way",
 ]
 
 async function command(chatClient, channel, user) {
@@ -100,9 +118,7 @@ async function fake(user) {
 async function create(user) {
 
     const pronoun = await pronouns.get_pronouns(user);
-    const prompt = (pronoun ? `${user}'s pronouns are ${pronoun}\n\n` : "") +
-        `${user}: give me words of validation ${focus[Math.floor(Math.random() * focus.length)]}\n` +
-        `Sgt Pepper Bot:`;
+    const prompt = `Give ${user} ${pronoun ? `(${pronoun})` : ""} words of validation ${focus[Math.floor(Math.random() * focus.length)]}\n`;
     console.log(prompt);
 
     const response = await openai.createCompletion("text-davinci-002", {
@@ -112,7 +128,7 @@ async function create(user) {
     });
     const result = response.data.choices[0];
     // trim spaces and newlines
-    return "@" + user + " " + result.text.trim();
+    return "@" + user + " " + result.text.trim().replaceAll("\n", " ");
 }
 
 module.exports = {
