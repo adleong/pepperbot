@@ -108,6 +108,15 @@ async function nthCommand(chatClient, apiClient, online, channel, db, user, arg)
     nth(chatClient, apiClient, online, channel, db, user, n);
 }
 
+async function record(chatClient, db, channel) {
+    const { rows } = await db.query('SELECT * FROM nth WHERE type=$1 order by n desc limit 1', ['max']);
+    if (rows[0]) {
+        chatClient.say(channel, `The current record is ${ordinal(rows[0].n)} by ${rows[0].user_name}.`);
+    } else {
+        chatClient.say(channel, `There is no record yet.`);
+    }
+}
+
 async function clear(db) {
     await db.query('DELETE FROM nth WHERE type=$1', ['nth']);
     await db.query('DELETE FROM nth WHERE type=$1', ['guess']);
@@ -116,5 +125,6 @@ async function clear(db) {
 module.exports = {
     firstCommand,
     nthCommand,
-    clear
+    clear,
+    record
 };

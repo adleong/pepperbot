@@ -298,6 +298,9 @@ const run = async () => {
             chatClient.say(channel, `Sorry, ${user}, only mods can do that.`);
           }
           break;
+        case '!nth':
+          await first.record(chatClient, db, channel);
+          break;
         // case '!nth':
         //   const nthT = args.shift();
         //   const n = args.shift();
