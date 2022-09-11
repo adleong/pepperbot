@@ -10,6 +10,7 @@ const Discord = require('discord.js');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const advice = require("./advice");
 const auth = require("./auth");
@@ -53,6 +54,13 @@ const db = new Client({
 
 db.connect();
 console.log("Database connected");
+
+const options = {
+  target: 'http://localhost:8888/', // target host with the same base path
+};
+
+// create the proxy
+const proxy = createProxyMiddleware({ target: 'http://localhost:8888', changeOrigin: true });
 
 express()
   .set('views', path.join(__dirname, 'views'))
@@ -103,6 +111,8 @@ express()
   .get('/say.json', async (req, res) => {
     say.listen(res);
   })
+  // match all post requests
+  .post('*', proxy)
   .listen(PORT, () => console.log(`Listening on ${PORT}`))
 
 const run = async () => {
@@ -384,7 +394,8 @@ const run = async () => {
   // Arbitrary but consistent string.
   const listener = new EventSubListener(eventSubClient, new ReverseProxyAdapter({
     hostName: 'sgt-pepper-bot.herokuapp.com', // The host name the server is available from
-    externalPort: 443 // The external port (optional, defaults to 443)
+    port: 8888,
+    externalPort: PORT // The external port (optional, defaults to 443)
   }), '1tfvrk3svxsk2jer25o8967xb6rn5u2u9wuhyu7brk');
   await listener.listen();
 
