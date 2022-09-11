@@ -127,13 +127,14 @@ const run = async () => {
 
   timers.load(chatClient, db, channel, bot);
 
+  const stream = await apiClient.helix.streams.getStreamByUserName(channel);
+  let online = !!stream;
+  console.log("Stream online: " + online);
+
   // On startup
   chatClient.onRegister(async () => {
     const stream = await apiClient.helix.streams.getStreamByUserName(channel);
     chatClient.say(channel, 'Sgt. Pepper powered on!');
-    if (stream) {
-      chatClient.say(channel, 'It\'s a chat quick time event: the First! and Second! redeems are now available! Come and get \'em!');
-    }
   });
 
   // Shutdown handlers
@@ -156,7 +157,7 @@ const run = async () => {
       const args = message.split(' ');
       const command = args.shift().toLowerCase();
 
-      const u = await apiClient.helix.users.gxetUserByName(user);
+      const u = await apiClient.helix.users.getUserByName(user);
       const mod = await apiClient.helix.moderation.checkUserMod(broadcaster.id, u.id);
 
       switch (command) {
@@ -202,7 +203,8 @@ const run = async () => {
           chatClient.say(channel, 'Hello, everyone! Please allow me to introduce myself: I am Sgt Pepper Bot MkII and I am at your service.  Use !commands to see what I can do! https://github.com/adleong/pepperbot');
           break;
         case '!leaders':
-          await pepper.leaders(chatClient, db, channel);
+          const leaders = await money.leaders(db);
+          chatClient.say(channel, `The pepper leaders are: ${leaders.map(l => `${l.name} (${l.money})`).join(', ')}`);
           break;
         case '!request':
           await spin.request(chatClient, channel, db, user, args);
@@ -216,6 +218,22 @@ const run = async () => {
           break;
         case '!clear':
           await spin.clear(chatClient, channel, apiClient, db, user);
+          break;
+        case '!open':
+          if (mod || user === channel) {
+            spin.open();
+            chatClient.say(channel, 'The queue is now open!');
+          } else {
+            chatClient.say(channel, `Sorry, ${user}, only mods can do that.`);
+          }
+          break;
+        case '!close':
+          if (mod || user === channel) {
+            spin.close();
+            chatClient.say(channel, 'The queue is now closed!');
+          } else {
+            chatClient.say(channel, `Sorry, ${user}, only mods can do that.`);
+          }
           break;
         case '!sandwich':
           sandwich.command(chatClient, channel, args.join(' '));
@@ -269,10 +287,10 @@ const run = async () => {
         case '!fakequote':
           await fakequote.command(chatClient, channel);
           break;
-        case '!fakevalidate':
-          const t = args.shift();
-          await fakevalidate.command(chatClient, channel, t ? t : user);
-          break;
+        // case '!fakevalidate':
+        //   const t = args.shift();
+        //   await fakevalidate.command(chatClient, channel, t ? t : user);
+        //   break;
         case '!say':
           if (mod || user === channel) {
             say.say(args.join(' '));
@@ -283,11 +301,11 @@ const run = async () => {
         // case '!nth':
         //   const nthT = args.shift();
         //   const n = args.shift();
-        //   await first.nthCommand(chatClient, apiClient, channel, db, nthT, n);
+        //   await first.nthCommand(chatClient, apiClient, online, channel, db, nthT, n);
         //   break;
         // case '!first':
         //   const firstT = args.shift();
-        //   await first.firstCommand(chatClient, apiClient, channel, db, firstT);
+        //   await first.firstCommand(chatClient, apiClient, online, channel, db, firstT);
         //   break;
         case '!commands':
           let commands = ['!advice', '!game', '!title', '!awesome', '!lurk', '!unlurk', '!roll', '!pepper', '!leaders', '!request',
@@ -347,10 +365,10 @@ const run = async () => {
             catch(err => console.log(err));
           break;
         case 'First!':
-          first.firstCommand(chatClient, apiClient, channel, db, message.userName);
+          first.firstCommand(chatClient, apiClient, online, channel, db, message.userName);
           break;
         case 'Nth!':
-          first.nthCommand(chatClient, apiClient, channel, db, message.userName, message.message);
+          first.nthCommand(chatClient, apiClient, online, channel, db, message.userName, message.message);
           break;
         case 'Random word':
           wotd.command(chatClient, channel).catch(err => console.log(err));
@@ -395,28 +413,26 @@ const run = async () => {
   const listener = new EventSubListener(eventSubClient, new ReverseProxyAdapter({
     hostName: 'sgt-pepper-bot.herokuapp.com', // The host name the server is available from
     port: 8888,
-    externalPort: PORT // The external port (optional, defaults to 443)
+    externalPort: PORT
   }), '1tfvrk3svxsk2jer25o8967xb6rn5u2u9wuhyu7brk');
   await listener.listen();
 
   const onlineSubscription = await listener.subscribeToStreamOnlineEvents(broadcaster.id, e => {
-    console.log(`${e.broadcasterDisplayName} just went live!`);
-    chatClient.say(channel, `${e.broadcasterDisplayName} just went live!`);
+    console.log(`It's Dama time! ${e.broadcasterDisplayName} just went live!`);
+    console.log(e);
+    first.clear(db);
+    online = true;
+    chatClient.say(channel, `It's Dama time! ${e.broadcasterDisplayName} just went live!`);
   });
 
   const offlineSubscription = await listener.subscribeToStreamOfflineEvents(broadcaster.id, e => {
-    console.log(`${e.broadcasterDisplayName} just went offline`);
-    chatClient.say(channel, `${e.broadcasterDisplayName} just went offline`);
-  });
+    console.log(`Dama time is OVER! ${e.broadcasterDisplayName} just went offline`);
+    console.log(e);
+    spin.clear(chatClient, channel, apiClient, db, 'sgt_pepper_bot');
+    spin.open();
+    online = false;
+    chatClient.say(channel, `Dama time is OVER! ${e.broadcasterDisplayName} just went offline`);
 
-  const raidSubscription = await listener.subscribeToChannelRaidEventsFrom(broadcaster.id, e => {
-    console.log('WE RAIDING');
-    chatClient.say(channel, `WE RAIDING`);
-  });
-
-  const raidFromSubscription = await listener.subscribeToChannelRaidEventsTo(broadcaster.id, e => {
-    console.log('GOT RAIDED');
-    chatClient.say(channel, `GOT RAIDED`);
   });
 
   // Discord

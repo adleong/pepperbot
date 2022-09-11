@@ -1,31 +1,5 @@
 const money = require('./money.js');
 
-const seconds = 1000;
-const minutes = 60 * seconds;
-const hours = 60 * minutes;
-
-let winners = [];
-let ts = Date.now();
-const guesses = new Map();
-
-function expired(ts) {
-    const now = Date.now();
-    return now - ts > 6 * hours;
-}
-
-function expire() {
-    if (expired(ts)) {
-        console.log("Expiring winners");
-        winners = [];
-    }
-    for (const [user, guess] of guesses) {
-        if (expired(guess.ts)) {
-            console.log("Expiring guess of " + user);
-            guesses.delete(user);
-        }
-    }
-}
-
 function timeSince(start) {
     const now = new Date();
     let hours = now.getHours() - start.getHours();
@@ -74,56 +48,73 @@ function ordinal(n) {
     }
 }
 
-async function nth(chatClient, apiClient, channel, db, user, n) {
-    expire();
-    const stream = await apiClient.helix.streams.getStreamByUserName(channel);
-    if (!stream) {
+async function nth(chatClient, apiClient, online, channel, db, user, n) {
+    if (!online) {
         chatClient.say(channel, `OMG, ${user}, ${channel} isn't even live.`);
         return;
     }
     ts = Date.now();
-    if (guesses.has(user)) {
-        const guess = guesses.get(user);
-        chatClient.say(channel, `Nice try, ${user}, but you already tried to be ${guess.guess}.`);
-        return;
+    const guesses = await db.query('SELECT * FROM nth WHERE user_name=$1 and type=$2', [user, 'guess']);
+    for (const guess of guesses.rows) {
+        if (guess.user_name == user) {
+            chatClient.say(channel, `Nice try, ${user}, but you already tried to be ${ordinal(guess.n)}.`);
+            return;
+        }
     }
-    guesses.set(user, {
-        guess: ordinal(n),
-        ts: Date.now()
-    });
+    await db.query('INSERT INTO nth (user_name, n, type) VALUES ($1, $2, $3)', [user, n, 'guess']);
+
+    const res = await db.query('SELECT * FROM nth WHERE type=$1 order by n', ['nth']);
+    const winners = res.rows;
+
     if (winners[n - 1]) {
-        if (n == 1 && (stream.startDate < Date.now() - Number(hours))) {
-            chatClient.say(channel, `${user}. Did you seriously expect to be first when stream has been live for ${timeSince(stream.startDate)}? ${winners[n - 1]} beat you to it.`);
+        const stream = await apiClient.helix.streams.getStreamByUserName(channel);
+        if (stream && n == 1 && (stream.startDate < Date.now() - Number(hours))) {
+            chatClient.say(channel, `${user}. Did you seriously expect to be first when stream has been live for ${timeSince(stream.startDate)}? ${winners[n - 1].user_name} beat you to it.`);
         } else {
-            chatClient.say(channel, `Sorry, ${user}, but ${winners[n - 1]} was ${ordinal(n)}.`);
+            chatClient.say(channel, `Sorry, ${user}, but ${winners[n - 1].user_name} was ${ordinal(n)}.`);
         }
     } else if (n == 1 || winners[n - 2]) {
-        winners.push(user);
+        await db.query('INSERT INTO nth (user_name, n, type) VALUES ($1, $2, $3)', [user, n, 'nth']);
         chatClient.say(channel, `Congrats, ${user}, on being ${ordinal(n)}!`);
         if (n == 1) {
             money.earn(chatClient, db, channel, user, 2);
         } else {
             money.earn(chatClient, db, channel, user, 1);
         }
+        const maxes = await db.query('SELECT max(n) FROM nth WHERE type=$1', ['max']);
+        let max = 0;
+        if (maxes.rows[0].max) {
+            max = maxes.rows[0].max;
+        }
+        if (n > max) {
+            await db.query('INSERT INTO nth (user_name, n, type) VALUES ($1, $2, $3)', [user, n, 'max']);
+            chatClient.say(channel, `IT'S A NEW WORLD RECORD! ${user} gets ${ordinal(n)} for the first time!`);
+        }
     } else {
         chatClient.say(channel, `Sorry, ${user}, you can't be ${ordinal(n)} because nobody was ${ordinal(n - 1)}.`);
     }
 }
 
-async function firstCommand(chatClient, apiClient, channel, db, user) {
-    await nth(chatClient, apiClient, channel, db, user, 1);
+async function firstCommand(chatClient, apiClient, online, channel, db, user) {
+    await nth(chatClient, apiClient, online, channel, db, user, 1);
 }
 
-async function nthCommand(chatClient, apiClient, channel, db, user, arg) {
+async function nthCommand(chatClient, apiClient, online, channel, db, user, arg) {
     const n = parseInt(arg);
     if (!(n > 0)) {
         await chatClient.say(channel, `${user}: nth must be a positive number.`);
         return;
     }
-    nth(chatClient, apiClient, channel, db, user, n);
+    nth(chatClient, apiClient, online, channel, db, user, n);
+}
+
+async function clear(db) {
+    await db.query('DELETE FROM nth WHERE type=$1', ['nth']);
+    await db.query('DELETE FROM nth WHERE type=$1', ['guess']);
 }
 
 module.exports = {
     firstCommand,
-    nthCommand
+    nthCommand,
+    clear
 };

@@ -1,6 +1,8 @@
 const SSAPI = require('ssapi-node');
 const api = new SSAPI();
 
+let closed = false;
+
 async function lookup(query) {
     // If arg is a number string
     if (query.match(/^\d+$/)) {
@@ -24,6 +26,10 @@ async function lookup(query) {
 }
 
 async function request(chatClient, channel, db, user, args) {
+    if (closed) {
+        chatClient.say(channel, `Sorry, ${user}, requests are closed`);
+        return;
+    }
     const query = args.join(' ');
     const song = await lookup(query).catch(err => {
         chatClient.say(channel, err);
@@ -76,9 +82,19 @@ async function queue(channel, db) {
     return rows;
 }
 
+function close() {
+    closed = true;
+}
+
+function open() {
+    closed = false;
+}
+
 module.exports = {
     clear,
     done,
     queue,
-    request
+    request,
+    close,
+    open,
 };

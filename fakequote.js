@@ -4,7 +4,7 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 const re = /\-\w\w+\W*$/;
-const url = /(\w+:\/\/)?\w+\.[a-zA-Z0-9\/\?\%\#\&_=\-\.]+/g;
+const url = /(\w+:\/\/)?\w+\.[a-zA-Z0-9][a-zA-Z0-9\/\?\%\#\&_=\-\.]*/g;
 
 async function command(chatClient, channel) {
     const quote = await fake();
@@ -33,6 +33,12 @@ async function fake() {
         return "Sorry, I couldn't think of anything. -Sgt Pepper Bot";
     }
     // Replace all links in quote with [hyperlink blocked]
+    //find url matches
+    const matches = quote.match(url);
+    if (matches) {
+        console.log("blocked url: " + matches[0]);
+        console.log("in quote: " + quote);
+    }
     quote = quote.replaceAll(url, "[hyperlink blocked]");
 
     const response = await openai.createCompletion("content-filter-alpha", {
