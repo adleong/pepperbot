@@ -1,5 +1,7 @@
 const { ApiClient } = require('twitch');
 const { ChatClient } = require('twitch-chat-client');
+const { EventSubListener, ReverseProxyAdapter } = require('twitch-eventsub');
+const { ClientCredentialsAuthProvider } = require('twitch-auth');
 const { Client } = require('pg');
 const { PubSubClient } = require('twitch-pubsub-client');
 const express = require('express')
@@ -133,6 +135,8 @@ const run = async () => {
 
   const outstandingShoutouts = new Set();
 
+  const broadcaster = await apiClient.helix.users.getUserByName(channel);
+
   // Chat listener
   chatClient.onMessage(async (_, user, message, msg) => {
     try {
@@ -142,8 +146,7 @@ const run = async () => {
       const args = message.split(' ');
       const command = args.shift().toLowerCase();
 
-      const broadcaster = await apiClient.helix.users.getUserByName(channel);
-      const u = await apiClient.helix.users.getUserByName(user);
+      const u = await apiClient.helix.users.gxetUserByName(user);
       const mod = await apiClient.helix.moderation.checkUserMod(broadcaster.id, u.id);
 
       switch (command) {
@@ -373,6 +376,36 @@ const run = async () => {
     } catch (err) {
       console.log(err);
     }
+  });
+
+  // EventSub
+  const authProvider = new ClientCredentialsAuthProvider(clientId, clientSecret);
+  const eventSubClient = new ApiClient({ authProvider });
+  // Arbitrary but consistent string.
+  const listener = new EventSubListener(eventSubClient, new ReverseProxyAdapter({
+    hostName: 'sgt-pepper-bot.herokuapp.com', // The host name the server is available from
+    externalPort: 443 // The external port (optional, defaults to 443)
+  }), '1tfvrk3svxsk2jer25o8967xb6rn5u2u9wuhyu7brk');
+  await listener.listen();
+
+  const onlineSubscription = await listener.subscribeToStreamOnlineEvents(broadcaster.id, e => {
+    console.log(`${e.broadcasterDisplayName} just went live!`);
+    chatClient.say(channel, `${e.broadcasterDisplayName} just went live!`);
+  });
+
+  const offlineSubscription = await listener.subscribeToStreamOfflineEvents(broadcaster.id, e => {
+    console.log(`${e.broadcasterDisplayName} just went offline`);
+    chatClient.say(channel, `${e.broadcasterDisplayName} just went offline`);
+  });
+
+  const raidSubscription = await listener.subscribeToChannelRaidEventsFrom(broadcaster.id, e => {
+    console.log('WE RAIDING');
+    chatClient.say(channel, `WE RAIDING`);
+  });
+
+  const raidFromSubscription = await listener.subscribeToChannelRaidEventsTo(broadcaster.id, e => {
+    console.log('GOT RAIDED');
+    chatClient.say(channel, `GOT RAIDED`);
   });
 
   // Discord
