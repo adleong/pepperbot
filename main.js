@@ -435,7 +435,6 @@ const run = async () => {
     spin.open();
     online = false;
     chatClient.say(channel, `Dama time is OVER! ${e.broadcasterDisplayName} just went offline`);
-
   });
 
   // Discord

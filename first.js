@@ -53,8 +53,13 @@ function ordinal(n) {
 }
 
 async function nth(chatClient, apiClient, online, channel, db, user, n) {
+    const stream = await apiClient.helix.streams.getStreamByUserName(channel);
     if (!online) {
-        chatClient.say(channel, `OMG, ${user}, ${channel} isn't even live.`);
+        if (stream) {
+            chatClient.say(channel, `ok just... hold on, ${user}, I'm still getting ready. just chill for a sec`);
+        } else {
+            chatClient.say(channel, `OMG, ${user}, ${channel} isn't even live.`);
+        }
         return;
     }
     ts = Date.now();
@@ -71,7 +76,6 @@ async function nth(chatClient, apiClient, online, channel, db, user, n) {
     const winners = res.rows;
 
     if (winners[n - 1]) {
-        const stream = await apiClient.helix.streams.getStreamByUserName(channel);
         if (stream && n == 1 && (stream.startDate < Date.now() - Number(hours))) {
             chatClient.say(channel, `${user}. Did you seriously expect to be first when stream has been live for ${timeSince(stream.startDate)}? ${winners[n - 1].user_name} beat you to it.`);
         } else {
