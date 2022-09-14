@@ -368,10 +368,10 @@ const run = async () => {
             catch(err => console.log(err));
           break;
         case 'First!':
-          first.firstCommand(chatClient, apiClient, online, channel, db, message.userName);
+          first.firstCommand(chatClient, apiClient, online, channel, db, message.userName).catch(err => console.log(err));
           break;
         case 'Nth!':
-          first.nthCommand(chatClient, apiClient, online, channel, db, message.userName, message.message);
+          first.nthCommand(chatClient, apiClient, online, channel, db, message.userName, message.message).catch(err => console.log(err));
           break;
         case 'Random word':
           wotd.command(chatClient, channel).catch(err => console.log(err));

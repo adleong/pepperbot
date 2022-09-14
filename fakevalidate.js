@@ -5,7 +5,7 @@ const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
 });
 const openai = new OpenAIApi(configuration);
-const url = /(\w+:\/\/)?\w+\.[a-zA-Z0-9\/\?\%\#\&_=\-\.]+/g;
+const url = /(\w+:\/\/)?\w+\.[a-zA-Z0-9][a-zA-Z0-9\/\?\%\#\&_=\-\.]*/g;
 
 const focus = [
     "about how they can vanquish my foes",
@@ -27,6 +27,8 @@ const focus = [
     "about their name",
     "about their flavor",
     "about friendship",
+    "about liking the beatles",
+    "about how many swords they have",
     "about how many arms they have",
     "about how many weapons they can wield",
     "about my unusual fashion choices",
@@ -64,10 +66,14 @@ const focus = [
     "but spell some words wrong",
     "in rhyming couplet",
     "in a wierd way",
+    "as a limeric",
+    "as a haiku",
+    "as a sonnet"
 ]
 
 async function command(chatClient, channel, user) {
     const quote = await fake(user);
+    console.log(quote);
     chatClient.say(channel, quote);
 }
 

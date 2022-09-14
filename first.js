@@ -1,5 +1,9 @@
 const money = require('./money.js');
 
+const seconds = 1000;
+const minutes = 60 * seconds;
+const hours = 60 * minutes;
+
 function timeSince(start) {
     const now = new Date();
     let hours = now.getHours() - start.getHours();
