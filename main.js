@@ -36,6 +36,7 @@ const first = require("./first");
 const wotd = require("./wotd");
 const say = require("./say");
 const pronouns = require("./pronouns");
+const common = require("./common");
 const { env } = require('process');
 
 const clientId = process.env.CLIENT_ID;
@@ -55,72 +56,77 @@ const db = new Client({
 db.connect();
 console.log("Database connected");
 
-const options = {
-  target: 'http://localhost:8888/', // target host with the same base path
-};
-
-// create the proxy
-const proxy = createProxyMiddleware({ target: 'http://localhost:8888', changeOrigin: true });
-
-express()
-  .set('views', path.join(__dirname, 'views'))
-  .set('view engine', 'ejs')
-  .get('/carousel', async (req, res) => {
-    res.render('pages/carousel', {})
-  })
-  .get('/quote', async (req, res) => {
-    const q = await quote.quote(db, channel);
-    res.render('pages/quote', { 'quote': q })
-  })
-  .get('/leaders', async (req, res) => {
-    const results = await pepper.leadersResults(db);
-    res.render('pages/leaders', { results })
-  })
-  .get('/reclaimers', async (req, res) => {
-    const results = await pepper.claimedLeaders(db);
-    res.render('pages/claimed', { results })
-  })
-  .get('/money', async (req, res) => {
-    const results = await money.leaders(db);
-    res.render('pages/money', { results })
-  })
-  .get('/queue', async (req, res) => {
-    const queue = await spin.queue(channel, db);
-    res.render('pages/queue', { 'results': queue })
-  })
-  .get('/timer', async (req, res) => {
-    res.render('pages/timer')
-  })
-  .get('/timer/start', async (req, res) => {
-    pepper.start();
-    res.sendStatus(200);
-  })
-  .get('/timer/stop', async (req, res) => {
-    pepper.stop();
-    res.sendStatus(200);
-  })
-  .get('/timer/ping', async (req, res) => {
-    const claimant = await pepper.ping(req.query.secs);
-    res.setHeader('Content-Type', 'application/json');
-    res.write(JSON.stringify(claimant));
-    res.end();
-  })
-  .get('/say', async (req, res) => {
-    res.render('pages/say', {})
-  })
-  .get('/say.json', async (req, res) => {
-    say.listen(res);
-  })
-  // match all post requests
-  .post('*', proxy)
-  .listen(PORT, () => console.log(`Listening on ${PORT}`))
-
 const run = async () => {
 
   const userAuth = await auth.provider(db, channel, clientId, clientSecret);
   const botAuth = await auth.provider(db, bot, clientId, clientSecret);
 
   const apiClient = new ApiClient({ authProvider: userAuth });
+
+  const options = {
+    target: 'http://localhost:8888/', // target host with the same base path
+  };
+
+  // create the proxy
+  const proxy = createProxyMiddleware({ target: 'http://localhost:8888', changeOrigin: true });
+
+  express()
+    .set('views', path.join(__dirname, 'views'))
+    .set('view engine', 'ejs')
+    .get('/carousel', async (req, res) => {
+      res.render('pages/carousel', {})
+    })
+    .get('/quote', async (req, res) => {
+      const q = await quote.quote(db, channel);
+      res.render('pages/quote', { 'quote': q })
+    })
+    .get('/leaders', async (req, res) => {
+      const results = await pepper.leadersResults(db);
+      res.render('pages/leaders', { results })
+    })
+    .get('/reclaimers', async (req, res) => {
+      const results = await pepper.claimedLeaders(db);
+      res.render('pages/claimed', { results })
+    })
+    .get('/money', async (req, res) => {
+      const results = await money.leaders(db);
+      res.render('pages/money', { results })
+    })
+    .get('/queue', async (req, res) => {
+      const queue = await spin.queue(channel, db);
+      res.render('pages/queue', { 'results': queue })
+    })
+    .get('/timer', async (req, res) => {
+      res.render('pages/timer')
+    })
+    .get('/timer/start', async (req, res) => {
+      pepper.start();
+      res.sendStatus(200);
+    })
+    .get('/timer/stop', async (req, res) => {
+      pepper.stop();
+      res.sendStatus(200);
+    })
+    .get('/timer/ping', async (req, res) => {
+      const claimant = await pepper.ping(req.query.secs);
+      res.setHeader('Content-Type', 'application/json');
+      res.write(JSON.stringify(claimant));
+      res.end();
+    })
+    .get('/say', async (req, res) => {
+      res.render('pages/say', {})
+    })
+    .get('/say.json', async (req, res) => {
+      say.listen(res);
+    })
+    .get('/common/:user/:target', async (req, res) => {
+      const data = await common.command(apiClient, req.params.user, req.params.target);
+      res.render('pages/common', data);
+    })
+    // match all post requests
+    .post('*', proxy)
+    .listen(PORT, () => console.log(`Listening on ${PORT}`))
+
   const chatClient = new ChatClient(botAuth, { channels: [channel] });
   await chatClient.connect();
   console.log("Chat connected");

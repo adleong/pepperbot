@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Common</title>
+    <style>
+        .container {
+            -webkit-column-count: 3;
+            /* Chrome, Safari, Opera */
+            -moz-column-count: 3;
+            /* Firefox */
+            column-count: 3;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div>
+        <h2>Common</h2>
+
+        <h3>Both Follow:</h3>
+        <ul class="container">
+            <% common_follows.forEach(function(r) { %>
+                <li>
+                    <%= r %>
+                </li>
+                <% }); %>
+        </ul>
+        <br />
+
+        <h3>Both Followed By:</h3>
+        <ul class="container">
+            <% common_followers.forEach(function(r) { %>
+                <li>
+                    <%= r %>
+                </li>
+                <% }); %>
+        </ul>
+
+    </div>
+</body>
+
+</html>
