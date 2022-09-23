@@ -120,8 +120,12 @@ const run = async () => {
       say.listen(res);
     })
     .get('/common/:user/:target', async (req, res) => {
-      const data = await common.command(apiClient, req.params.user, req.params.target);
-      res.render('pages/common', data);
+      const data = await common.command(apiClient, req.params.user, req.params.target).then(data => {
+        res.render('pages/common', data);
+      }).catch(e => {
+        console.log(e);
+        res.sendStatus(500);
+      });
     })
     // match all post requests
     .post('*', proxy)
