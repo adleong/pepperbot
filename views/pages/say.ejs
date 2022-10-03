@@ -15,8 +15,12 @@
                             return;
                         } else {
                             // Process value.
-                            const say = JSON.parse(String.fromCharCode(...value));
-                            console.log(say);
+                            const parsed = JSON.parse(String.fromCharCode(...value));
+                            console.log(parsed);
+                            const say = parsed.say;
+                            if (!say) {
+                                return pump();
+                            }
                             var msg = new SpeechSynthesisUtterance();
                             // replace last instance of - with ; in say
                             const n = say.lastIndexOf("-");
