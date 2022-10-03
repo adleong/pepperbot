@@ -1,14 +1,14 @@
-const axios = require('axios');
+const pronouns = require("./pronouns.js");
 
 function rand(xs) {
     return xs[Math.floor(Math.random() * xs.length)];
 }
 
 async function theyHave(user) {
-    return axios.get(`https://pronouns.alejo.io/api/users/${user}`).then(res => {
-        if (res.data[0].pronoun_id.startsWith('she')) {
+    return pronouns.get_pronoun_id(user).then(id => {
+        if (id.startsWith('she')) {
             return "she has";
-        } else if (res.data[0].pronoun_id.startsWith('he')) {
+        } else if (id.startsWith('he')) {
             return "he has";
         } else {
             return "they have";
@@ -17,10 +17,10 @@ async function theyHave(user) {
 }
 
 async function them(user) {
-    return axios.get(`https://pronouns.alejo.io/api/users/${user}`).then(res => {
-        if (res.data[0].pronoun_id.startsWith('she')) {
+    return pronouns.get_pronoun_id(user).then(id => {
+        if (id.startsWith('she')) {
             return "her";
-        } else if (res.data[0].pronoun_id.startsWith('he')) {
+        } else if (id.startsWith('he')) {
             return "him";
         } else {
             return "them";
@@ -29,10 +29,10 @@ async function them(user) {
 }
 
 async function theyMake(user) {
-    return axios.get(`https://pronouns.alejo.io/api/users/${user}`).then(res => {
-        if (res.data[0].pronoun_id.startsWith('she')) {
+    return pronouns.get_pronoun_id(user).then(id => {
+        if (id.startsWith('she')) {
             return "she makes";
-        } else if (res.data[0].pronoun_id.startsWith('he')) {
+        } else if (id.startsWith('he')) {
             return "he makes";
         } else {
             return "they make";
@@ -45,10 +45,10 @@ function cap(s) {
 }
 
 async function theyAre(user) {
-    return axios.get(`https://pronouns.alejo.io/api/users/${user}`).then(res => {
-        if (res.data[0].pronoun_id.startsWith('she')) {
+    return pronouns.get_pronoun_id(user).then(id => {
+        if (id.startsWith('she')) {
             return "she is";
-        } else if (res.data[0].pronoun_id.startsWith('he')) {
+        } else if (id.startsWith('he')) {
             return "he is";
         } else {
             return "they are";
@@ -57,10 +57,10 @@ async function theyAre(user) {
 }
 
 async function they(user) {
-    return axios.get(`https://pronouns.alejo.io/api/users/${user}`).then(res => {
-        if (res.data[0].pronoun_id.startsWith('she')) {
+    return pronouns.get_pronoun_id(user).then(id => {
+        if (id.startsWith('she')) {
             return "she";
-        } else if (res.data[0].pronoun_id.startsWith('he')) {
+        } else if (id.startsWith('he')) {
             return "he";
         } else {
             return "they";
