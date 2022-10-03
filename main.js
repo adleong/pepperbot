@@ -187,7 +187,6 @@ const run = async () => {
             outstandingShoutouts.delete(target.name);
             chatClient.say(channel, `Thanks, ${user} for getting that shoutout to ${target.displayName} <3`);
             await money.earn(chatClient, db, channel, user);
-            await so.increment(db, user);
           }
           break;
         }

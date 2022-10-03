@@ -93,7 +93,6 @@ const run = async () => {
           if (outstandingShoutouts.has(target.name)) {
             outstandingShoutouts.delete(target.name);
             chatClient.say(channel, `Thanks, ${user} for getting that shoutout to ${target.displayName} <3`);
-            await so.increment(db, user);
           }
           break;
         }
