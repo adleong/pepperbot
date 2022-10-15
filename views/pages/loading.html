@@ -1,0 +1,103 @@
+<html>
+<head>
+    <script>
+        var messages = [
+            "Reticulating Splines",
+            "Grinding Pepper",
+            "Becoming Elden Lord",
+            "Extruding Buttstring",
+            "Refreshing Dash",
+            "Extending Hyper",
+            "Collecting Bones",
+            "Getting in the Mouth",
+            "Finding the Gay",
+            "Exploring Ruins",
+            "Translating Cypher",
+            "Looking for Clues",
+            "Checking Under the Elevator",
+            "Checking Behind the Door",
+            "Resolving Time Paradoxes",
+            "Overthrowing Governments",
+            "Collecting Strawberries",
+            "Donning Antlers",
+            "Reversing Hyper",
+            "Mending Runes",
+            "Solving Pluzzles",
+            "Cooking Ramen",
+            "Swashing Buckles",
+            "Hot Drinks",
+            "Randomizing Loot",
+            "Quantizing Notes",
+            "Backsolving",
+            "Figure Skating",
+            "Validating Parking",
+            "Spending Quality Time with a Friend",
+            "Smashing the Patriarchy",
+            "Dismantling Capitalism",
+            "Quote Baiting",
+            "Finding Collectables",
+            "Faking Quotes",
+            "Tempomapping",
+            "Alluding to Smut",
+            "Extending Arms",
+            "Extending Legs",
+            "Hoarding Consumables",
+            "Smooching Dragon",
+            "Worshipping Snails",
+            "Salve, Friend",
+            "Activating Blade Mode",
+            "Disabling Pain Inhibiters",
+            "Resetting Timeline",
+            "Becoming Orb",
+            "Kicking Ladders",
+            "Spamming Magic",
+            "Explaining Digital Roots",
+            "Building a Town",
+            "Metapod",
+            "Classifying Sandwiches",
+            "Reading the Manual",
+            "Eating Hotdogs",
+            "Trying Ranged Battle",
+            "Checking Behind the Waterfall",
+            "Clipping out of Bounds",
+            "Shuffling the Deck",
+            "Sharpening Spikes",
+            "Putting on Pants",
+            "Removing Pants",
+            "Backseating",
+            "Memorizing Precepts",
+            "Getting Good",
+            "Skirt go Spinny",
+            "Take a Deep Breath",
+            "Unlocking B-sides",
+            "Unlocking C-sides",
+            "Unlocking D-sides",
+            "Unlocking Ω-sides",
+            "Unlocking ∞-sides",
+            "Wubadubadubaduba",
+        ];
+        // randomize the messages
+        messages.sort(function() { return 0.5 - Math.random() });
+        var dots = [
+            "",
+            ".",
+            "..",
+            "...",
+        ];
+        var i = 0;
+        var j = 0;
+        // create a timer which changes the text every second
+        var timer = setInterval(function() {
+            var div = document.getElementsByTagName('div')[0];
+            j++;
+            if (j > 20) {
+                j = 0;
+                i = (i + 1) % messages.length;
+            }
+            div.innerHTML = messages[i] + dots[j % dots.length];
+        }, 300);
+    </script>
+<body>
+    <div>Loading</div>
+</body>
+</html>

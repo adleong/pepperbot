@@ -127,6 +127,9 @@ const run = async () => {
         res.sendStatus(500);
       });
     })
+    .get('/loading', (req, res) => {
+      res.sendFile('./views/pages/loading.html', { root: __dirname });
+    })
     // match all post requests
     .post('*', proxy)
     .listen(PORT, () => console.log(`Listening on ${PORT}`))
