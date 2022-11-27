@@ -296,9 +296,6 @@ const run = async () => {
           }
           await pronouns.pronouns(chatClient, channel, target);
           break;
-        case '!fakequote':
-          await fakequote.command(chatClient, channel);
-          break;
         // case '!fakevalidate':
         //   const t = args.shift();
         //   await fakevalidate.command(chatClient, channel, t ? t : user);
@@ -396,6 +393,9 @@ const run = async () => {
           break;
         case 'Fake validate me':
           fakevalidate.command(chatClient, channel, message.userName).catch(err => console.log(err));
+          break;
+        case 'Fake quote':
+          fakequote.command(chatClient, channel).catch(err => console.log(err));
           break;
       }
     } catch (err) {
