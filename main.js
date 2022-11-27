@@ -397,6 +397,9 @@ const run = async () => {
         case 'Fake quote':
           fakequote.command(chatClient, channel).catch(err => console.log(err));
           break;
+        case 'Make me a powerpoint':
+          chatClient.say(channel, '*poof* ' + message.userName + ' is now a powerpoint.');
+          break;
       }
     } catch (err) {
       console.log(err);
