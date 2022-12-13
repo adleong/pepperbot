@@ -170,9 +170,11 @@ async function create(channel, self, user, roast = false) {
         `Playfully insult ${u} ${focus[Math.floor(Math.random() * focus.length)]}.` :
         `Give ${u} words of validation ${focus[Math.floor(Math.random() * focus.length)]}.`;
 
-    if (roast && Math.random() < 0.9) {
-        let target = await pronounify(awesome.get(channel, self))
-        prompt += ` Compare them to ${target}.`;
+    if (roast && Math.random() < 0.2) {
+        let target = await pronounify(awesome.get(channel, self));
+        if (target && target != u) {
+            prompt += ` Compare them to ${target}.`;
+        }
     }
     prompt += "\n";
     console.log(prompt);
