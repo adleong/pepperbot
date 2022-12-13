@@ -31,8 +31,8 @@ const focus = [
     "about how many swords they have",
     "about how many arms they have",
     "about how many weapons they can wield",
-    "about my unusual fashion choices",
-    "about my specific accomplishments",
+    "about their unusual fashion choices",
+    "about their specific accomplishments",
     "about that time we overthrew a government",
     "about how hot they are",
     "about how powerful they are",
@@ -86,7 +86,19 @@ const focus = [
     "as an elaborate sword fighting metaphor",
     "as an elaborate and creepy cult metaphor",
     "as an elaborate metaphor related to mythology",
-    "as an elaborate La-Mulana metaphor"
+    "as an elaborate La-Mulana (video game) metaphor",
+    "as an elaborate Celeste (video game) metaphor",
+    "as an elaborate Hollow Knight (video game) metaphor",
+    "as an elaborate Subnautica (video game) metaphor",
+    "as an elaborate Spin Rhythm XD (video game) metaphor",
+    "as an elaborate Undertale (video game) metaphor",
+    "as an elaborate Outer Wilds (video game) metaphor",
+    "as an elaborate Zelda (video game) metaphor",
+    "as an elaborate Metroid (video game) metaphor",
+    "as an elaborate Elden Ring (video game) metaphor. Arise, tarnished",
+    "as an elaborate Hades (video game) metaphor",
+    "as an elaborate Sayonara Wild Hearts (video game) metaphor",
+    "as an elaborate Metal Gear Rising (video game) metaphor",
 ]
 
 async function command(chatClient, channel, user) {
@@ -95,8 +107,14 @@ async function command(chatClient, channel, user) {
     chatClient.say(channel, quote);
 }
 
-async function fake(user) {
-    let quote = await create(user).catch(error => {
+async function roast(chatClient, channel, user) {
+    const quote = await fake(user, roast = true);
+    console.log(quote);
+    chatClient.say(channel, quote);
+}
+
+async function fake(user, roast = false) {
+    let quote = await create(user, roast).catch(error => {
         if (error.response) {
             // The request was made and the server responded with a status code
             // that falls out of the range of 2xx
@@ -139,13 +157,15 @@ async function fake(user) {
     return await fake(user);
 }
 
-async function create(user) {
+async function create(user, roast = false) {
 
     const pronoun = await pronouns.get_pronouns(user).catch(() => null);
-    const prompt = `Give ${user} ${pronoun ? `(${pronoun})` : ""} words of validation ${focus[Math.floor(Math.random() * focus.length)]}\n`;
+    const prompt = roast ? 
+        `Give ${user} ${pronoun ? `(${pronoun})` : ""} a playful roasting ${focus[Math.floor(Math.random() * focus.length)]}\n` :
+        `Give ${user} ${pronoun ? `(${pronoun})` : ""} words of validation ${focus[Math.floor(Math.random() * focus.length)]}\n`;
     console.log(prompt);
 
-    const response = await openai.createCompletion("text-davinci-002", {
+    const response = await openai.createCompletion("text-davinci-003", {
         prompt: prompt,
         temperature: 1,
         max_tokens: 256,
@@ -157,5 +177,6 @@ async function create(user) {
 
 module.exports = {
     command,
+    roast,
     fake,
 };
