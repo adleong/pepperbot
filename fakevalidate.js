@@ -102,20 +102,20 @@ const focus = [
     "as an elaborate Metal Gear Rising (video game) metaphor",
 ]
 
-async function command(chatClient, channel, user) {
-    const quote = await fake(user);
+async function command(chatClient, channel, self, user) {
+    const quote = await fake(channel, self, user);
     console.log(quote);
     chatClient.say(channel, quote);
 }
 
-async function roast(chatClient, channel, user) {
-    const quote = await fake(user, roast = true);
+async function roast(chatClient, channel, self, user) {
+    const quote = await fake(channel, self, user, roast = true);
     console.log(quote);
     chatClient.say(channel, quote);
 }
 
-async function fake(user, roast = false) {
-    let quote = await create(user, roast).catch(error => {
+async function fake(channel, self, user, roast = false) {
+    let quote = await create(channel, self, user, roast).catch(error => {
         if (error.response) {
             // The request was made and the server responded with a status code
             // that falls out of the range of 2xx
@@ -163,7 +163,7 @@ async function pronounify(user) {
     return pronoun ? `${user} (${pronoun})` : user;
 }
 
-async function create(user, roast = false) {
+async function create(channel, self, user, roast = false) {
 
     let u = await pronounify(user);
     let prompt = roast ? 
@@ -171,7 +171,7 @@ async function create(user, roast = false) {
         `Give ${u} words of validation ${focus[Math.floor(Math.random() * focus.length)]}.`;
 
     if (roast && Math.random() < 0.2) {
-        let target = await pronounify(awesome.get())
+        let target = await pronounify(awesome.get(channel, self))
         prompt += ` Compare them to ${target}.`;
     }
     prompt += "\n";

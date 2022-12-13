@@ -392,10 +392,10 @@ const run = async () => {
           });
           break;
         case 'Fake validate me':
-          fakevalidate.command(chatClient, channel, message.userName).catch(err => console.log(err));
+          fakevalidate.command(chatClient, channel, bot, message.userName).catch(err => console.log(err));
           break;
         case 'Fake roast me':
-          fakevalidate.roast(chatClient, channel, message.userName).catch(err => console.log(err));
+          fakevalidate.roast(chatClient, channel, bot, message.userName).catch(err => console.log(err));
           break;
         case 'Fake quote':
           fakequote.command(chatClient, channel).catch(err => console.log(err));
