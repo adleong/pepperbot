@@ -23,7 +23,7 @@ function prune() {
     }
 }
 
-async function command(chatClient, channel, self, db) {
+function get(channel, self) {
     prune();
     let users = [];
     if (chatters.has(channel)) {
@@ -34,9 +34,14 @@ async function command(chatClient, channel, self, db) {
     }
     users.push(self);
     const i = Math.floor(Math.random() * users.length);
-    chatClient.say(channel, `You know who's awesome? ${users[i]} is awesome!`);
+    return users[i];
+}
 
-    const { rows } = await db.query('SELECT message FROM catchphrases WHERE user_name = $1', [users[i]]);
+async function command(chatClient, channel, self, db) {
+    let user = get(channel, self);
+    chatClient.say(channel, `You know who's awesome? ${user} is awesome!`);
+
+    const { rows } = await db.query('SELECT message FROM catchphrases WHERE user_name = $1', [user]);
     if (rows.length > 0) {
         chatClient.say(channel, rows[0].message);
     }
@@ -64,6 +69,7 @@ function dumpChatters(chatClient, channel) {
 
 module.exports = {
     add,
+    get,
     command,
     dumpChatters,
     setCatchphrase

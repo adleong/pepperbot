@@ -1,5 +1,6 @@
 const { Configuration, OpenAIApi } = require("openai");
 const pronouns = require("./pronouns.js");
+const awesome = require("./awesome.js");
 
 const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
@@ -157,12 +158,24 @@ async function fake(user, roast = false) {
     return await fake(user);
 }
 
+async function pronounify(user) {
+    let user = awesome.get()
+    const pronoun = await pronouns.get_pronouns(user).catch(() => null);
+    return pronoun ? `${user} (${pronoun})` : user;
+}
+
 async function create(user, roast = false) {
 
-    const pronoun = await pronouns.get_pronouns(user).catch(() => null);
-    const prompt = roast ? 
-        `Give ${user} ${pronoun ? `(${pronoun})` : ""} a playful roasting ${focus[Math.floor(Math.random() * focus.length)]}\n` :
-        `Give ${user} ${pronoun ? `(${pronoun})` : ""} words of validation ${focus[Math.floor(Math.random() * focus.length)]}\n`;
+    let u = await pronounify(user);
+    let prompt = roast ? 
+        `Playfully insult ${u} ${focus[Math.floor(Math.random() * focus.length)]}.` :
+        `Give ${u} words of validation ${focus[Math.floor(Math.random() * focus.length)]}.`;
+
+    if (roast && Math.random() < 0.2) {
+        let target = await pronounify(awesome.get())
+        prompt += ` Compare them to ${target}.`;
+    }
+    prompt += "\n";
     console.log(prompt);
 
     const response = await openai.createCompletion("text-davinci-003", {
