@@ -155,7 +155,7 @@ async function fake(channel, self, user, roast = false) {
     console.log("Rejecting unsafe validation: " + quote);
     console.log(classification.text);
     console.log(classification.logprobs.top_logprobs[0]);
-    return await fake(user);
+    return await fake(channel, self, user, roast);
 }
 
 async function pronounify(user) {
@@ -170,7 +170,7 @@ async function create(channel, self, user, roast = false) {
         `Playfully insult ${u} ${focus[Math.floor(Math.random() * focus.length)]}.` :
         `Give ${u} words of validation ${focus[Math.floor(Math.random() * focus.length)]}.`;
 
-    if (roast && Math.random() < 0.2) {
+    if (roast && Math.random() < 0.9) {
         let target = await pronounify(awesome.get(channel, self))
         prompt += ` Compare them to ${target}.`;
     }
