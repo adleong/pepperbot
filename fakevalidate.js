@@ -159,7 +159,6 @@ async function fake(user, roast = false) {
 }
 
 async function pronounify(user) {
-    let user = awesome.get()
     const pronoun = await pronouns.get_pronouns(user).catch(() => null);
     return pronoun ? `${user} (${pronoun})` : user;
 }
