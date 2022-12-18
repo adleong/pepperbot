@@ -157,6 +157,67 @@ const run = async () => {
     process.exit(0);
   }));
 
+  // Discord
+  const token = env.DISCORD_TOKEN;
+  const guildId = env.GUILD_ID;
+  const discordClientId = env.DISCORD_CLIENT_ID;
+
+  const discordClient = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS] });
+  discordClient.on('ready', () => {
+    console.log('Discord client ready.');
+    console.log('Initializing slash commands...');
+
+    const commands = [
+      new SlashCommandBuilder()
+        .setName('quote')
+        .setDescription('Fetch a quote')
+        .addStringOption(option =>
+          option.setName('query')
+            .setDescription('Quote id or search query')),
+      new SlashCommandBuilder()
+        .setName('advice')
+        .setDescription('Get some advice')
+        .addStringOption(option =>
+          option.setName('query')
+            .setDescription('search query')),
+    ].map(command => command.toJSON());
+
+    console.log(commands);
+
+    const rest = new REST({ version: '9' }).setToken(token);
+
+    rest.put(Routes.applicationGuildCommands(discordClientId, guildId), { body: commands })
+      .then(() => console.log('Successfully registered application commands.'))
+      .catch(console.error);
+
+  });
+
+  discordClient.on('interactionCreate', async interaction => {
+    if (!interaction.isCommand()) return;
+
+    const { commandName } = interaction;
+
+    if (commandName === 'quote') {
+      const query = interaction.options.getString('query');
+      const args = [];
+      if (query) {
+        args.push(query);
+      }
+      const result = await quote.lookup(db, channel, interaction.user.toString(), args);
+      await interaction.reply(result);
+    } else if (commandName === 'advice') {
+      const query = interaction.options.getString('query');
+      const args = [];
+      if (query) {
+        args.push(query);
+      }
+      const result = await advice.lookup(db, channel, args);
+      await interaction.reply(result);
+    }
+  });
+
+  discordClient.login(token);
+
   const outstandingShoutouts = new Set();
 
   const broadcaster = await apiClient.helix.users.getUserByName(channel);
@@ -392,13 +453,19 @@ const run = async () => {
           });
           break;
         case 'Fake validate me':
-          fakevalidate.command(chatClient, channel, bot, message.userName).catch(err => console.log(err));
+          fakevalidate.command(chatClient, channel, bot, message.userName)
+            .catch(err => console.log(err))
+            .then(quote => discordClient.channels.cache.get('986881827316826143').send(quote));
           break;
         case 'Fake roast me':
-          fakevalidate.roast(chatClient, channel, bot, message.userName).catch(err => console.log(err));
+          fakevalidate.roast(chatClient, channel, bot, message.userName).catch(err => console.log(err))
+            .catch(err => console.log(err))
+            .then(quote => discordClient.channels.cache.get('986881827316826143').send(quote));
           break;
         case 'Fake quote':
-          fakequote.command(chatClient, channel).catch(err => console.log(err));
+          fakequote.command(chatClient, channel).catch(err => console.log(err))
+            .catch(err => console.log(err))
+            .then(quote => discordClient.channels.cache.get('986881827316826143').send(quote));
           break;
         case 'Make me a powerpoint':
           chatClient.say(channel, '*poof* ' + message.userName + ' is now a powerpoint.');
@@ -454,75 +521,6 @@ const run = async () => {
     online = false;
     chatClient.say(channel, `Dama time is OVER! ${e.broadcasterDisplayName} just went offline`);
   });
-
-  // Discord
-  const token = env.DISCORD_TOKEN;
-  const guildId = env.GUILD_ID;
-  const discordClientId = env.DISCORD_CLIENT_ID;
-
-  const discordClient = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS] });
-  discordClient.on('ready', () => {
-    console.log('Discord client ready.');
-    console.log('Initializing slash commands...');
-
-    const commands = [
-      new SlashCommandBuilder()
-        .setName('quote')
-        .setDescription('Fetch a quote')
-        .addStringOption(option =>
-          option.setName('query')
-            .setDescription('Quote id or search query')),
-      new SlashCommandBuilder()
-        .setName('fakequote')
-        .setDescription('Generate a fake quote'),
-      new SlashCommandBuilder()
-        .setName('advice')
-        .setDescription('Get some advice')
-        .addStringOption(option =>
-          option.setName('query')
-            .setDescription('search query')),
-    ].map(command => command.toJSON());
-
-    console.log(commands);
-
-    const rest = new REST({ version: '9' }).setToken(token);
-
-    rest.put(Routes.applicationGuildCommands(discordClientId, guildId), { body: commands })
-      .then(() => console.log('Successfully registered application commands.'))
-      .catch(console.error);
-
-  });
-
-  discordClient.on('interactionCreate', async interaction => {
-    if (!interaction.isCommand()) return;
-
-    const { commandName } = interaction;
-
-    if (commandName === 'quote') {
-      const query = interaction.options.getString('query');
-      const args = [];
-      if (query) {
-        args.push(query);
-      }
-      const result = await quote.lookup(db, channel, interaction.user.toString(), args);
-      await interaction.reply(result);
-    } else if (commandName === 'fakequote') {
-      await interaction.deferReply();
-      const result = await fakequote.fake();
-      await interaction.editReply(result);
-    } else if (commandName === 'advice') {
-      const query = interaction.options.getString('query');
-      const args = [];
-      if (query) {
-        args.push(query);
-      }
-      const result = await advice.lookup(db, channel, args);
-      await interaction.reply(result);
-    }
-  });
-
-  discordClient.login(token);
-
 };
 
 run();

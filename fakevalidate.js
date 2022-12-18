@@ -106,12 +106,14 @@ async function command(chatClient, channel, self, user) {
     const quote = await fake(channel, self, user);
     console.log(quote);
     chatClient.say(channel, quote);
+    return quote;
 }
 
 async function roast(chatClient, channel, self, user) {
     const quote = await fake(channel, self, user, roast = true);
     console.log(quote);
     chatClient.say(channel, quote);
+    return quote;
 }
 
 async function fake(channel, self, user, roast = false) {

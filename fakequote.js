@@ -9,6 +9,7 @@ const url = /(\w+:\/\/)?\w+\.[a-zA-Z0-9][a-zA-Z0-9\/\?\%\#\&_=\-\.]*/g;
 async function command(chatClient, channel) {
     const quote = await fake();
     chatClient.say(channel, quote);
+    return quote;
 }
 
 async function fake() {
