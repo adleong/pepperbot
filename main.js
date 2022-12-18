@@ -454,18 +454,24 @@ const run = async () => {
           break;
         case 'Fake validate me':
           fakevalidate.command(chatClient, channel, bot, message.userName)
-            .catch(err => console.log(err))
-            .then(quote => discordClient.channels.cache.get('986881827316826143').send(quote));
+            .then(quote => { 
+              if (quote) { discordClient.channels.cache.get('986881827316826143').send(quote) }
+            })
+            .catch(err => console.log(err));
           break;
         case 'Fake roast me':
           fakevalidate.roast(chatClient, channel, bot, message.userName).catch(err => console.log(err))
-            .catch(err => console.log(err))
-            .then(quote => discordClient.channels.cache.get('986881827316826143').send(quote));
+            .then(quote => { 
+              if (quote) { discordClient.channels.cache.get('986881827316826143').send(quote) }
+            })
+            .catch(err => console.log(err));
           break;
         case 'Fake quote':
           fakequote.command(chatClient, channel).catch(err => console.log(err))
+            .then(quote => { 
+              if (quote) { discordClient.channels.cache.get('986881827316826143').send(quote) }
+            })
             .catch(err => console.log(err))
-            .then(quote => discordClient.channels.cache.get('986881827316826143').send(quote));
           break;
         case 'Make me a powerpoint':
           chatClient.say(channel, '*poof* ' + message.userName + ' is now a powerpoint.');
