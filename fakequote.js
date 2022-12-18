@@ -5,6 +5,7 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 const re = /\-\w\w+\W*$/;
 const url = /(\w+:\/\/)?\w+\.[a-zA-Z0-9][a-zA-Z0-9\/\?\%\#\&_=\-\.]*/g;
+const period = /\.\W*/g;
 
 async function command(chatClient, channel) {
     const quote = await fake();
@@ -35,6 +36,7 @@ async function fake() {
     }
     // Replace all links in quote with [hyperlink blocked]
     //find url matches
+    quote = quote.replaceAll(period, ". ");
     const matches = quote.match(url);
     if (matches) {
         console.log("blocked url: " + matches[0]);

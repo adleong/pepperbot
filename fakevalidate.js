@@ -7,6 +7,7 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 const url = /(\w+:\/\/)?\w+\.[a-zA-Z0-9][a-zA-Z0-9\/\?\%\#\&_=\-\.]*/g;
+const period = /\.\W*/g;
 
 const focus = [
     "about how they can vanquish my foes",
@@ -138,6 +139,7 @@ async function fake(channel, self, user, roast = false) {
         return `You're awesome, ${user}! I love you`;
     }
     // Replace all links in quote with [hyperlink blocked]
+    quote = quote.replaceAll(period, ". ");
     quote = quote.replaceAll(url, "[hyperlink blocked]");
 
     const response = await openai.createCompletion("content-filter-alpha", {
