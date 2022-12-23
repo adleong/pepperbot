@@ -39,11 +39,13 @@ function get(channel, self) {
 
 async function command(chatClient, channel, self, db) {
     let user = get(channel, self);
-    chatClient.say(channel, `You know who's awesome? ${user} is awesome!`);
+    if (user) {
+        chatClient.say(channel, `You know who's awesome? ${user} is awesome!`);
 
-    const { rows } = await db.query('SELECT message FROM catchphrases WHERE user_name = $1', [user]);
-    if (rows.length > 0) {
-        chatClient.say(channel, rows[0].message);
+        const { rows } = await db.query('SELECT message FROM catchphrases WHERE user_name = $1', [user]);
+        if (rows.length > 0) {
+            chatClient.say(channel, rows[0].message);
+        }
     }
 }
 
