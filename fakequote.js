@@ -9,7 +9,10 @@ const period = /\.\W*/g;
 
 async function command(chatClient, channel) {
     const quote = await fake();
-    chatClient.say(channel, quote);
+    // split quote into message of length at most 450
+    for (m of quote.match(/.{1,450}/g)) {
+        chatClient.say(channel, m);
+    }
     return quote;
 }
 

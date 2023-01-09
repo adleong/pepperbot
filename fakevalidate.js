@@ -106,14 +106,20 @@ const focus = [
 async function command(chatClient, channel, self, user) {
     const quote = await fake(channel, self, user);
     console.log(quote);
-    chatClient.say(channel, quote);
+    // split quote into message of length at most 450
+    for (m of quote.match(/.{1,450}/g)) {
+        chatClient.say(channel, m);
+    }
     return quote;
 }
 
 async function roast(chatClient, channel, self, user) {
     const quote = await fake(channel, self, user, roast = true);
     console.log(quote);
-    chatClient.say(channel, quote);
+    // split quote into message of length at most 450
+    for (m of quote.match(/.{1,450}/g)) {
+        chatClient.say(channel, m);
+    }
     return quote;
 }
 
