@@ -1,9 +1,9 @@
-const { ApiClient } = require('twitch');
-const { ChatClient } = require('twitch-chat-client');
-const { EventSubListener, ReverseProxyAdapter } = require('twitch-eventsub');
-const { ClientCredentialsAuthProvider } = require('twitch-auth');
+const { ApiClient } = require('@twurple/api');
+const { ChatClient } = require('@twurple/chat');
+const { EventSubHttpListener, ReverseProxyAdapter } = require('@twurple/eventsub-http');
+const { ClientCredentialsAuthProvider } = require('@twurple/auth');
 const { Client } = require('pg');
-const { PubSubClient } = require('twitch-pubsub-client');
+const { PubSubClient } = require('@twurple/pubsub');
 const express = require('express')
 const path = require('path')
 const Discord = require('discord.js');
@@ -37,6 +37,7 @@ const wotd = require("./wotd");
 const say = require("./say");
 const pronouns = require("./pronouns");
 const common = require("./common");
+const tags = require("./tags");
 const { env } = require('process');
 
 const clientId = process.env.CLIENT_ID;
@@ -134,19 +135,19 @@ const run = async () => {
     .post('*', proxy)
     .listen(PORT, () => console.log(`Listening on ${PORT}`))
 
-  const chatClient = new ChatClient(botAuth, { channels: [channel] });
+  const chatClient = new ChatClient({authProvider: botAuth, channels: [channel] });
   await chatClient.connect();
   console.log("Chat connected");
 
   timers.load(chatClient, db, channel, bot);
 
-  const stream = await apiClient.helix.streams.getStreamByUserName(channel);
+  const stream = await apiClient.streams.getStreamByUserName(channel);
   let online = !!stream;
   console.log("Stream online: " + online);
 
   // On startup
   chatClient.onRegister(async () => {
-    const stream = await apiClient.helix.streams.getStreamByUserName(channel);
+    const stream = await apiClient.streams.getStreamByUserName(channel);
     chatClient.say(channel, 'Sgt. Pepper powered on!');
   });
 
@@ -220,7 +221,7 @@ const run = async () => {
 
   const outstandingShoutouts = new Set();
 
-  const broadcaster = await apiClient.helix.users.getUserByName(channel);
+  const broadcaster = await apiClient.users.getUserByName(channel);
 
   // Chat listener
   chatClient.onMessage(async (_, user, message, msg) => {
@@ -231,8 +232,8 @@ const run = async () => {
       const args = message.split(' ');
       const command = args.shift().toLowerCase();
 
-      const u = await apiClient.helix.users.getUserByName(user);
-      const mod = await apiClient.helix.moderation.checkUserMod(broadcaster.id, u.id);
+      const u = await apiClient.users.getUserByName(user);
+      const mod = await apiClient.moderation.checkUserMod(broadcaster.id, u.id);
 
       switch (command) {
         case '!quote':
@@ -243,7 +244,7 @@ const run = async () => {
           break;
         case '!so': {
           const target = await so.command(chatClient, apiClient, channel, args.shift());
-          const stream = await apiClient.helix.streams.getStreamByUserName(channel);
+          const stream = await apiClient.streams.getStreamByUserName(channel);
           if (!stream) {
             break; // No shoutout rewards while channel isn't live.
           }
@@ -380,6 +381,18 @@ const run = async () => {
         //   const firstT = args.shift();
         //   await first.firstCommand(chatClient, apiClient, online, channel, db, firstT);
         //   break;
+        case '!tags':
+          let tag = args.shift();
+          if (tag) {
+            if (mod || user === channel) {
+              await tags.addTag(chatClient, apiClient, channel, tag);
+            } else {
+              chatClient.say(channel, `Sorry, ${user}, only mods can do that.`);
+            }
+          } else {
+            await tags.getTags(chatClient, apiClient, channel);
+          }
+          break;
         case '!commands':
           let commands = ['!advice', '!game', '!title', '!awesome', '!lurk', '!unlurk', '!roll', '!pepper', '!leaders', '!request',
             '!done', '!clear', '!sandwich', '!addcommand', '!addtimer', '!remove'];
@@ -400,7 +413,7 @@ const run = async () => {
 
   // Events listener.
   const pubSubClient = new PubSubClient();
-  const userId = await pubSubClient.registerUserListener(apiClient);
+  const userId = await pubSubClient.registerUserListener(userAuth, channel);
   await pubSubClient.onRedemption(userId, message => {
     try {
       console.log(`${message.userName} redeems ${message.rewardName}`);
@@ -503,13 +516,19 @@ const run = async () => {
   // EventSub
   const authProvider = new ClientCredentialsAuthProvider(clientId, clientSecret);
   const eventSubClient = new ApiClient({ authProvider });
+  await eventSubClient.eventSub.deleteAllSubscriptions();
   // Arbitrary but consistent string.
-  const listener = new EventSubListener(eventSubClient, new ReverseProxyAdapter({
-    hostName: 'sgt-pepper-bot.herokuapp.com', // The host name the server is available from
-    port: 8888,
-    externalPort: PORT
-  }), '1tfvrk3svxsk2jer25o8967xb6rn5u2u9wuhyu7brk');
-  await listener.listen();
+  const listener = new EventSubHttpListener({
+    apiClient: eventSubClient,
+    adapter: new ReverseProxyAdapter({
+      hostName: 'sgt-pepper-bot.herokuapp.com', // The host name the server is available from
+      port: 8888,
+      externalPort: PORT
+    }),
+    secret: '1tfvrk3svxsk2jer25o8967xb6rn5u2u9wuhyu7brk',
+    strictHostCheck: true,
+  });
+  await listener.start();
 
   const onlineSubscription = await listener.subscribeToStreamOnlineEvents(broadcaster.id, e => {
     console.log(`It's Dama time! ${e.broadcasterDisplayName} just went live!`);
@@ -517,6 +536,7 @@ const run = async () => {
     first.clear(db);
     online = true;
     chatClient.say(channel, `It's Dama time! ${e.broadcasterDisplayName} just went live!`);
+    tags.loadTags(chatClient, apiClient, db, channel);
   });
 
   const offlineSubscription = await listener.subscribeToStreamOfflineEvents(broadcaster.id, e => {

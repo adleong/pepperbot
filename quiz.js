@@ -26,6 +26,10 @@ async function command(chatClient, apiClient, channel, db) {
         chatClient.say(channel, `No quizzes while ${channel} isn't live.`);
         return;
     }
+    if (quiz !== null) {
+        chatClient.say(channel, "There's already a quiz in progress.");
+        return;
+    }
 
     const { rows } = await db.query('SELECT message, game, quoted_by FROM quotes WHERE CHANNEL = $1 ORDER BY random() LIMIT 1', [channel]);
     const match = rows[0].message.match(re);

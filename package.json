@@ -1,6 +1,11 @@
 {
   "dependencies": {
     "@discordjs/rest": "^0.5.0",
+    "@twurple/api": "^5.3.3",
+    "@twurple/auth": "^5.3.3",
+    "@twurple/chat": "^5.3.3",
+    "@twurple/eventsub": "^5.3.3",
+    "@twurple/pubsub": "^5.3.3",
     "crypto-js": "^4.0.0",
     "discord": "^0.8.2",
     "discord.js": "^13.8.0",
@@ -11,13 +16,7 @@
     "http-proxy-middleware": "^2.0.6",
     "openai": "^2.0.5",
     "pg": "^8.6.0",
-    "ssapi-node": "^1.0.4",
-    "twitch": "^4.5.5",
-    "twitch-auth": "^4.5.5",
-    "twitch-chat-client": "^4.5.5",
-    "twitch-eventsub": "^4.6.7",
-    "twitch-js": "^2.0.0-beta.42",
-    "twitch-pubsub-client": "^4.6.0"
+    "ssapi-node": "^1.0.4"
   },
   "devDependencies": {
     "eslint": "^7.29.0",

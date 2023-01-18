@@ -1,4 +1,4 @@
-const { RefreshableAuthProvider, StaticAuthProvider } = require('twitch-auth');
+const { RefreshingAuthProvider, StaticAuthProvider } = require('@twurple/auth');
 
 async function provider(db, user, clientId, clientSecret) {
 
@@ -6,24 +6,28 @@ async function provider(db, user, clientId, clientSecret) {
     const { rows } = await db.query('SELECT access_token, refresh_token, expiry_timestamp FROM tokens WHERE user_name = $1', [user]);
     const accessToken = rows[0].access_token;
     const refreshToken = rows[0].refresh_token;
-    const expiry = new Date(rows[0].expiry_timestamp);
+    const expiry = rows[0].expiry_timestamp;
 
-    console.log(`Loaded token for ${user}.  Token will expire on ${expiry}`)
+    console.log(`Loaded token for ${user}.  Token will expire in ${expiry}`)
     const scopes = ['chat:read', 'chat:edit', 'user:edit:broadcast', 'channel:read:redemptions',
     'channel:manage:broadcast', 'moderation:read'];
-    return new RefreshableAuthProvider(
-        new StaticAuthProvider(clientId, accessToken, scopes),
-        {
+    return new RefreshingAuthProvider({
+            clientId,
             clientSecret,
-            expiry,
-            onRefresh: async ({ accessToken, refreshToken, expiryDate }) => {
-                console.log(`Refreshing token for ${user}.  Next refresh at ${new Date(expiryDate)}`);
+            onRefresh: async token => {
+                console.log(`Refreshing token for ${user}.  Next refresh in ${token.expiresIn}`);
                 await db.query(
                     'UPDATE tokens SET access_token = $1, refresh_token = $2, expiry_timestamp = $3 WHERE user_name = $4',
-                    [accessToken, refreshToken, expiryDate, user]
+                    [token.accessToken, token.refreshToken, token.expiresIn, user]
                 );
-            },
-            refreshToken
+            }
+        },
+        {
+            accessToken,
+            expiresIn: 0,
+            obtainmentTimestamp: 0,
+            refreshToken,
+            scope: scopes
         }
     );
 }
