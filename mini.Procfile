@@ -1,1 +1,1 @@
-worker: node mini.js
+web: node mini.js
