@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mini Vanilla Bot</title>
+</head>
+<body>
+    <h1>Mini Vanilla Bot</h1>
+    <div>
+    <p>
+        Mini Vanilla is a Twitch bot for <a href="https://www.spinrhythmgame.com/">Spin Rhythm XD</a>
+        which allows users to request songs from <a href="https://spinsha.re">Spinshare</a>
+        and manages a queue of requests.
+    </p>
+    <p>
+        Mini Vanilla Bot was created by <a href="https://twitch.tv/damaplaysgames">Alex and Dama</a>
+        and is <a href="https://github.com/adleong/pepperbot">open source</a>.  If
+        you use Mini Vanilla Bot and would like to help pay for her hosting costs,
+        you can contribute on <a href="https://ko-fi.com/damaplaysgames">Ko-fi</a>.
+    </p>
+    </div>
+    <div>
+        <button
+            onclick="window.location.href='https://id.twitch.tv/oauth2/authorize?<%= add_params %>';"
+        >
+            Add Mini Vanilla to my channel
+        </button>
+        <button
+            onClick="window.location.href='https://id.twitch.tv/oauth2/authorize?<%= remove_params %>';"
+        >
+            Remove Mini Vanilla from my channel
+        </button>
+    </div>
+    <div>
+        <p>
+            The queue of songs for your channel is at: <code>https://mini-vanilla.herokuapp.com/queue/CHANNEL_NAME</code>
+        </p>
+        <p>
+            Mini Vanilla will rearrange the queue to prioritize fairness. This
+            means that a viewer's first request will always take priority over
+            another viewer's second request and so on.  Because of this, you
+            may sometimes notice a new request jumping to the front of the queue
+            if it is from a viewer who has had fewer requests played.  This is
+            by design.
+        </p>
+        <h2>Chat Commands</h2>
+        <ul>
+            <li><code>!spin</code> - Print help about how to request songs.</li>
+            <li><code>!request SONG_NAME</code> - Request a song from Spinshare by name. (only works if the song name is unique)</li>
+            <li><code>!request SPINSHARE_ID</code> - Request a song from Spinshare by ID.</li>
+            <li><code>!queue</code> - Get a link to the queue.</li>
+        </ul>
+        <h2>Mod Commands</h2>
+        <p>This commands may only be performed by a mod.</p>
+        <ul>
+            <li><code>!done</code> - Remove the song at the head of the queue.</li>
+            <li><code>!done SPINSHARE_ID</code> - Remove a song from the queue by ID.</li>
+            <li><code>!clear</code> - Clear the queue.</li>
+        </ul>
+    </div>
+</body>
+</html>

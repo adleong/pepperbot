@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mini Vanilla Bot</title>
+</head>
+<body>
+    <% if (error == 'Channel not joined') { %>
+        <dev>
+            <h1>ok, just chill</h1>
+            <p>
+                Mini Vanilla Bot isn't even in <%= channel %> and you're trying to remove her?
+                Jeez.
+            </p>
+            <a href="/">sorry</a>
+        </dev>
+    <% } else if (error) { %>
+        <dev>
+            <h1>uhhhhhhhhhhhhhhhh</h1>
+            <p>
+                Something happen.
+            </p>
+            <pre>
+                <%= error %>
+            </pre>
+            <a href="/">darn</a>
+        </dev>
+    <% } else { %>
+        <dev>
+            <h1>Later, bestie</h1>
+            <p>
+                Mini Vanilla Bot has been successfully removed from <%= channel %>.
+            </p>
+            <a href="/">no hard feelings</a>
+        </dev>
+    <% } %>
+</body>
+</html>

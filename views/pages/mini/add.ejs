@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mini Vanilla Bot</title>
+</head>
+<body>
+    <% if (error == 'Channel already added') { %>
+        <dev>
+            <h1>whoa, easy there</h1>
+            <p>
+                Mini Vanilla Bot has actually already been added to <%= channel %>.
+                She's already there!  You're all good!
+            </p>
+            <a href="/">oh, nice</a>
+        </dev>
+    <% } else if (error) { %>
+        <dev>
+            <h1>uhhhhhhhhhhhhhhhh</h1>
+            <p>
+                Something happen.
+            </p>
+            <pre>
+                <%= error %>
+            </pre>
+            <a href="/">darn</a>
+        </dev>
+    <% } else { %>
+        <dev>
+            <h1>Done!</h1>
+            <p>
+                Mini Vanilla Bot has been successfully added to <%= channel %>.
+            </p>
+            <a href="/">let's freaking goooooo</a>
+        </dev>
+    <% } %>
+</body>
+</html>
