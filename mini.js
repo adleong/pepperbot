@@ -112,6 +112,9 @@ const run = async () => {
         case '!mini':
           chatClient.say(channel, HOST);
           break;
+        case '!spin':
+          chatClient.say(channel, 'You can request songs by typing !request followed by the song name or spin id. You can look up songs to request on https://spinsha.re/');
+          break;
         case '!request':
           await spin.request(chatClient, channel, db, user, args);
           break;
@@ -129,8 +132,10 @@ const run = async () => {
           }
           await spin.clear(channel, db);
           break;
+        case '!q':
         case '!queue':
           chatClient.say(channel, HOST + '/queue/' + channel);
+          break;
       }
     } catch(err) {
       console.log(err);
