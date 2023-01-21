@@ -416,9 +416,9 @@ const run = async () => {
   const userId = await pubSubClient.registerUserListener(userAuth, channel);
   await pubSubClient.onRedemption(userId, message => {
     try {
-      console.log(`${message.userName} redeems ${message.rewardName}`);
+      console.log(`${message.userName} redeems ${message.rewardTitle}`);
       console.log(message.message);
-      switch (message.rewardName) {
+      switch (message.rewardTitle) {
         case 'Pepper Cam':
           pepper.command(chatClient, db, channel, message.userName, 15).
             catch(err => console.log(err));
