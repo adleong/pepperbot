@@ -10,6 +10,14 @@ async function lookup(query) {
         }
         throw `${query} not found`;
     }
+    const matches = query.match(/^https:\/\/spinsha.re\/song\/(\d+)/);
+    if (matches) {
+        const song = await api.getOpenData(`song/${matches[1]}`);
+        if (song && song.id) {
+            return song;
+        }
+        throw `${query} not found`;
+    }
     const data = await api.postOpenData("searchCharts", {
         searchQuery: query,
         showExplicit: true
