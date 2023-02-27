@@ -70,7 +70,7 @@ async function they(user) {
 
 
 async function command(chatClient, apiClient, channel, bot, user, target) {
-    const broadcaster = await apiClient.helix.users.getUserByName(channel);
+    const broadcaster = await apiClient.users.getUserByName(channel);
     let t = target.toLowerCase();
     if (target.startsWith('@')) {
         t = target.substring(1);
@@ -101,7 +101,7 @@ async function command(chatClient, apiClient, channel, bot, user, target) {
         return;
     }
 
-    t = await apiClient.helix.users.getUserByName(t).catch(() => null);
+    t = await apiClient.users.getUserByName(t).catch(() => null);
     if (!t) {
         const msg = [
             `${target} is now officially cancelled.`,

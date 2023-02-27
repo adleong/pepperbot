@@ -154,7 +154,7 @@ async function claim(chatClient, apiClient, db, channel, user) {
         return;
     }
 
-    const target = await apiClient.helix.users.getUserByName(user);
+    const target = await apiClient.users.getUserByName(user);
     claimant = {
         claimed: true,
         profileURL: target.profilePictureUrl,

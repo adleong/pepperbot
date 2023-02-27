@@ -1,7 +1,7 @@
 const { ApiClient } = require('@twurple/api');
 const { ChatClient } = require('@twurple/chat');
 const { EventSubHttpListener, ReverseProxyAdapter } = require('@twurple/eventsub-http');
-const { ClientCredentialsAuthProvider } = require('@twurple/auth');
+const { AppTokenAuthProvider } = require('@twurple/auth');
 const { Client } = require('pg');
 const { PubSubClient } = require('@twurple/pubsub');
 const express = require('express')
@@ -146,8 +146,7 @@ const run = async () => {
   console.log("Stream online: " + online);
 
   // On startup
-  chatClient.onRegister(async () => {
-    const stream = await apiClient.streams.getStreamByUserName(channel);
+  chatClient.onAuthenticationSuccess(() => {
     chatClient.say(channel, 'Sgt. Pepper powered on!');
   });
 
@@ -412,9 +411,11 @@ const run = async () => {
   });
 
   // Events listener.
-  const pubSubClient = new PubSubClient();
-  const userId = await pubSubClient.registerUserListener(userAuth, channel);
-  await pubSubClient.onRedemption(userId, message => {
+  console.log("userAuth is " + userAuth);
+  const pubSubClient = new PubSubClient({ authProvider: userAuth });
+  console.log("pubsub client is " + pubSubClient);
+  console.log("broadcaster is " + broadcaster.id);
+  pubSubClient.onRedemption(broadcaster.id, message => {
     try {
       console.log(`${message.userName} redeems ${message.rewardTitle}`);
       console.log(message.message);
@@ -514,7 +515,7 @@ const run = async () => {
   });
 
   // EventSub
-  const authProvider = new ClientCredentialsAuthProvider(clientId, clientSecret);
+  const authProvider = new AppTokenAuthProvider(clientId, clientSecret);
   const eventSubClient = new ApiClient({ authProvider });
   await eventSubClient.eventSub.deleteAllSubscriptions();
   // Arbitrary but consistent string.
@@ -527,10 +528,11 @@ const run = async () => {
     }),
     secret: '1tfvrk3svxsk2jer25o8967xb6rn5u2u9wuhyu7brk',
     strictHostCheck: true,
+    legacySecrets: false,
   });
   await listener.start();
 
-  const onlineSubscription = await listener.subscribeToStreamOnlineEvents(broadcaster.id, e => {
+  const onlineSubscription = await listener.onStreamOnline(broadcaster.id, e => {
     console.log(`It's Dama time! ${e.broadcasterDisplayName} just went live!`);
     console.log(e);
     first.clear(db);
@@ -539,7 +541,7 @@ const run = async () => {
     tags.loadTags(chatClient, apiClient, db, channel);
   });
 
-  const offlineSubscription = await listener.subscribeToStreamOfflineEvents(broadcaster.id, e => {
+  const offlineSubscription = await listener.onStreamOffline(broadcaster.id, e => {
     console.log(`Dama time is OVER! ${e.broadcasterDisplayName} just went offline`);
     console.log(e);
     spin.clear(chatClient, channel, apiClient, db, 'sgt_pepper_bot');

@@ -12,8 +12,8 @@ async function command(chatClient, apiClient, db, channel, channelId, user, args
     } else if (args.length > 1 && args[0] == "add" ) {
         args.shift();
         const quote = args.join(' ');
-        const broadcaster = await apiClient.helix.users.getUserByName(channel);
-        const ch = await apiClient.helix.channels.getChannelInfo(broadcaster);
+        const broadcaster = await apiClient.users.getUserByName(channel);
+        const ch = await apiClient.channels.getChannelInfo(broadcaster);
         const { rows } = await db.query('SELECT MAX(number) FROM quotes WHERE channel=$1', [channel]);
         const number = rows[0].max + 1;
         const result = await db.query('INSERT INTO quotes(message, quoted_by, game, channel, number) VALUES($1, $2, $3, $4, $5)', [quote, user, ch.gameName, channel, number]);

@@ -4,7 +4,7 @@ const SECONDS = 1000;
 const MINUTES = 60 * SECONDS;
 
 async function add(apiClient, channel, user) {
-    const u = await apiClient.helix.users.getUserByName(user);
+    const u = await apiClient.users.getUserByName(user);
     if (chatters.has(channel)) {
         chatters.get(channel).set(u.displayName, Date.now());
     } else {
@@ -50,7 +50,7 @@ async function command(chatClient, channel, self, db) {
 }
 
 async function setCatchphrase(chatClient, apiClient, channel, db, user, catchphrase) {
-    const u = await apiClient.helix.users.getUserByName(user);
+    const u = await apiClient.users.getUserByName(user);
     const { rows } = await db.query('SELECT * FROM catchphrases WHERE user_name = $1', [u.displayName]);
     if (rows.length === 0) {
         await db.query('INSERT INTO catchphrases (user_name, message) VALUES ($1, $2)', [u.displayName, catchphrase]);

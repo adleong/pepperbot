@@ -54,9 +54,9 @@ async function request(chatClient, channel, db, user, args) {
 }
 
 async function done(chatClient, channel, apiClient, db, user, id) {
-    const broadcaster = await apiClient.helix.users.getUserByName(channel);
-    const u = await apiClient.helix.users.getUserByName(user);
-    const mod = await apiClient.helix.moderation.checkUserMod(broadcaster.id, u.id);
+    const broadcaster = await apiClient.users.getUserByName(channel);
+    const u = await apiClient.users.getUserByName(user);
+    const mod = await apiClient.moderation.checkUserMod(broadcaster.id, u.id);
     if (!mod && broadcaster.id != u.id) {
         chatClient.say(channel, `Sorry, ${user}, only mods may perform this action`);
         return;
@@ -72,9 +72,9 @@ async function done(chatClient, channel, apiClient, db, user, id) {
 }
 
 async function clear(chatClient, channel, apiClient, db, user) {
-    const broadcaster = await apiClient.helix.users.getUserByName(channel);
-    const u = await apiClient.helix.users.getUserByName(user);
-    const mod = await apiClient.helix.moderation.checkUserMod(broadcaster.id, u.id);
+    const broadcaster = await apiClient.users.getUserByName(channel);
+    const u = await apiClient.users.getUserByName(user);
+    const mod = await apiClient.moderation.checkUserMod(broadcaster.id, u.id);
     if (!mod && broadcaster.id != u.id) {
         chatClient.say(channel, `Sorry, ${user}, only mods may perform this action`);
         return;

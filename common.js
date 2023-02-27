@@ -1,10 +1,10 @@
 async function get_follows(apiClient, target) {
     const t = target.startsWith('@') ? target.substring(1) : target;
-    const user = await apiClient.helix.users.getUserByName(t);
+    const user = await apiClient.users.getUserByName(t);
     if (!user) {
         return [];
     }
-    const cursor = apiClient.helix.users.getFollowsPaginated({ user: user.id });
+    const cursor = apiClient.users.getFollowsPaginated({ user: user.id });
     const follows = [];
     for await (const f of cursor) {
         follows.push(f.followedUserName)
@@ -14,11 +14,11 @@ async function get_follows(apiClient, target) {
 
 async function get_followers(apiClient, target) {
     const t = target.startsWith('@') ? target.substring(1) : target;
-    const user = await apiClient.helix.users.getUserByName(t);
+    const user = await apiClient.users.getUserByName(t);
     if (!user) {
         return [];
     }
-    const cursor = apiClient.helix.users.getFollowsPaginated({ followedUser: user.id });
+    const cursor = apiClient.users.getFollowsPaginated({ followedUser: user.id });
     const followers = [];
     for await (const f of cursor) {
         followers.push(f.userName)

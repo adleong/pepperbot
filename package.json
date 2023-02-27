@@ -1,11 +1,11 @@
 {
   "dependencies": {
     "@discordjs/rest": "^0.5.0",
-    "@twurple/api": "^5.3.3",
-    "@twurple/auth": "^5.3.3",
-    "@twurple/chat": "^5.3.3",
-    "@twurple/eventsub": "^5.3.3",
-    "@twurple/pubsub": "^5.3.3",
+    "@twurple/api": "^6.0.4",
+    "@twurple/auth": "^6.0.4",
+    "@twurple/chat": "^6.0.4",
+    "@twurple/eventsub-http": "^6.0.4",
+    "@twurple/pubsub": "^6.0.4",
     "crypto-js": "^4.0.0",
     "discord": "^0.8.2",
     "discord.js": "^13.8.0",

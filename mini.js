@@ -1,4 +1,3 @@
-const { ApiClient } = require('@twurple/api');
 const { ChatClient } = require('@twurple/chat');
 const { getTokenInfo, exchangeCode } = require('@twurple/auth');
 const { Client } = require('pg');
@@ -28,7 +27,6 @@ console.log("Database connected");
 const run = async () => {
 
   const botAuth = await auth.provider(db, bot, clientId, clientSecret);
-  const apiClient = new ApiClient({ authProvider: botAuth });
 
   const { rows } = await db.query('SELECT channel FROM mini_vanilla');
   let channels = rows.map(row => row.channel);

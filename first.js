@@ -53,7 +53,7 @@ function ordinal(n) {
 }
 
 async function nth(chatClient, apiClient, online, channel, db, user, n) {
-    const stream = await apiClient.helix.streams.getStreamByUserName(channel);
+    const stream = await apiClient.streams.getStreamByUserName(channel);
     if (!online) {
         if (stream) {
             chatClient.say(channel, `ok just... hold on, ${user}, I'm still getting ready. just chill for a sec`);

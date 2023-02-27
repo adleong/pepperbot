@@ -1,4 +1,4 @@
-const { RefreshingAuthProvider, StaticAuthProvider } = require('@twurple/auth');
+const { RefreshingAuthProvider } = require('@twurple/auth');
 
 async function provider(db, user, clientId, clientSecret) {
 
@@ -11,10 +11,10 @@ async function provider(db, user, clientId, clientSecret) {
     console.log(`Loaded token for ${user}.  Token will expire in ${expiry}`)
     const scopes = ['chat:read', 'chat:edit', 'user:edit:broadcast', 'channel:read:redemptions',
     'channel:manage:broadcast', 'moderation:read'];
-    return new RefreshingAuthProvider({
+    const provider = new RefreshingAuthProvider({
             clientId,
             clientSecret,
-            onRefresh: async token => {
+            onRefresh: async (userId, token) => {
                 console.log(`Refreshing token for ${user}.  Next refresh in ${token.expiresIn}`);
                 await db.query(
                     'UPDATE tokens SET access_token = $1, refresh_token = $2, expiry_timestamp = $3 WHERE user_name = $4',
@@ -22,14 +22,15 @@ async function provider(db, user, clientId, clientSecret) {
                 );
             }
         },
-        {
-            accessToken,
-            expiresIn: 0,
-            obtainmentTimestamp: 0,
-            refreshToken,
-            scope: scopes
-        }
     );
+    await provider.addUserForToken({
+        accessToken,
+        expiresIn: 0,
+        obtainmentTimestamp: 0,
+        refreshToken,
+        scope: scopes
+    }, ['chat']);
+    return provider;
 }
 
 module.exports = { provider };
