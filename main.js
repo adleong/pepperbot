@@ -138,17 +138,13 @@ const run = async () => {
   const chatClient = new ChatClient({authProvider: botAuth, channels: [channel] });
   await chatClient.connect();
   console.log("Chat connected");
+  chatClient.say(channel, 'Sgt. Pepper powered on!');
 
   timers.load(chatClient, db, channel, bot);
 
   const stream = await apiClient.streams.getStreamByUserName(channel);
   let online = !!stream;
   console.log("Stream online: " + online);
-
-  // On startup
-  chatClient.onAuthenticationSuccess(() => {
-    chatClient.say(channel, 'Sgt. Pepper powered on!');
-  });
 
   // Shutdown handlers
   ['SIGINT', 'SIGTERM'].forEach(signal => process.on(signal, () => {
@@ -411,10 +407,7 @@ const run = async () => {
   });
 
   // Events listener.
-  console.log("userAuth is " + userAuth);
   const pubSubClient = new PubSubClient({ authProvider: userAuth });
-  console.log("pubsub client is " + pubSubClient);
-  console.log("broadcaster is " + broadcaster.id);
   pubSubClient.onRedemption(broadcaster.id, message => {
     try {
       console.log(`${message.userName} redeems ${message.rewardTitle}`);

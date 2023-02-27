@@ -10,12 +10,12 @@ async function provider(db, user, clientId, clientSecret) {
 
     console.log(`Loaded token for ${user}.  Token will expire in ${expiry}`)
     const scopes = ['chat:read', 'chat:edit', 'user:edit:broadcast', 'channel:read:redemptions',
-    'channel:manage:broadcast', 'moderation:read'];
+    'channel:manage:broadcast', 'moderation:read', 'moderator:manage:shoutouts'];
     const provider = new RefreshingAuthProvider({
             clientId,
             clientSecret,
             onRefresh: async (userId, token) => {
-                console.log(`Refreshing token for ${user}.  Next refresh in ${token.expiresIn}`);
+                console.log(`Refreshing token for ${user} with scopes ${token.scope}.  Next refresh in ${token.expiresIn}`);
                 await db.query(
                     'UPDATE tokens SET access_token = $1, refresh_token = $2, expiry_timestamp = $3 WHERE user_name = $4',
                     [token.accessToken, token.refreshToken, token.expiresIn, user]

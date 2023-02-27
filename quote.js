@@ -13,7 +13,7 @@ async function command(chatClient, apiClient, db, channel, channelId, user, args
         args.shift();
         const quote = args.join(' ');
         const broadcaster = await apiClient.users.getUserByName(channel);
-        const ch = await apiClient.channels.getChannelInfo(broadcaster);
+        const ch = await apiClient.channels.getChannelInfoById(broadcaster);
         const { rows } = await db.query('SELECT MAX(number) FROM quotes WHERE channel=$1', [channel]);
         const number = rows[0].max + 1;
         const result = await db.query('INSERT INTO quotes(message, quoted_by, game, channel, number) VALUES($1, $2, $3, $4, $5)', [quote, user, ch.gameName, channel, number]);

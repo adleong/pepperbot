@@ -62,7 +62,9 @@ const run = async () => {
         res.render('pages/mini/add', { channel, error: 'Channel already added' })
       } else {
         await db.query('INSERT INTO mini_vanilla (channel) VALUES ($1)', [channel]);
-        chatClient.join(channel);
+        chatClient.join(channel).then(() => {
+          chatClient.say(channel, 'Mini Vanilla reporting for duty!');
+        });
         res.render('pages/mini/add', { channel, error: null })
       }
   })
@@ -88,13 +90,6 @@ const run = async () => {
     res.render('pages/queue', { 'results': queue })
   })
   .listen(PORT, () => console.log(`Listening on ${PORT}`))
-
-  // Chat listener
-  chatClient.onJoin(async (channel, user) => {
-    if (user === bot) {
-      chatClient.say(channel, 'Mini Vanilla reporting for duty!');
-    }
-  });
 
   chatClient.onMessage(async (chan, user, message, msg) => {
     try {
@@ -141,6 +136,9 @@ const run = async () => {
   });
 
   await chatClient.connect();
+  for (const channel of channels) {    
+    chatClient.say(channel, 'Mini Vanilla reporting for duty!');
+  }
 };
 
 run();

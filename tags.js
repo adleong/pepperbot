@@ -1,12 +1,12 @@
 async function getTags(chatClient, apiClient, channel) {
     const broadcaster = await apiClient.users.getUserByName(channel);
-    const ch = await apiClient.channels.getChannelInfo(broadcaster);
+    const ch = await apiClient.channels.getChannelInfoById(broadcaster);
     chatClient.say(channel, `The tags are: ${ch.tags.join(', ')}`);
 }
 
 async function addTag(chatClient, apiClient, channel, tag) {
     const broadcaster = await apiClient.users.getUserByName(channel);
-    const ch = await apiClient.channels.getChannelInfo(broadcaster);
+    const ch = await apiClient.channels.getChannelInfoById(broadcaster);
     // if tags contains tag, remove it
     let tags = ch.tags;
     if (ch.tags.map(t => t.toLowerCase()).includes(tag.toLowerCase())) {
@@ -21,7 +21,7 @@ async function addTag(chatClient, apiClient, channel, tag) {
 
 async function loadTags(chatClient, apiClient, db, channel) {
     const broadcaster = await apiClient.users.getUserByName(channel);
-    const ch = await apiClient.channels.getChannelInfo(broadcaster);
+    const ch = await apiClient.channels.getChannelInfoById(broadcaster);
     const { rows } = await db.query('SELECT tag from tags where game = $1 OR game is null', [ch.game]);
     console.log(rows);
     for (let row of rows) {

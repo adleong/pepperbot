@@ -1,7 +1,7 @@
 async function command(chatClient, apiClient, channel, user, args) {
     const broadcaster = await apiClient.users.getUserByName(channel);
     const u = await apiClient.users.getUserByName(user);
-    const ch = await apiClient.channels.getChannelInfo(broadcaster);
+    const ch = await apiClient.channels.getChannelInfoById(broadcaster);
     if (args.length == 0) {
         chatClient.say(channel, `The current game is ${ch.gameName}`);
     } else {
