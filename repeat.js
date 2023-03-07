@@ -8,6 +8,9 @@ function prev(x) {
 }
 
 async function add(chatClient, channel, user, msg) {
+    if (msg.startsWith("!")) {
+        return;
+    }
     const message = msg.toLowerCase().replace(/[.,/?#!$%^&*;:{}=\-_`~()]/g, "")
     messages[i] = message;
     users[i] = user;

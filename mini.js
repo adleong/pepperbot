@@ -1,3 +1,4 @@
+const { ApiClient } = require('@twurple/api');
 const { ChatClient } = require('@twurple/chat');
 const { getTokenInfo, exchangeCode } = require('@twurple/auth');
 const { Client } = require('pg');
@@ -6,6 +7,7 @@ const path = require('path')
 const repeat = require('./repeat');
 const auth = require('./auth');
 const spin = require('./minispin');
+const dashboard = require('./minidashboard');
 
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
@@ -32,6 +34,7 @@ const run = async () => {
   let channels = rows.map(row => row.channel);
 
   const chatClient = new ChatClient({authProvider: botAuth, channels });
+  const apiClient = new ApiClient({ authProvider: botAuth });
 
   // Shutdown handlers
   ['SIGINT', 'SIGTERM'].forEach(signal => process.on(signal, () => {
@@ -88,6 +91,10 @@ const run = async () => {
     const channel = req.params.channel;
     const queue = await spin.queue(channel, db);
     res.render('pages/queue', { 'results': queue })
+  })
+  .get('/dashboard', async (req, res) => {
+    const results = await dashboard.dashboard(apiClient, db);
+    res.render('pages/mini/dashboard', { results: results })
   })
   .listen(PORT, () => console.log(`Listening on ${PORT}`))
 
