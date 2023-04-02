@@ -11,6 +11,10 @@ async function add(chatClient, channel, user, msg) {
     if (msg.startsWith("!")) {
         return;
     }
+    if (msg.toLowerCase().includes("of all time") && !msg.includes("?")) {
+        await chatClient.say(channel, "so true");
+        return;
+    }
     const message = msg.toLowerCase().replace(/[.,/?#!$%^&*;:{}=\-_`~()]/g, "")
     messages[i] = message;
     users[i] = user;
