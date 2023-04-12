@@ -1,4 +1,5 @@
 <html>
+
 <head>
     <script>
         var messages = [
@@ -103,9 +104,10 @@
             "Saying Hello", // AustinSpafford
             "Replacing pianos with xylophones", // SaberaMesia
             "qbnt_vmk4fU", // Programmatic
+            "Jhythming", // Kwaziuto
         ];
         // randomize the messages
-        messages.sort(function() { return 0.5 - Math.random() });
+        messages.sort(function () { return 0.5 - Math.random() });
         var dots = [
             "",
             ".",
@@ -115,7 +117,7 @@
         var i = 0;
         var j = 0;
         // create a timer which changes the text every second
-        var timer = setInterval(function() {
+        var timer = setInterval(function () {
             var div = document.getElementsByTagName('div')[0];
             j++;
             if (j > 20) {
@@ -125,7 +127,9 @@
             div.innerHTML = messages[i] + dots[j % dots.length];
         }, 300);
     </script>
+
 <body>
     <div>Loading</div>
 </body>
+
 </html>
