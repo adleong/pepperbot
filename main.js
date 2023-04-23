@@ -135,14 +135,14 @@ const run = async () => {
     .post('*', proxy)
     .listen(PORT, () => console.log(`Listening on ${PORT}`))
 
-  const chatClient = new ChatClient({authProvider: botAuth, channels: [channel] });
+  const chatClient = new ChatClient({ authProvider: botAuth, channels: [channel] });
   await chatClient.connect();
   console.log("Chat connected");
   chatClient.say(channel, 'Sgt. Pepper powered on!');
 
   timers.load(chatClient, db, channel, bot);
 
-  const stream = await apiClient.streams.getStreamByUserName(channel);
+  const stream = await apiClient.streams.getStreamByUserName(channel).catch(console.error);
   let online = !!stream;
   console.log("Stream online: " + online);
 
@@ -402,6 +402,7 @@ const run = async () => {
         }
       }
     } catch (err) {
+      console.log("error in message handler:");
       console.log(err);
     }
   });
@@ -410,8 +411,7 @@ const run = async () => {
   const pubSubClient = new PubSubClient({ authProvider: userAuth });
   pubSubClient.onRedemption(broadcaster.id, message => {
     try {
-      console.log(`${message.userName} redeems ${message.rewardTitle}`);
-      console.log(message.message);
+      console.log(`${message.userName} redeems ${message.rewardTitle}: ${message.message}`);
       switch (message.rewardTitle) {
         case 'Pepper Cam':
           pepper.command(chatClient, db, channel, message.userName, 15).
@@ -461,21 +461,21 @@ const run = async () => {
           break;
         case 'Fake validate me':
           fakevalidate.command(chatClient, channel, bot, message.userName)
-            .then(quote => { 
+            .then(quote => {
               if (quote) { discordClient.channels.cache.get('986881827316826143').send(quote) }
             })
             .catch(err => console.log(err));
           break;
         case 'Fake roast me':
           fakevalidate.roast(chatClient, channel, bot, message.userName).catch(err => console.log(err))
-            .then(quote => { 
+            .then(quote => {
               if (quote) { discordClient.channels.cache.get('986881827316826143').send(quote) }
             })
             .catch(err => console.log(err));
           break;
         case 'Fake quote':
           fakequote.command(chatClient, channel).catch(err => console.log(err))
-            .then(quote => { 
+            .then(quote => {
               if (quote) { discordClient.channels.cache.get('986881827316826143').send(quote) }
             })
             .catch(err => console.log(err))
@@ -485,6 +485,7 @@ const run = async () => {
           break;
       }
     } catch (err) {
+      console.log("error in redemption handler:");
       console.log(err);
     }
   });
@@ -503,6 +504,7 @@ const run = async () => {
         }
       }, 2 * 60 * 1000);
     } catch (err) {
+      console.log("error in raid handler:");
       console.log(err);
     }
   });

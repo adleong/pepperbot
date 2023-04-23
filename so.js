@@ -13,7 +13,10 @@ async function command(chatClient, apiClient, channel, user) {
         }
         chatClient.say(channel, shoutout);
         chatClient.say(channel, `/shoutout ${target_channel.name}`)
-        await apiClient.chat.shoutoutUser(broadcaster.id, target.id, broadcaster.id);
+        await apiClient.chat.shoutoutUser(broadcaster.id, target.id, broadcaster.id).catch((err) => {
+            console.log("shoutout failed:");
+            console.log(err);
+        });
     } else {
         chatClient.say(channel, `${u}? Never heard of them.`);
     }

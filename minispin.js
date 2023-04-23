@@ -41,20 +41,23 @@ async function request(chatClient, channel, db, user, args) {
         const text = `#${song.id}: ${song.title} - ${song.charter} (${song.XDDifficulty})`;
         const { rows } = await db.query('SELECT count(1) from minirequests where channel = $1 and added_by = $2', [channel, user]);
         const priority = rows[0].count;
-        await db.query('INSERT INTO minirequests (spin_id, channel, title, added_by, priority, done) VALUES ($1, $2, $3, $4, $5, $6)',
+        const res = await db.query('INSERT INTO minirequests (spin_id, channel, title, added_by, priority, done) VALUES ($1, $2, $3, $4, $5, $6)',
             [song.id, channel, text, user, priority, false]);
+        console.log(`Inserting ${res.rowCount} song: ${song.id}`);
         chatClient.say(channel, `Adding #${song.id}: ${song.title} - ${song.charter} (${song.XDDifficulty})`);
     }
 }
 
 async function done(channel, db, id) {
     if (id) {
-        await db.query('UPDATE minirequests SET done = true WHERE spin_id = $1 AND channel = $2', [id, channel]);
+        const res = await db.query('UPDATE minirequests SET done = true WHERE spin_id = $1 AND channel = $2', [id, channel]);
+        console.log(`Done ${res.rowCount} song: ${id}`);
     } else {
-        await db.query('UPDATE minirequests SET done = true WHERE id = (' +
+        const res = await db.query('UPDATE minirequests SET done = true WHERE id = (' +
             'SELECT id FROM minirequests ' +
             'WHERE channel=$1 AND DONE=false ' +
             'ORDER BY priority, id LIMIT 1)', [channel]);
+        console.log(`Done ${res.rowCount} song`);
     }
 }
 
