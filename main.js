@@ -219,13 +219,19 @@ const run = async () => {
   const broadcaster = await apiClient.users.getUserByName(channel);
 
   // Chat listener
-  chatClient.onMessage(async (_, user, message, msg) => {
+  chatClient.onMessage(async (_, user, m, msg) => {
     try {
+      const message = m.replace('\udb40\udc00', ''); // Remove garbage \uE0000 character.
       awesome.add(apiClient, channel, user);
       repeat.add(chatClient, channel, user, message);
 
       const args = message.split(' ');
       const command = args.shift().toLowerCase();
+
+      if (command.startsWith('!')) {
+        // print message
+        console.log(`[${channel}] ${user}: ${message}`);
+      }
 
       const u = await apiClient.users.getUserByName(user);
       const mod = await apiClient.moderation.checkUserMod(broadcaster.id, u.id);
