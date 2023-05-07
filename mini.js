@@ -23,7 +23,7 @@ const db = new Client({
   ssl
 });
 
-db.connect(); 
+db.connect();
 console.log("Database connected");
 
 const run = async () => {
@@ -33,13 +33,13 @@ const run = async () => {
   const { rows } = await db.query('SELECT channel FROM mini_vanilla');
   let channels = rows.map(row => row.channel);
 
-  const chatClient = new ChatClient({authProvider: botAuth, channels });
+  const chatClient = new ChatClient({ authProvider: botAuth, channels });
   const apiClient = new ApiClient({ authProvider: botAuth });
 
   // Shutdown handlers
   ['SIGINT', 'SIGTERM'].forEach(signal => process.on(signal, () => {
-    for (const channel of channels) {    
-        chatClient.say(channel, 'Mini Vanilla powering down...');
+    for (const channel of channels) {
+      chatClient.say(channel, 'Mini Vanilla powering down...');
     }
     db.end();
     process.exit(0);
@@ -49,9 +49,9 @@ const run = async () => {
     .set('views', path.join(__dirname, 'views'))
     .set('view engine', 'ejs')
     .get('/', async (req, res) => {
-      res.render('pages/mini/index', { 
+      res.render('pages/mini/index', {
         add_params: `client_id=${clientId}&redirect_uri=${HOST}/add&response_type=code&scope=`,
-        remove_params: `client_id=${clientId}&redirect_uri=${HOST}/remove&response_type=code&scope=`, 
+        remove_params: `client_id=${clientId}&redirect_uri=${HOST}/remove&response_type=code&scope=`,
       })
     })
     .get('/add', async (req, res) => {
@@ -70,41 +70,47 @@ const run = async () => {
         });
         res.render('pages/mini/add', { channel, error: null })
       }
-  })
-  .get('/remove', async (req, res) => {
-    const code = req.query.code;
-    // Get an access token and use it to instantiate an ApiClient.
-    const token = await exchangeCode(clientId, clientSecret, code, `${HOST}/remove`);
-    const tokenInfo = await getTokenInfo(token.accessToken, clientId);
-    const channel = tokenInfo.userName;
-    const channels = await db.query('SELECT channel FROM mini_vanilla WHERE channel = $1', [channel]);
-    if (channels.rows.length > 0) {
-      await db.query('DELETE FROM mini_vanilla WHERE channel = $1', [channel]);
-      chatClient.say(channel, 'Ok byeeeeeeeeeeee');
-      chatClient.part(channel);
-      res.render('pages/mini/remove', { channel, error: null })
-    } else {
-      res.render('pages/mini/remove', { channel, error: 'Channel not joined' })
-    }
-  })
-  .get('/queue/:channel', async (req, res) => {
-    const channel = req.params.channel;
-    const queue = await spin.queue(channel, db);
-    res.render('pages/queue', { 'results': queue })
-  })
-  .get('/dashboard', async (req, res) => {
-    const results = await dashboard.dashboard(apiClient, db);
-    res.render('pages/mini/dashboard', { results: results })
-  })
-  .listen(PORT, () => console.log(`Listening on ${PORT}`))
+    })
+    .get('/remove', async (req, res) => {
+      const code = req.query.code;
+      // Get an access token and use it to instantiate an ApiClient.
+      const token = await exchangeCode(clientId, clientSecret, code, `${HOST}/remove`);
+      const tokenInfo = await getTokenInfo(token.accessToken, clientId);
+      const channel = tokenInfo.userName;
+      const channels = await db.query('SELECT channel FROM mini_vanilla WHERE channel = $1', [channel]);
+      if (channels.rows.length > 0) {
+        await db.query('DELETE FROM mini_vanilla WHERE channel = $1', [channel]);
+        chatClient.say(channel, 'Ok byeeeeeeeeeeee');
+        chatClient.part(channel);
+        res.render('pages/mini/remove', { channel, error: null })
+      } else {
+        res.render('pages/mini/remove', { channel, error: 'Channel not joined' })
+      }
+    })
+    .get('/queue/:channel', async (req, res) => {
+      const channel = req.params.channel;
+      const queue = await spin.queue(channel, db);
+      res.render('pages/queue', { 'results': queue })
+    })
+    .get('/dashboard', async (req, res) => {
+      const results = await dashboard.dashboard(apiClient, db);
+      res.render('pages/mini/dashboard', { results: results })
+    })
+    .listen(PORT, () => console.log(`Listening on ${PORT}`))
 
-  chatClient.onMessage(async (chan, user, message, msg) => {
+  chatClient.onMessage(async (chan, user, m, msg) => {
     try {
+      const message = m.replace('\udb40\udc00', ''); // Remove garbage \uE0000 character.
       const channel = chan.substring(1);
       repeat.add(chatClient, channel, user, message);
 
       const args = message.split(' ');
       const command = args.shift().toLowerCase();
+
+      if (command.startsWith('!')) {
+        // print message
+        console.log(`[${channel}] ${user}: ${message}`);
+      }
 
       const mod = msg.userInfo.isMod || msg.userInfo.isBroadcaster;
 
@@ -137,13 +143,13 @@ const run = async () => {
           chatClient.say(channel, HOST + '/queue/' + channel);
           break;
       }
-    } catch(err) {
+    } catch (err) {
       console.log(err);
     }
   });
 
   await chatClient.connect();
-  for (const channel of channels) {    
+  for (const channel of channels) {
     chatClient.say(channel, 'Mini Vanilla reporting for duty!');
   }
 };
