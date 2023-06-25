@@ -16,6 +16,7 @@ const advice = require("./advice");
 const auth = require("./auth");
 const awesome = require("./awesome");
 const brag = require("./brag");
+const celeste = require("./celeste");
 const fakequote = require("./fakequote");
 const fakevalidate = require("./fakevalidate");
 const game = require("./game");
@@ -312,6 +313,9 @@ const run = async () => {
           break;
         case '!sandwich':
           sandwich.command(chatClient, channel, args.join(' '));
+          break;
+        case '!tech':
+          celeste.command(chatClient, channel);
           break;
         case '!addcommand':
           if (mod || user === channel) {
