@@ -1,16 +1,23 @@
 function prefix() {
-    if (Math.random() < 0.67) {
-        return "";
-    }
-    const prefixes = [
+    return prefix_from([
         "reverse",
         "chained",
         "delayed",
         "grounded",
         "inverted",
         "extended",
-    ];
-    return prefixes[Math.floor(Math.random() * prefixes.length)] + " " + prefix();
+    ]);
+}
+
+function prefix_from(prefixes) {
+    if (prefixes.length === 0) {
+        return "";
+    }
+    if (Math.random() < 0.67) {
+        return "";
+    }
+    const result = prefixes[Math.floor(Math.random() * prefixes.length)];
+    return result + " " + prefix_from(prefixes.filter((x) => x !== result));
 }
 
 function tech() {
