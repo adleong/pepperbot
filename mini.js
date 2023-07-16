@@ -138,6 +138,20 @@ const run = async () => {
           }
           await spin.clear(channel, db);
           break;
+        case '!open':
+          if (!mod) {
+            chatClient.say(channel, `Sorry, ${user}, only mods may perform this action`);
+            break;
+          }
+          await spin.open(chatClient, channel, db);
+          break;
+        case '!close':
+          if (!mod) {
+            chatClient.say(channel, `Sorry, ${user}, only mods may perform this action`);
+            break;
+          }
+          await spin.close(chatClient, channel, db);
+          break;
         case '!q':
         case '!queue':
           chatClient.say(channel, HOST + '/queue/' + channel);

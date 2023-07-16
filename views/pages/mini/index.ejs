@@ -29,9 +29,20 @@
         </button>
     </div>
     <div>
+        <h2>Queue</h2>
         <p>
             The queue of songs for your channel is at:
-            <code>https://mini-vanilla-bot.herokuapp.com/queue/CHANNEL_NAME</code>
+        <pre>https://mini-vanilla-bot.herokuapp.com/queue/CHANNEL_NAME</pre>
+        You can add this as a browser source to display the queue on your stream.
+        You can add custom CSS to the browser source to style the queue
+        however you like. For example:
+        <pre>
+body { 
+    background-color: rgba(0, 255, 255, 0.6);
+    font-size: 30px;
+    color: black; 
+}
+            </pre>
         </p>
         <p>
             Mini Vanilla will rearrange the queue to prioritize fairness. This
@@ -47,7 +58,7 @@
             <li><code>!request SONG_NAME</code> - Request a song from Spinshare by name. (only works if the song name is
                 unique)</li>
             <li><code>!request SPINSHARE_ID</code> - Request a song from Spinshare by ID.</li>
-            <li><code>!queue</code> - Get a link to the queue.</li>
+            <li><code>!queue</code> or <code>!q</code> - Get a link to the queue.</li>
         </ul>
         <h2>Mod Commands</h2>
         <p>These commands may only be performed by a mod.</p>
@@ -55,6 +66,8 @@
             <li><code>!done</code> - Remove the song at the head of the queue.</li>
             <li><code>!done SPINSHARE_ID</code> - Remove a song from the queue by ID.</li>
             <li><code>!clear</code> - Clear the queue (resetting priority order).</li>
+            <li><code>!close</code> - Close the queue so that no more songs can be requested.</li>
+            <li><code>!open</code> - Open the queue so that songs can be requested.</li>
         </ul>
     </div>
 </body>

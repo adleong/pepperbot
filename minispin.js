@@ -31,7 +31,23 @@ async function lookup(query) {
     }
 }
 
+async function open(chatClient, channel, db) {
+    const res = await db.query('UPDATE mini_vanilla SET open = true WHERE channel = $1', [channel]);
+    chatClient.say(channel, `Requests are now open`);
+}
+
+async function close(chatClient, channel, db) {
+    const res = await db.query('UPDATE mini_vanilla SET open = false WHERE channel = $1', [channel]);
+    chatClient.say(channel, `Requests are now closed`);
+}
+
 async function request(chatClient, channel, db, user, args) {
+    const { rows } = await db.query('SELECT open from mini_vanilla WHERE channel = $1', [channel]);
+    if (rows[0].open === false) {
+        chatClient.say(channel, `Sorry, ${user}, requests are closed`);
+        return;
+    }
+
     const query = args.join(' ');
     const song = await lookup(query).catch(err => {
         chatClient.say(channel, err);
@@ -78,4 +94,6 @@ module.exports = {
     done,
     queue,
     request,
+    open,
+    close,
 };
