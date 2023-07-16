@@ -1,3 +1,14 @@
+function prefix_from(prefixes) {
+    if (prefixes.length === 0) {
+        return "";
+    }
+    if (Math.random() < 0.67) {
+        return "";
+    }
+    const result = prefixes[Math.floor(Math.random() * prefixes.length)];
+    return result + " " + prefix_from(prefixes.filter(x => x !== result));
+}
+
 function prefix() {
     return prefix_from([
         "reverse",
@@ -7,17 +18,6 @@ function prefix() {
         "inverted",
         "extended",
     ]);
-}
-
-function prefix_from(prefixes) {
-    if (prefixes.length === 0) {
-        return "";
-    }
-    if (Math.random() < 0.67) {
-        return "";
-    }
-    const result = prefixes[Math.floor(Math.random() * prefixes.length)];
-    return result + " " + prefix_from(prefixes.filter((x) => x !== result));
 }
 
 function tech() {
@@ -92,14 +92,13 @@ function tech() {
     const result = prefix() + " " + techs[Math.floor(Math.random() * techs.length)] + suffixes[Math.floor(Math.random() * suffixes.length)];
     if (Math.random() < 0.1) {
         return result + " into " + tech();
-    } else {
-        return result;
     }
+    return result;
 }
 
 function command(chatClient, channel) {
-    let message = tech();
-    // if message starts with a vowel
+    const message = tech();
+    // If message starts with a vowel
     if (["a", "e", "i", "o", "u"].includes(message[0])) {
         chatClient.say(channel, `Simply do an ${message}`);
     } else {
