@@ -137,9 +137,6 @@ const run = async () => {
     .listen(PORT, () => console.log(`Listening on ${PORT}`))
 
   const chatClient = new ChatClient({ authProvider: botAuth, channels: [channel] });
-  await chatClient.connect();
-  console.log("Chat connected");
-  chatClient.say(channel, 'Sgt. Pepper powered on!');
 
   timers.load(chatClient, db, channel, bot);
 
@@ -220,6 +217,25 @@ const run = async () => {
   const broadcaster = await apiClient.users.getUserByName(channel);
 
   // Chat listener
+  chatClient.onConnect(() => {
+    console.log("Chat connected");
+    chatClient.say(channel, 'Sgt. Pepper powered on!');
+  });
+
+  chatClient.onDisconnect((manually, reason) => {
+    console.log("Chat disconnected (manual=%b): %s", manually, reason);
+    console.log("attempting to reconnect...");
+    chatClient.connect()
+  });
+
+  chatClient.onMessageFailed((channel, reason) => {
+    console.log("Message failed to send to %s: %s", channel, reason);
+  })
+
+  chatClient.onMessageRatelimit((channel, text) => {
+    console.log("Message rate limited to %s: %s", channel, text);
+  });
+
   chatClient.onMessage(async (_, user, m, msg) => {
     try {
       const message = m.replace('\udb40\udc00', ''); // Remove garbage \uE0000 character.
@@ -417,6 +433,8 @@ const run = async () => {
     }
   });
 
+  await chatClient.connect();
+
   // Events listener.
   const pubSubClient = new PubSubClient({ authProvider: userAuth });
   pubSubClient.onRedemption(broadcaster.id, message => {
@@ -492,6 +510,14 @@ const run = async () => {
           break;
         case 'Make me a powerpoint':
           chatClient.say(channel, '*poof* ' + message.userName + ' is now a powerpoint.');
+          break;
+        case 'Mario Screaming':
+          db.query('INSERT INTO requests (spin_id, channel, title, added_by, priority, done) VALUES ($1, $2, $3, $4, $5, $6)',
+            [2880, channel, "`#2880: Mario Screaming, you absolute maniac`;", message.userName, 0, false]);
+          console.log(`Inserting... *sigh* Mario Screaming`);
+          chatClient.say(channel, "WHAT.");
+          chatClient.say(channel, "*sigh*");
+          chatClient.say(channel, "Adding #2880: Mario Screaming, you absolute maniac");
           break;
       }
     } catch (err) {

@@ -44,6 +44,10 @@ async function request(chatClient, channel, db, user, args) {
     });
     // Insert song into queue
     if (song) {
+        if (song.id == 2880) {
+            chatClient.say(channel, "No.");
+            return;
+        }
         const text = `#${song.id}: ${song.title} - ${song.charter} (${song.XDDifficulty})`;
         const { rows } = await db.query('SELECT count(1) from requests where channel = $1 and added_by = $2', [channel, user]);
         const priority = rows[0].count;
