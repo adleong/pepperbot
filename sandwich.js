@@ -1,4 +1,5 @@
 const sha256 = require('crypto-js/sha256');
+const { aOrAn } = require('./helpers/aOrAn');
 
 function sandwich(hash) {
     const output = []
@@ -100,7 +101,7 @@ function command(chatClient, channel, input) {
 
     const result = sandwich(hash);
     if (result) {
-        chatClient.say(channel, `Yes, ${input} is a ${result}`);
+        chatClient.say(channel, `Yes, ${input} is ${aOrAn(result)} ${result}`);
     } else {
         chatClient.say(channel, `No, ${input} is not a sandwich`);
     }

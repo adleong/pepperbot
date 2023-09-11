@@ -1,3 +1,5 @@
+const { aOrAn } = require("./helpers/aOrAn");
+
 function prefix_from(prefixes) {
     if (prefixes.length === 0) {
         return "";
@@ -98,12 +100,7 @@ function tech() {
 
 function command(chatClient, channel) {
     const message = tech();
-    // If message starts with a vowel
-    if (["a", "e", "i", "o", "u"].includes(message[0])) {
-        chatClient.say(channel, `Simply do an ${message}`);
-    } else {
-        chatClient.say(channel, `Simply do a ${message}`);
-    }
+    chatClient.say(channel, `Simply do ${aOrAn(message)} ${message}`);
 }
 
 module.exports = { command };
