@@ -8,7 +8,12 @@ function prefix_from(prefixes) {
         return "";
     }
     const result = prefixes[Math.floor(Math.random() * prefixes.length)];
-    return result + " " + prefix_from(prefixes.filter(x => x !== result));
+    const suffix = prefix_from(prefixes.filter(x => x !== result));
+    if (suffix === "") {
+        return result;
+    } else {
+        return result + " " + suffix;
+    }
 }
 
 function prefix() {
@@ -16,6 +21,7 @@ function prefix() {
         "reverse",
         "chained",
         "delayed",
+        "failed",
         "grounded",
         "inverted",
         "extended",
@@ -28,6 +34,7 @@ function tech() {
         "back",
         "Badeline",
         "bino",
+        "block",
         "bubble",
         "bubs",
         "bunny",
@@ -42,12 +49,14 @@ function tech() {
         "dream",
         "fast",
         "feather",
+        "fish",
         "heart",
         "hyper",
         "ice",
         "jelly",
         "Kevin",
         "key",
+        "Lexi",
         "multi",
         "neutral",
         "oil",
@@ -55,10 +64,12 @@ function tech() {
         "Theo",
         "spike",
         "spinner",
+        "spring",
         "super",
         "ultra",
         "wall",
         "wave",
+        "wind",
     ];
     const suffixes = [
         "boost",
@@ -66,6 +77,7 @@ function tech() {
         "bounce",
         " bubble",
         " buffer",
+        " cancel",
         "corner",
         " corner boost",
         " cycle",
@@ -81,6 +93,7 @@ function tech() {
         "jump",
         " jump",
         "kick",
+        " ladder",
         " pop",
         " skip",
         " skip skip",
@@ -91,7 +104,11 @@ function tech() {
         " warp",
         "vator",
     ];
-    const result = prefix() + " " + techs[Math.floor(Math.random() * techs.length)] + suffixes[Math.floor(Math.random() * suffixes.length)];
+    let p = prefix();
+    if (p !== "") {
+        p = p + " ";
+    }
+    const result = p + techs[Math.floor(Math.random() * techs.length)] + suffixes[Math.floor(Math.random() * suffixes.length)];
     if (Math.random() < 0.1) {
         return result + " into " + tech();
     }
