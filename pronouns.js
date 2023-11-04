@@ -23,7 +23,7 @@ let cache = {};
 const client = axios.create({
     baseURL: 'https://pronouns.alejo.io/api',
     timeout: 5000,
-  });
+});
 
 async function pronouns(chatClient, channel, user) {
     return get_pronouns(user).then(pronoun => {
@@ -45,7 +45,7 @@ async function get_pronoun_id(user) {
     }
     const id = res.data[0].pronoun_id;
     cache[user] = id;
-    return out;
+    return id;
 }
 
 async function get_pronouns(user) {
