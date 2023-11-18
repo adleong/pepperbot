@@ -120,7 +120,7 @@ async function command(chatClient, apiClient, channel, bot, user, target) {
         `Can you believe the AUDACITY of ${user} trying to ban ${t.displayName}?`
     ])
 
-    const follow = await t.getFollowTo(broadcaster);
+    const follow = await broadcaster.getChannelFollower(t);
     if (follow) {
         console.log(`Follow date of ${t.displayName} is ${follow.followDate}`);
         const now = new Date();

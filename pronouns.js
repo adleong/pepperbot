@@ -25,22 +25,16 @@ const client = axios.create({
     timeout: 5000,
 });
 
-async function pronouns(chatClient, channel, user) {
-    return get_pronouns(user).then(pronoun => {
-        if (pronoun) {
-            chatClient.say(channel, `I think ${user}'s pronouns are ${pronoun}. If this isn't right, set them at https://pronouns.alejo.io`);
-        } else {
-            chatClient.say(channel, `I don't know ${user}'s pronouns. Set them at https://pronouns.alejo.io`);
-        }
-    }).catch(() => chatClient.say(channel, `Sorry, I'm having trouble getting ${user}'s pronouns. Try again later.`));
-}
-
 async function get_pronoun_id(user) {
     if (cache[user]) {
         return cache[user];
     }
     const res = await client.get(`/users/${user}`);
     if (res == null || !res.data[0]) {
+        console.log("Failed to get pronoun id for user " + user);
+        if (res) {
+            console.log(res.data);
+        }
         return null;
     }
     const id = res.data[0].pronoun_id;
@@ -59,6 +53,16 @@ async function get_pronouns(user) {
         return null;
     }
     return out;
+}
+
+async function pronouns(chatClient, channel, user) {
+    return get_pronouns(user).then(pronoun => {
+        if (pronoun) {
+            chatClient.say(channel, `I think ${user}'s pronouns are ${pronoun}. If this isn't right, set them at https://pronouns.alejo.io`);
+        } else {
+            chatClient.say(channel, `I don't know ${user}'s pronouns. Set them at https://pronouns.alejo.io`);
+        }
+    }).catch(() => chatClient.say(channel, `Sorry, I'm having trouble getting ${user}'s pronouns. Try again later.`));
 }
 
 module.exports = { pronouns, get_pronouns, get_pronoun_id };
