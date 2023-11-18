@@ -85,6 +85,9 @@ async function nth(chatClient, apiClient, online, channel, db, user, n) {
         await db.query('INSERT INTO nth (user_name, n, type) VALUES ($1, $2, $3)', [user, n, 'nth']);
         chatClient.say(channel, `Congrats, ${user}, on being ${ordinal(n)}!`);
         if (n == 1) {
+            if ((stream.startDate < Date.now() - Number(hours))) {
+                chatClient.say(channel, `...at ${timeSince(stream.startDate)} into stream somehow`);
+            }
             money.earn(chatClient, db, channel, user, 2);
         } else {
             money.earn(chatClient, db, channel, user, 1);

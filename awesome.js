@@ -1,3 +1,5 @@
+const pronouns = require("./pronouns.js");
+
 const chatters = new Map();
 
 const SECONDS = 1000;
@@ -23,6 +25,30 @@ function prune() {
     }
 }
 
+async function third_person(user) {
+    return pronouns.get_pronoun_id(user).then(id => {
+        switch (id) {
+            case "aeaer": return "aer";
+            case "any": return ["him", "her", "them"][Math.floor(Math.random() * 3)];
+            case "eem": return "em";
+            case "faefaer": return "faer";
+            case "hehim": return "him";
+            case "heshe": return ["him", "her"][Math.floor(Math.random() * 2)];
+            case "hethem": return ["him", "them"][Math.floor(Math.random() * 2)];
+            case "itits": return "it";
+            case "other": return "this one";
+            case "perper": return "per";
+            case "sheher": return "her";
+            case "shethem": return ["her", "them"][Math.floor(Math.random() * 2)];
+            case "theythem": return "them";
+            case "vever": return "ver";
+            case "xexem": return "xem";
+            case "ziehir": return "hir";
+            default: return "them";
+        }
+    }).catch(() => "them");
+}
+
 function get(channel, self) {
     prune();
     let users = [];
@@ -40,7 +66,8 @@ function get(channel, self) {
 async function command(chatClient, channel, self, db) {
     let user = get(channel, self);
     if (user) {
-        chatClient.say(channel, `You know who's awesome? ${user} is awesome!`);
+        const them = await third_person(user);
+        chatClient.say(channel, `You know who's awesome? ${user} is awesome! We love ${them}.`);
 
         const { rows } = await db.query('SELECT message FROM catchphrases WHERE user_name = $1', [user]);
         if (rows.length > 0) {
@@ -60,14 +87,12 @@ async function setCatchphrase(chatClient, apiClient, channel, db, user, catchphr
     chatClient.say(channel, 'Catchphrase for ' + u.displayName + ' set to: ' + catchphrase);
 }
 
-
 function dumpChatters(chatClient, channel) {
     prune();
     for (const [user, ts] of chatters.get(channel)) {
         chatClient.say(channel, user + ' last spoke at ' + new Date(ts).toString());
     }
 }
-
 
 module.exports = {
     add,
