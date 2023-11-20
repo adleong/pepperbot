@@ -33,8 +33,8 @@ async function provider(db, user, clientId, clientSecret) {
     );
     await provider.addUserForToken({
         accessToken,
-        expiresIn: expiry,
-        obtainmentTimestamp: Date.now(),
+        expiresIn: 0,
+        obtainmentTimestamp: 0,
         refreshToken,
         scope: scopes
     }, ['chat']);
