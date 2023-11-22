@@ -16,21 +16,17 @@ async function provider(db, user, clientId, clientSecret) {
 
     console.log(`Loaded token for ${user}.  Token will expire in ${expiry}`)
 
-    const info = await getTokenInfo(accessToken, clientId);
-    console.log(`Token for ${user} has scopes ${info.scopes}`);
-
     const provider = new RefreshingAuthProvider({
         clientId,
         clientSecret,
-        onRefresh: async (userId, token) => {
-            console.log(`Refreshing token for ${user} with scopes ${token.scope}.  Next refresh in ${token.expiresIn}`);
-            await db.query(
-                'UPDATE tokens SET access_token = $1, refresh_token = $2, expiry_timestamp = $3 WHERE user_name = $4',
-                [token.accessToken, token.refreshToken, token.expiresIn, user]
-            );
-        },
-    },
-    );
+    });
+    provider.onRefresh(async (userId, token) => {
+        console.log(`Refreshing token for ${user} with scopes ${token.scope}.  Next refresh in ${token.expiresIn}`);
+        await db.query(
+            'UPDATE tokens SET access_token = $1, refresh_token = $2, expiry_timestamp = $3 WHERE user_name = $4',
+            [token.accessToken, token.refreshToken, token.expiresIn, user]
+        );
+    });
     await provider.addUserForToken({
         accessToken,
         expiresIn: 0,
