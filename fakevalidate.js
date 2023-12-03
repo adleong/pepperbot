@@ -1,11 +1,8 @@
-const { Configuration, OpenAIApi } = require("openai");
+const { OpenAI } = require("openai");
 const pronouns = require("./pronouns.js");
 const awesome = require("./awesome.js");
 
-const configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
+const openai = new OpenAI();
 const url = /(\w+:\/\/)?\w+\.[a-zA-Z0-9][a-zA-Z0-9\/\?\%\#\&_=\-\.]*/g;
 const period = /\.\W*/g;
 
@@ -148,24 +145,16 @@ async function fake(channel, self, user, roast = false) {
     quote = quote.replaceAll(period, ". ");
     quote = quote.replaceAll(url, "[hyperlink blocked]");
 
-    const response = await openai.createCompletion("content-filter-alpha", {
-        prompt: "<|endoftext|>" + quote + "\n--\nLabel:",
-        temperature: 0,
-        max_tokens: 1,
-        top_p: 0,
-        logprobs: 10
-    })
-    const classification = response.data.choices[0];
-    if (classification.text == "0" || classification.text == "1") {
+    const response = await openai.moderations.create({
+        input: quote,
+    });
+    if (response.flagged) {
+        console.log("Rejecting unsafe validation: " + quote);
+        console.log(response);
+        return await fake(channel, self, user, roast);
+    } else {
         return quote;
     }
-    if (classification.logprobs.top_logprobs[0][classification.text] < -0.355) {
-        return quote;
-    }
-    console.log("Rejecting unsafe validation: " + quote);
-    console.log(classification.text);
-    console.log(classification.logprobs.top_logprobs[0]);
-    return await fake(channel, self, user, roast);
 }
 
 async function pronounify(user) {
@@ -176,9 +165,9 @@ async function pronounify(user) {
 async function create(channel, self, user, roast = false) {
 
     let u = await pronounify(user);
-    let prompt = roast ? 
+    let prompt = roast ?
         `Playfully insult ${u} ${focus[Math.floor(Math.random() * focus.length)]}.` :
-        `Give ${u} words of validation ${focus[Math.floor(Math.random() * focus.length)]}.`;
+        `Give ${u} praise and validation ${focus[Math.floor(Math.random() * focus.length)]}.`;
 
     if (roast && Math.random() < 0.2) {
         let target = await pronounify(awesome.get(channel, self));
@@ -189,14 +178,19 @@ async function create(channel, self, user, roast = false) {
     prompt += "\n";
     console.log(prompt);
 
-    const response = await openai.createCompletion("text-davinci-003", {
-        prompt: prompt,
-        temperature: 1,
-        max_tokens: 256,
+    const response = await openai.chat.completions.create({
+        model: 'gpt-4',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 80,
+        temperature: 1.0,
     });
-    const result = response.data.choices[0];
+
     // trim spaces and newlines
-    return "@" + user + " " + result.text.trim().replaceAll("\n", " ");
+    const result = response.choices[0].message.content.trim().replaceAll("\n", " ");
+    // find the last instnace of  . or ? or ! using a regex
+    // and remove it and everything after it
+    const lastPunctuationIndex = result.search(/[.!?][^.!?]*$/);
+    return "@" + user + " " + result.substring(0, lastPunctuationIndex + 1);
 }
 
 module.exports = {

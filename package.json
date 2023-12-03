@@ -6,6 +6,7 @@
     "@twurple/chat": "^7.0.4",
     "@twurple/eventsub-http": "^7.0.4",
     "@twurple/pubsub": "^7.0.4",
+    "axios": "^1.6.2",
     "crypto-js": "^4.0.0",
     "discord": "^0.8.2",
     "discord.js": "^13.8.0",
@@ -14,7 +15,7 @@
     "express": "^4.17.1",
     "got": "^9.6.0",
     "http-proxy-middleware": "^2.0.6",
-    "openai": "^2.0.5",
+    "openai": "^4.20.1",
     "pg": "^8.6.0",
     "ssapi-node": "^1.0.4"
   },
