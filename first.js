@@ -101,6 +101,9 @@ async function nth(chatClient, apiClient, online, channel, db, user, n) {
             await db.query('INSERT INTO nth (user_name, n, type) VALUES ($1, $2, $3)', [user, n, 'max']);
             chatClient.say(channel, `IT'S A NEW WORLD RECORD! ${user} gets ${ordinal(n)} for the first time!`);
         }
+        if (n > 1 && Math.random() < 0.01){
+            chatClient.say(channel, `And that's numberwang!`);
+        }
     } else {
         chatClient.say(channel, `Sorry, ${user}, you can't be ${ordinal(n)} because nobody was ${ordinal(n - 1)}.`);
     }
