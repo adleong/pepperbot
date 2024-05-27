@@ -1,10 +1,9 @@
 const { OpenAI } = require("openai");
+const fakeaudit = require("./fakeaudit.js");
 const pronouns = require("./pronouns.js");
 const awesome = require("./awesome.js");
 
 const openai = new OpenAI();
-const url = /(\w+:\/\/)?\w+\.[a-zA-Z0-9][a-zA-Z0-9\/\?\%\#\&_=\-\.]*/g;
-const period = /\.\W*/g;
 
 const focus = [
     "about how they can vanquish my foes",
@@ -103,8 +102,8 @@ const focus = [
     "as an elaborate Metal Gear Rising (video game) metaphor",
 ]
 
-async function command(chatClient, channel, self, user) {
-    const quote = await fake(channel, self, user);
+async function command(chatClient, db, channel, self, user) {
+    const quote = await fake(channel, db, self, user);
     console.log(quote);
     // split quote into message of length at most 450
     for (m of quote.match(/.{1,450}/g)) {
@@ -113,8 +112,8 @@ async function command(chatClient, channel, self, user) {
     return quote;
 }
 
-async function roast(chatClient, channel, self, user) {
-    const quote = await fake(channel, self, user, roast = true);
+async function roast(chatClient, db, channel, self, user) {
+    const quote = await fake(channel, db, self, user, roast = true);
     console.log(quote);
     // split quote into message of length at most 450
     for (m of quote.match(/.{1,450}/g)) {
@@ -123,7 +122,7 @@ async function roast(chatClient, channel, self, user) {
     return quote;
 }
 
-async function fake(channel, self, user, roast = false) {
+async function fake(channel, db, self, user, roast = false) {
     let quote = await create(channel, self, user, roast).catch(error => {
         if (error.response) {
             // The request was made and the server responded with a status code
@@ -144,17 +143,10 @@ async function fake(channel, self, user, roast = false) {
     if (!quote) {
         return `You're awesome, ${user}! I love you`;
     }
-    // Replace all links in quote with [hyperlink blocked]
-    quote = quote.replaceAll(period, ". ");
-    quote = quote.replaceAll(url, "[hyperlink blocked]");
 
-    const response = await openai.moderations.create({
-        input: quote,
-    });
-    if (response.flagged) {
-        console.log("Rejecting unsafe validation: " + quote);
-        console.log(response);
-        return await fake(channel, self, user, roast);
+    quote = await fakeaudit.audit(quote, db);
+    if (!quote) {
+        return await fake(channel, db, self, user, roast);
     } else {
         return quote;
     }
@@ -184,7 +176,7 @@ async function create(channel, self, user, roast = false) {
     const response = await openai.chat.completions.create({
         model: 'gpt-4',
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 80,
+        max_tokens: 60,
         temperature: 1.0,
     });
 
