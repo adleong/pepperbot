@@ -1,11 +1,10 @@
 const { OpenAI } = require("openai");
+const fakeaudit = require("./fakeaudit.js");
 const openai = new OpenAI(process.env.OPENAI_API_KEY);
 const re = /\-\w\w+\W*$/;
-const url = /(\w+:\/\/)?\w+\.[a-zA-Z0-9][a-zA-Z0-9\/\?\%\#\&_=\-\.]*/g;
-const period = /\.\W*/g;
 
-async function command(chatClient, channel) {
-    const quote = await fake();
+async function command(chatClient, db, channel) {
+    const quote = await fake(db);
     // split quote into message of length at most 450
     for (m of quote.match(/.{1,450}/g)) {
         chatClient.say(channel, m);
@@ -13,7 +12,7 @@ async function command(chatClient, channel) {
     return quote;
 }
 
-async function fake() {
+async function fake(db) {
     let quote = await create().catch(error => {
         if (error.response) {
             // The request was made and the server responded with a status code
@@ -34,23 +33,10 @@ async function fake() {
     if (!quote) {
         return "Sorry, I couldn't think of anything. -Sgt Pepper Bot";
     }
-    // Replace all links in quote with [hyperlink blocked]
-    //find url matches
-    quote = quote.replaceAll(period, ". ");
-    const matches = quote.match(url);
-    if (matches) {
-        console.log("blocked url: " + matches[0]);
-        console.log("in quote: " + quote);
-    }
-    quote = quote.replaceAll(url, "[hyperlink blocked]");
 
-    const response = await openai.moderations.create({
-        input: quote,
-    });
-    if (response.flagged) {
-        console.log("Rejecting unsafe quote: " + quote);
-        console.log(response);
-        return await fake();
+    quote = await fakeaudit.audit(quote, db);
+    if (!quote) {
+        return await fake(db);
     } else {
         return quote;
     }

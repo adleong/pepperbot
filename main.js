@@ -19,6 +19,7 @@ const brag = require("./brag");
 const celeste = require("./celeste");
 const fakequote = require("./fakequote");
 const fakevalidate = require("./fakevalidate");
+const fakeaudit = require("./fakeaudit.js");
 const game = require("./game");
 const lurk = require("./lurk");
 const pepper = require("./pepper");
@@ -390,6 +391,13 @@ const run = async () => {
             chatClient.say(channel, `Sorry, ${user}, only mods can do that.`);
           }
           break;
+        case '!audit':
+          if (mod || user === channel) {
+            await fakeaudit.audit(args.join(' '), db);
+          } else {
+            chatClient.say(channel, `Sorry, ${user}, only mods can do that.`);
+          }
+          break;
         case '!nth':
           await first.record(chatClient, db, channel);
           break;
@@ -488,21 +496,21 @@ const run = async () => {
           });
           break;
         case 'Fake validate me':
-          fakevalidate.command(chatClient, channel, bot, message.userName)
+          fakevalidate.command(chatClient, db, channel, bot, message.userName)
             .then(quote => {
               if (quote) { discordClient.channels.cache.get('986881827316826143').send(quote) }
             })
             .catch(err => console.log(err));
           break;
         case 'Fake roast me':
-          fakevalidate.roast(chatClient, channel, bot, message.userName).catch(err => console.log(err))
+          fakevalidate.roast(chatClient, db, channel, bot, message.userName).catch(err => console.log(err))
             .then(quote => {
               if (quote) { discordClient.channels.cache.get('986881827316826143').send(quote) }
             })
             .catch(err => console.log(err));
           break;
         case 'Fake quote':
-          fakequote.command(chatClient, channel).catch(err => console.log(err))
+          fakequote.command(chatClient, db, channel).catch(err => console.log(err))
             .then(quote => {
               if (quote) { discordClient.channels.cache.get('986881827316826143').send(quote) }
             })

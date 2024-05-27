@@ -25,6 +25,7 @@ function prefix() {
         "grounded",
         "inverted",
         "extended",
+        "upside-down",
     ]);
 }
 
@@ -70,6 +71,8 @@ function tech() {
         "wall",
         "wave",
         "wind",
+        "frown",
+        "smile"
     ];
     const suffixes = [
         "boost",
