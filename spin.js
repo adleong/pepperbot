@@ -3,7 +3,7 @@ const api = new SSAPI();
 
 let closed = false;
 
-async function lookup(query) {
+async function lookup(query, by) {
     // If arg is a number string
     if (query.match(/^\d+$/)) {
         const song = await api.getOpenData(`song/${query}`);
@@ -27,6 +27,17 @@ async function lookup(query) {
     if (data.length === 0) {
         throw `${query} not found`;
     } else if (data.length > 1) {
+        if (by) {
+            const filtered = data.filter(song =>
+                song.artist.toLowerCase() == by.toLowerCase() ||
+                song.charter.toLowerCase() == by.toLowerCase());
+            if (filtered.length == 0) {
+                throw `Could not find such a chart by ${by}`;
+            }
+            if (filtered.length == 1) {
+                return filtered[0];
+            }
+        }
         throw `Too many results, be more specific`;
     } else {
         return data[0];
@@ -38,8 +49,13 @@ async function request(chatClient, channel, db, user, args) {
         chatClient.say(channel, `Sorry, ${user}, requests are closed`);
         return;
     }
-    const query = args.join(' ');
-    const song = await lookup(query).catch(err => {
+    const query = args.filter(w => !w.startsWith("by:")).join(' ');
+    const byArg = args.filter(w => w.startsWith("by:"))[0];
+    let by = null;
+    if (byArg) {
+        by = byArg.slice(3);
+    }
+    const song = await lookup(query, by).catch(err => {
         chatClient.say(channel, err);
     });
     // Insert song into queue

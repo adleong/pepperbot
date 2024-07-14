@@ -38,8 +38,11 @@ const run = async () => {
 
   // Shutdown handlers
   ['SIGINT', 'SIGTERM'].forEach(signal => process.on(signal, () => {
+    console.log('Mini Vanilla powering down...');
     for (const channel of channels) {
-      chatClient.say(channel, 'Mini Vanilla powering down...');
+      chatClient.say(channel, 'Mini Vanilla powering down...').catch(error => {
+        console.log(error);
+      });
     }
     db.end();
     process.exit(0);
@@ -163,8 +166,11 @@ const run = async () => {
   });
 
   await chatClient.connect();
+  console.log('Mini Vanilla reporting for duty!');
   for (const channel of channels) {
-    chatClient.say(channel, 'Mini Vanilla reporting for duty!');
+    chatClient.say(channel, 'Mini Vanilla reporting for duty!').catch(error => {
+      console.log(error);
+    });
   }
 };
 

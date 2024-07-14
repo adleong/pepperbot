@@ -12,16 +12,22 @@ async function dashboard(apiClient, db) {
                 result.queue = r.count;
             }
         }
-        const stream = await apiClient.streams.getStreamByUserName(channel);
-        if (stream) {
-            if (stream.gameName == 'Spin Rhythm XD') {
-                result.live = `🟢 (${stream.viewers})`;
+        const stream = await apiClient.streams.getStreamByUserName(channel).then(stream => {
+            if (stream) {
+                if (stream.gameName == 'Spin Rhythm XD') {
+                    result.live = `🟢 (${stream.viewers})`;
+                } else {
+                    result.live = `🟡 (${stream.viewers})`;
+                }
             } else {
-                result.live = `🟡 (${stream.viewers})`;
+                result.live = '🔴';
             }
-        } else {
-            result.live = '🔴';
-        }
+        },
+            error => {
+                console.log(error);
+                result.live = '⚠️';
+                result.details = error;
+            });
         results.push(result);
     }
     return results;

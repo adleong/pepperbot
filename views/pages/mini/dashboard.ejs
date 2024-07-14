@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Mini Vanilla Bot</title>
 </head>
+
 <body>
     <h1>Dashboard</h1>
     <div>
@@ -15,13 +17,22 @@
             </tr>
             <% results.forEach(function(r) { %>
                 <tr>
-                    <td><a href="https://twitch.tv/<%= r.channel %>"><%= r.channel %></a></td>
-                    <td><%= r.queue %></td>
-                    <td><%= r.complete %></td>
-                    <td><%= r.live %></td>
+                    <td><a href="https://twitch.tv/<%= r.channel %>">
+                            <%= r.channel %>
+                        </a></td>
+                    <td>
+                        <%= r.queue %>
+                    </td>
+                    <td>
+                        <%= r.complete %>
+                    </td>
+                    <td title="<%= r.details %>">
+                        <%= r.live %>
+                    </td>
                 </tr>
-            <% }); %>
+                <% }); %>
         </table>
     </div>
 </body>
+
 </html>
