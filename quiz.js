@@ -170,7 +170,7 @@ async function startRound4(chatClient, channel, db) {
             answers: {}
         }
     } else {
-        const quote = await fake.fake();
+        const quote = await fake.fake(db);
         chatClient.say(channel, "ROUND 4: Is this quote 'real' or 'fake'?");
         chatClient.say(channel, quote);
         chatClient.say(channel, "(You have 60 seconds to answer starting... NOW)");
