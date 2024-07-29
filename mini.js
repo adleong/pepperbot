@@ -101,10 +101,9 @@ const run = async () => {
     })
     .listen(PORT, () => console.log(`Listening on ${PORT}`))
 
-  chatClient.onMessage(async (chan, user, m, msg) => {
+  chatClient.onMessage(async (channel, user, m, msg) => {
     try {
       const message = m.replace('\udb40\udc00', ''); // Remove garbage \uE0000 character.
-      const channel = chan.substring(1);
       repeat.add(chatClient, channel, user, message);
 
       const args = message.split(' ');
