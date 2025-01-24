@@ -83,7 +83,12 @@ async function nth(chatClient, apiClient, online, channel, db, user, n) {
         }
     } else if (n == 1 || winners[n - 2]) {
         await db.query('INSERT INTO nth (user_name, n, type) VALUES ($1, $2, $3)', [user, n, 'nth']);
-        chatClient.say(channel, `Congrats, ${user}, on being ${ordinal(n)}!`);
+        if (stream && n == 1 && (stream.startDate < Date.now() - Number(hours))) {
+            chatClient.say(channel, `${user}. Did you seriously expect to be first when stream has been... wait, no one claimed first yet????`);
+
+        } else {
+            chatClient.say(channel, `Congrats, ${user}, on being ${ordinal(n)}!`);
+        }
         if (n == 1) {
             if ((stream.startDate < Date.now() - Number(hours))) {
                 chatClient.say(channel, `...at ${timeSince(stream.startDate)} into stream somehow`);
@@ -101,7 +106,7 @@ async function nth(chatClient, apiClient, online, channel, db, user, n) {
             await db.query('INSERT INTO nth (user_name, n, type) VALUES ($1, $2, $3)', [user, n, 'max']);
             chatClient.say(channel, `IT'S A NEW WORLD RECORD! ${user} gets ${ordinal(n)} for the first time!`);
         }
-        if (n > 1 && Math.random() < 0.01){
+        if (n > 1 && Math.random() < 0.01) {
             chatClient.say(channel, `And that's numberwang!`);
         }
     } else {

@@ -60,6 +60,9 @@ function answer(user, message) {
 function endRound1(chatClient, channel, db) {
     const correct = [];
     for (const key in quiz.answers) {
+        if (quiz.answers[key] === "lexi") {
+            quiz.answers[key] = "alex";
+        }
         if (quiz.answers[key] === quiz.correct) {
             correct.push(key);
         }
