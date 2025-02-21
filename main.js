@@ -495,27 +495,27 @@ const run = async () => {
             chatClient.say(channel, quote);
           });
           break;
-        case 'Fake validate me':
-          fakevalidate.command(chatClient, db, channel, bot, message.userName)
-            .then(quote => {
-              if (quote) { discordClient.channels.cache.get('986881827316826143').send(quote) }
-            })
-            .catch(err => console.log(err));
-          break;
-        case 'Fake roast me':
-          fakevalidate.roast(chatClient, db, channel, bot, message.userName).catch(err => console.log(err))
-            .then(quote => {
-              if (quote) { discordClient.channels.cache.get('986881827316826143').send(quote) }
-            })
-            .catch(err => console.log(err));
-          break;
-        case 'Fake quote':
-          fakequote.command(chatClient, db, channel).catch(err => console.log(err))
-            .then(quote => {
-              if (quote) { discordClient.channels.cache.get('986881827316826143').send(quote) }
-            })
-            .catch(err => console.log(err))
-          break;
+        // case 'Fake validate me':
+        //   fakevalidate.command(chatClient, db, channel, bot, message.userName)
+        //     .then(quote => {
+        //       if (quote) { discordClient.channels.cache.get('986881827316826143').send(quote) }
+        //     })
+        //     .catch(err => console.log(err));
+        //   break;
+        // case 'Fake roast me':
+        //   fakevalidate.roast(chatClient, db, channel, bot, message.userName).catch(err => console.log(err))
+        //     .then(quote => {
+        //       if (quote) { discordClient.channels.cache.get('986881827316826143').send(quote) }
+        //     })
+        //     .catch(err => console.log(err));
+        //   break;
+        // case 'Fake quote':
+        //   fakequote.command(chatClient, db, channel).catch(err => console.log(err))
+        //     .then(quote => {
+        //       if (quote) { discordClient.channels.cache.get('986881827316826143').send(quote) }
+        //     })
+        //     .catch(err => console.log(err))
+        //   break;
         case 'Make me a powerpoint':
           chatClient.say(channel, '*poof* ' + message.userName + ' is now a powerpoint.');
           break;

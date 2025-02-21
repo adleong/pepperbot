@@ -154,10 +154,16 @@ function endRound3(chatClient, channel, db) {
         chatClient.say(channel, correct.join(', ') + " got it right, it was " + quiz.correct);
     }
 
+    // Promise.all(
+    //     correct.map(user => money.earn(chatClient, db, channel, user))
+    // ).then(() => {
+    //     startRound4(chatClient, channel, db);
+    // });
     Promise.all(
         correct.map(user => money.earn(chatClient, db, channel, user))
     ).then(() => {
-        startRound4(chatClient, channel, db);
+        chatClient.say(channel, "Thanks for playing, everyone!");
+        quiz = null;
     });
 }
 
