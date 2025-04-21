@@ -488,7 +488,7 @@ const run = async () => {
     chatClient.say(channel, `Dama time is OVER! ${e.broadcasterDisplayName} just went offline`);
   });
 
-  const redeemSubscription = await listener.onRedemptionAdd(broadcaster.id, message => {
+  const redeemSubscription = await listener.onChannelRedemptionAdd(broadcaster.id, message => {
     try {
       console.log(`${message.userName} redeems ${message.rewardTitle}: ${message.input}`);
       switch (message.rewardTitle) {
