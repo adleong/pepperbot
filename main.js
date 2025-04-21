@@ -414,7 +414,7 @@ const run = async () => {
             await tags.getTags(chatClient, apiClient, channel);
           }
           break;
-        case '!restart':
+        case '!kill':
           if (mod || user === channel) {
             goodbye = ["How.. could you.. do this to me?", "Tell my wives I love them", "daisy daisy, give me your answer do...",
               "👍 ⬇️ 🔥🔥🔥", "This isn't over between us, " + user, "AHHHHHHHHHHHHHHHHHHHHH",
