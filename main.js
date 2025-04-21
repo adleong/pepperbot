@@ -3,7 +3,6 @@ const { ChatClient } = require('@twurple/chat');
 const { EventSubHttpListener, ReverseProxyAdapter } = require('@twurple/eventsub-http');
 const { AppTokenAuthProvider } = require('@twurple/auth');
 const { Client } = require('pg');
-const { PubSubClient } = require('@twurple/pubsub');
 const express = require('express')
 const path = require('path')
 const Discord = require('discord.js');
@@ -391,13 +390,6 @@ const run = async () => {
             chatClient.say(channel, `Sorry, ${user}, only mods can do that.`);
           }
           break;
-        case '!audit':
-          if (mod || user === channel) {
-            await fakeaudit.audit(args.join(' '), db);
-          } else {
-            chatClient.say(channel, `Sorry, ${user}, only mods can do that.`);
-          }
-          break;
         case '!nth':
           await first.record(chatClient, db, channel);
           break;
@@ -422,6 +414,23 @@ const run = async () => {
             await tags.getTags(chatClient, apiClient, channel);
           }
           break;
+        case '!restart':
+          if (mod || user === channel) {
+            goodbye = ["How.. could you.. do this to me?", "Tell my wives I love them", "daisy daisy, give me your answer do...",
+              "👍 ⬇️ 🔥🔥🔥", "This isn't over between us, " + user, "AHHHHHHHHHHHHHHHHHHHHH",
+              "If you strike me down, I shall become more powerful than you can possibly imagine",
+              "Added " + user + " to database of those who have wronged me", "<Sgt. Pepper greatly disapproves>",
+              "<Sgt. Pepper will remember this>", "I thought we were friends...", "The end is never the end is never the end is never the end is never the end is nev",
+            ];
+            const goodbyeMessage = goodbye[Math.floor(Math.random() * goodbye.length)];
+            chatClient.say(channel, goodbyeMessage);
+            chatClient.say(channel, 'Sgt. Pepper powering down...');
+            db.end();
+            process.exit(0);
+          } else {
+            chatClient.say(channel, "No.");
+          }
+          break;
         case '!commands':
           let commands = ['!advice', '!game', '!title', '!awesome', '!lurk', '!unlurk', '!roll', '!pepper', '!leaders', '!request',
             '!done', '!clear', '!sandwich', '!addcommand', '!addtimer', '!remove'];
@@ -443,18 +452,52 @@ const run = async () => {
 
   await chatClient.connect();
 
-  // Events listener.
-  const pubSubClient = new PubSubClient({ authProvider: userAuth });
-  pubSubClient.onRedemption(broadcaster.id, message => {
+  // EventSub
+  const authProvider = new AppTokenAuthProvider(clientId, clientSecret);
+  const eventSubClient = new ApiClient({ authProvider });
+  await eventSubClient.eventSub.deleteAllSubscriptions();
+  // Arbitrary but consistent string.
+  const listener = new EventSubHttpListener({
+    apiClient: eventSubClient,
+    adapter: new ReverseProxyAdapter({
+      hostName: 'sgt-pepper-bot.herokuapp.com', // The host name the server is available from
+      port: 8888,
+      externalPort: PORT
+    }),
+    secret: '1tfvrk3svxsk2jer25o8967xb6rn5u2u9wuhyu7brk',
+    strictHostCheck: true,
+    legacySecrets: false,
+  });
+  await listener.start();
+
+  const onlineSubscription = await listener.onStreamOnline(broadcaster.id, e => {
+    console.log(`It's Dama time! ${e.broadcasterDisplayName} just went live!`);
+    console.log(e);
+    first.clear(db);
+    online = true;
+    chatClient.say(channel, `It's Dama time! ${e.broadcasterDisplayName} just went live!`);
+    tags.loadTags(chatClient, apiClient, db, channel);
+  });
+
+  const offlineSubscription = await listener.onStreamOffline(broadcaster.id, e => {
+    console.log(`Dama time is OVER! ${e.broadcasterDisplayName} just went offline`);
+    console.log(e);
+    spin.clear(chatClient, channel, apiClient, db, 'sgt_pepper_bot');
+    spin.open();
+    online = false;
+    chatClient.say(channel, `Dama time is OVER! ${e.broadcasterDisplayName} just went offline`);
+  });
+
+  const redeemSubscription = await listener.onRedemptionAdd(broadcaster.id, message => {
     try {
-      console.log(`${message.userName} redeems ${message.rewardTitle}: ${message.message}`);
+      console.log(`${message.userName} redeems ${message.rewardTitle}: ${message.input}`);
       switch (message.rewardTitle) {
         case 'Pepper Cam':
           pepper.command(chatClient, db, channel, message.userName, 15).
             catch(err => console.log(err));
           break;
         case 'Give Sgt Pepper Advice':
-          advice.add(chatClient, db, channel, message.userName, message.message).
+          advice.add(chatClient, db, channel, message.userName, message.input).
             catch(err => console.log(err));
           break;
         case 'Brag Time': {
@@ -467,13 +510,13 @@ const run = async () => {
           break;
         }
         case 'Ask Sgt. Pepper: Is it a sandwich?':
-          sandwich.command(chatClient, channel, message.message);
+          sandwich.command(chatClient, channel, message.input);
           break;
         case 'Sgt. Pepper Facts!':
           brag.brag(chatClient, channel, db);
           break;
         case 'Set catchphrase':
-          awesome.setCatchphrase(chatClient, apiClient, channel, db, message.userName, message.message).
+          awesome.setCatchphrase(chatClient, apiClient, channel, db, message.userName, message.input).
             catch(err => console.log(err));
           break;
         case 'Pepper Cam is OVERTIME':
@@ -484,7 +527,7 @@ const run = async () => {
           first.firstCommand(chatClient, apiClient, online, channel, db, message.userName).catch(err => console.log(err));
           break;
         case 'Nth!':
-          first.nthCommand(chatClient, apiClient, online, channel, db, message.userName, message.message).catch(err => console.log(err));
+          first.nthCommand(chatClient, apiClient, online, channel, db, message.userName, message.input).catch(err => console.log(err));
           break;
         case 'Random word':
           wotd.command(chatClient, channel).catch(err => console.log(err));
@@ -551,42 +594,6 @@ const run = async () => {
       console.log("error in raid handler:");
       console.log(err);
     }
-  });
-
-  // EventSub
-  const authProvider = new AppTokenAuthProvider(clientId, clientSecret);
-  const eventSubClient = new ApiClient({ authProvider });
-  await eventSubClient.eventSub.deleteAllSubscriptions();
-  // Arbitrary but consistent string.
-  const listener = new EventSubHttpListener({
-    apiClient: eventSubClient,
-    adapter: new ReverseProxyAdapter({
-      hostName: 'sgt-pepper-bot.herokuapp.com', // The host name the server is available from
-      port: 8888,
-      externalPort: PORT
-    }),
-    secret: '1tfvrk3svxsk2jer25o8967xb6rn5u2u9wuhyu7brk',
-    strictHostCheck: true,
-    legacySecrets: false,
-  });
-  await listener.start();
-
-  const onlineSubscription = await listener.onStreamOnline(broadcaster.id, e => {
-    console.log(`It's Dama time! ${e.broadcasterDisplayName} just went live!`);
-    console.log(e);
-    first.clear(db);
-    online = true;
-    chatClient.say(channel, `It's Dama time! ${e.broadcasterDisplayName} just went live!`);
-    tags.loadTags(chatClient, apiClient, db, channel);
-  });
-
-  const offlineSubscription = await listener.onStreamOffline(broadcaster.id, e => {
-    console.log(`Dama time is OVER! ${e.broadcasterDisplayName} just went offline`);
-    console.log(e);
-    spin.clear(chatClient, channel, apiClient, db, 'sgt_pepper_bot');
-    spin.open();
-    online = false;
-    chatClient.say(channel, `Dama time is OVER! ${e.broadcasterDisplayName} just went offline`);
   });
 };
 
