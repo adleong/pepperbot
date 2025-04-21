@@ -424,7 +424,9 @@ const run = async () => {
             ];
             const goodbyeMessage = goodbye[Math.floor(Math.random() * goodbye.length)];
             chatClient.say(channel, goodbyeMessage);
+            await new Promise(r => setTimeout(r, 1000));
             chatClient.say(channel, 'Sgt. Pepper powering down...');
+            await new Promise(r => setTimeout(r, 1000));
             db.end();
             process.exit(0);
           } else {
