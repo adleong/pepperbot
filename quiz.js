@@ -12,7 +12,12 @@ function pickWord(words) {
     const commonWords = ['the', 'of', 'and', 'a', 'to', 'in', 'is', 'you', 'that',
         'it', 'he', 'was', 'for', 'on', 'are', 'as', 'with', 'his', 'they', 'i',
         'at', 'be', 'this', 'have', 'from', 'or', 'one', 'had', 'by', 'word', 'but',
-        'not', 'what', 'all', 'were', 'we', 'when', 'your', 'can', 'said',
+        'not', 'what', 'all', 'were', 'we', 'when', 'your', 'can', 'said', 'do',
+        'say', 'her', 'she', 'an', 'will', 'would', 'their', 'so', 'up', 'out',
+        'if', 'about', 'who', 'get', 'which', 'go', 'me', 'like', 'time', 'no',
+        'just', 'him', 'know', 'take', 'people', 'into', 'year', 'good', 'some',
+        'could', 'them', 'see', 'other', 'than', 'then', 'now', 'look', 'only',
+        'come', 'its', 'over', 'think', 'also',
     ];
     if (commonWords.includes(word.toLowerCase())) {
         return pickWord(words);
@@ -37,7 +42,7 @@ async function command(chatClient, apiClient, channel, db) {
         await command(chatClient, channel, db);
         return;
     }
-    chatClient.say(channel, "It's quiz time! Answer these four questions correctly to win a prize!")
+    chatClient.say(channel, "It's quiz time! Answer these three questions correctly to win a prize!")
     chatClient.say(channel, "ROUND 1: Who said this?");
     chatClient.say(channel, match[1]);
     chatClient.say(channel, "(You have 60 seconds to answer starting... NOW)");
