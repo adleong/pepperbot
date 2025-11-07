@@ -8,7 +8,7 @@ let quiz = null;
 
 function pickWord(words) {
     const i = Math.floor(Math.random() * words.length);
-    const word = words[i].replace(/[^a-z0-9]/gi, "");
+    const word = words[i].replace(/[^a-z0-9]/gi, "").toLowerCase();
     const commonWords = ['the', 'of', 'and', 'a', 'to', 'in', 'is', 'you', 'that',
         'it', 'he', 'was', 'for', 'on', 'are', 'as', 'with', 'his', 'they', 'i',
         'at', 'be', 'this', 'have', 'from', 'or', 'one', 'had', 'by', 'word', 'but',
@@ -19,7 +19,7 @@ function pickWord(words) {
         'could', 'them', 'see', 'other', 'than', 'then', 'now', 'look', 'only',
         'come', 'its', 'over', 'think', 'also',
     ];
-    if (commonWords.includes(word.toLowerCase())) {
+    if (commonWords.includes(word)) {
         return pickWord(words);
     }
     return i;
