@@ -16,9 +16,6 @@ const auth = require("./auth");
 const awesome = require("./awesome");
 const brag = require("./brag");
 const celeste = require("./celeste");
-const fakequote = require("./fakequote");
-const fakevalidate = require("./fakevalidate");
-const fakeaudit = require("./fakeaudit.js");
 const game = require("./game");
 const lurk = require("./lurk");
 const pepper = require("./pepper");
@@ -46,6 +43,7 @@ const clientSecret = process.env.CLIENT_SECRET;
 const channel = process.env.CHANNEL;
 const bot = process.env.NAME
 const PORT = process.env.PORT || 5000
+const HOSTNAME = process.env.HOSTNAME || 'localhost'
 
 const ssl = process.env.DATABASE_URL.startsWith('postgres://localhost')
   ? false
@@ -379,10 +377,6 @@ const run = async () => {
           }
           await pronouns.pronouns(chatClient, channel, target);
           break;
-        // case '!fakevalidate':
-        //   const t = args.shift();
-        //   await fakevalidate.command(chatClient, channel, t ? t : user);
-        //   break;
         case '!say':
           if (mod || user === channel) {
             say.say(args.join(' '));
@@ -462,7 +456,7 @@ const run = async () => {
   const listener = new EventSubHttpListener({
     apiClient: eventSubClient,
     adapter: new ReverseProxyAdapter({
-      hostName: 'sgt-pepper-bot.herokuapp.com', // The host name the server is available from
+      hostName: HOSTNAME, // The host name the server is available from
       port: 8888,
       externalPort: PORT
     }),
@@ -534,33 +528,6 @@ const run = async () => {
         case 'Random word':
           wotd.command(chatClient, channel).catch(err => console.log(err));
           break;
-        case 'TTS Fake Quote':
-          fakequote.fake().then(quote => {
-            say.say(quote);
-            chatClient.say(channel, quote);
-          });
-          break;
-        // case 'Fake validate me':
-        //   fakevalidate.command(chatClient, db, channel, bot, message.userName)
-        //     .then(quote => {
-        //       if (quote) { discordClient.channels.cache.get('986881827316826143').send(quote) }
-        //     })
-        //     .catch(err => console.log(err));
-        //   break;
-        // case 'Fake roast me':
-        //   fakevalidate.roast(chatClient, db, channel, bot, message.userName).catch(err => console.log(err))
-        //     .then(quote => {
-        //       if (quote) { discordClient.channels.cache.get('986881827316826143').send(quote) }
-        //     })
-        //     .catch(err => console.log(err));
-        //   break;
-        // case 'Fake quote':
-        //   fakequote.command(chatClient, db, channel).catch(err => console.log(err))
-        //     .then(quote => {
-        //       if (quote) { discordClient.channels.cache.get('986881827316826143').send(quote) }
-        //     })
-        //     .catch(err => console.log(err))
-        //   break;
         case 'Make me a powerpoint':
           chatClient.say(channel, '*poof* ' + message.userName + ' is now a powerpoint.');
           break;

@@ -1,6 +1,5 @@
 
 const money = require("./money");
-const fake = require("./fakequote");
 
 const re = /(.*)[-~]\W*(\w+)/;
 const timer = 60 * 1000;
@@ -164,54 +163,6 @@ function endRound3(chatClient, channel, db) {
     // ).then(() => {
     //     startRound4(chatClient, channel, db);
     // });
-    Promise.all(
-        correct.map(user => money.earn(chatClient, db, channel, user))
-    ).then(() => {
-        chatClient.say(channel, "Thanks for playing, everyone!");
-        quiz = null;
-    });
-}
-
-async function startRound4(chatClient, channel, db) {
-    const real = Math.random() < 0.5;
-    if (real) {
-        const { rows } = await db.query('SELECT message, game, quoted_by FROM quotes WHERE CHANNEL = $1 ORDER BY random() LIMIT 1', [channel]);
-        chatClient.say(channel, "ROUND 4: Is this quote 'real' or 'fake'?");
-        chatClient.say(channel, rows[0].message);
-        chatClient.say(channel, "(You have 60 seconds to answer starting... NOW)");
-        quiz = {
-            correct: 'real',
-            answers: {}
-        }
-    } else {
-        const quote = await fake.fake(db);
-        chatClient.say(channel, "ROUND 4: Is this quote 'real' or 'fake'?");
-        chatClient.say(channel, quote);
-        chatClient.say(channel, "(You have 60 seconds to answer starting... NOW)");
-        quiz = {
-            correct: 'fake',
-            answers: {}
-        }
-    }
-
-    setTimeout(() => {
-        endRound4(chatClient, channel, db);
-    }, timer);
-}
-
-function endRound4(chatClient, channel, db) {
-    const correct = [];
-    for (const key in quiz.answers) {
-        if (quiz.answers[key].replace(/[^a-z0-9]/gi, "") === quiz.correct.replace(/[^a-z0-9]/gi, "")) {
-            correct.push(key);
-        }
-    }
-    if (correct.length === 0) {
-        chatClient.say(channel, "Nobody answered correctly. The correct answer was " + quiz.correct);
-    } else {
-        chatClient.say(channel, correct.join(', ') + " got it right, it was " + quiz.correct);
-    }
-
     Promise.all(
         correct.map(user => money.earn(chatClient, db, channel, user))
     ).then(() => {
