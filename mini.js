@@ -55,6 +55,7 @@ const run = async () => {
       res.render('pages/mini/index', {
         add_params: `client_id=${clientId}&redirect_uri=${HOST}/add&response_type=code&scope=`,
         remove_params: `client_id=${clientId}&redirect_uri=${HOST}/remove&response_type=code&scope=`,
+        hostname: HOST,
       })
     })
     .get('/add', async (req, res) => {
