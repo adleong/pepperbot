@@ -221,9 +221,7 @@ const run = async () => {
   });
 
   chatClient.onDisconnect((manually, reason) => {
-    console.log("Chat disconnected (manual=%b): %s", manually, reason);
-    console.log("attempting to reconnect...");
-    chatClient.connect()
+    console.log("Chat disconnected (manual=%s): %s", manually, reason);
   });
 
   chatClient.onMessageFailed((channel, reason) => {
